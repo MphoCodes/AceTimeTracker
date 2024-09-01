@@ -73,7 +73,7 @@ Contributions to TimeTracker are welcome! Whether you want to fix a bug, add a n
 
 
 
-=======
+
 If you encounter any issues or have any questions about TimeTracker, please don't hesitate to [contact me](mailto:mpho.c.ndlela@gmail.com).
 
 ## License
@@ -82,7 +82,4 @@ TimeTracker is licensed under the [MIT License](LICENSE).
 
 ---
 
-<<<<<<< HEAD
-With TimeTracker, take control of your time and unlock your productivity potential. Download now and start tracking your tasks like a pro!
-=======
 With TimeTracker, take control of your time and unlock your productivity potential. Download now and start tracking your tasks like a pro!
