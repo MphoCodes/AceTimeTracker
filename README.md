@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/Pc5rbg6t)
+=======
+>>>>>>> 3c4db2b17d44e11bbc5576779a8f764a2b66edd6
 
 # TimeTracker App
 
@@ -73,7 +76,11 @@ Contributions to TimeTracker are welcome! Whether you want to fix a bug, add a n
 
 ## Support
 
+<<<<<<< HEAD
 If you encounter any issues or have any questions about TimeTracker, please don't hesitate to [contact us](mailto:mpho.c.ndlela@gmail.com).
+=======
+If you encounter any issues or have any questions about TimeTracker, please don't hesitate to [contact me](mailto:mpho.c.ndlela@gmail.com).
+>>>>>>> 3c4db2b17d44e11bbc5576779a8f764a2b66edd6
 
 ## License
 
@@ -81,4 +88,8 @@ TimeTracker is licensed under the [MIT License](LICENSE).
 
 ---
 
+<<<<<<< HEAD
 With TimeTracker, take control of your time and unlock your productivity potential. Download now and start tracking your tasks like a pro!
+=======
+With TimeTracker, take control of your time and unlock your productivity potential. Download now and start tracking your tasks like a pro!
+>>>>>>> 3c4db2b17d44e11bbc5576779a8f764a2b66edd6
