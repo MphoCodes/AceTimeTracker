@@ -72,7 +72,7 @@ Contributions to TimeTracker are welcome! Whether you want to fix a bug, add a n
 
 ## Support
 
-If you encounter any issues or have any questions about TimeTracker, please don't hesitate to [contact us](mailto:mpho.c.ndlela@gmail.com).
+If you encounter any issues or have any questions about TimeTracker, please don't hesitate to [contact me](mailto:mpho.c.ndlela@gmail.com).
 
 ## License
 
