@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "120066968318",
+    "project_id": "acetimetracker-a3fb0",
+    "storage_bucket": "acetimetracker-a3fb0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120066968318:android:4acc935aa5e0c6b1e9b3af",
+        "android_client_info": {
+          "package_name": "com.example.ace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFLQbRZfJxVQdzluCEfLwMsSbc6Hp7psA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120066968318:android:e8e08e1693e5fdc1e9b3af",
+        "android_client_info": {
+          "package_name": "com.example.acetimetracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFLQbRZfJxVQdzluCEfLwMsSbc6Hp7psA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
