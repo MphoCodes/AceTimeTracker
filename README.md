@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/Pc5rbg6t)
-=======
->>>>>>> 3c4db2b17d44e11bbc5576779a8f764a2b66edd6
-
 # TimeTracker App
 
 TimeTracker is a simple yet powerful Android application designed to help users track their time efficiently. Whether you're a freelancer, student, or professional, TimeTracker offers intuitive features to monitor and manage your tasks effectively.
