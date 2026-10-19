@@ -82,4 +82,20 @@
     <string name="profile_upload_profile_picture">Upload Profile Picture</string>
 
 
+    <string name="account_retry">Retry profile setup</string>
+    <string name="account_working">Please wait…</string>
+    <string name="account_invalid_input">Fill in all fields and confirm your password.</string>
+    <string name="account_sign_in_failed">Sign-in failed. Check your details and try again.</string>
+    <string name="account_registration_failed">Registration failed. Check your details and try again.</string>
+    <string name="account_profile_retry">You are signed in. Profile setup could not finish. Retry when connected.</string>
+    <string name="account_reset_failed">Could not send the reset email. Try again.</string>
+    <string name="account_reset_sent">If an account exists for this address, a password reset email has been sent.</string>
+    <string name="account_save_failed">Could not save your profile. Your changes are still here; try again.</string>
+    <string name="account_upload_failed">Could not upload the photo. Your existing photo is unchanged.</string>
+    <string name="account_session_changed">Your account changed. Sign in again.</string>
+    <string name="account_saving">Saving… Waiting for confirmation.</string>
+    <string name="account_save">Save changes</string>
+    <string name="account_different">Use a different account</string>
+    <string name="account_create">Create an account</string>
+    <string name="account_sign_in_email">Sign-in email (read-only)</string>
 </resources>

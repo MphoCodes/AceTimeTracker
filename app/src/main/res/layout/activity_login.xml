@@ -25,7 +25,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="290dp"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
 
@@ -64,7 +64,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints=""
-                    android:inputType="textPassword" />
+                    android:inputType="textPassword"
+                    android:saveEnabled="false" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -74,6 +75,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/btn_login" />
+            <TextView android:id="@+id/authStatusTextView" android:layout_width="match_parent" android:layout_height="wrap_content" android:accessibilityLiveRegion="polite" />
+            <Button android:id="@+id/buttonDifferentAccount" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/account_different" android:visibility="gone" />
+            <TextView android:id="@+id/tvRegisterLink" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/account_create" android:minHeight="48dp" android:gravity="center" android:clickable="true" android:focusable="true" />
+
 
             <TextView
                 android:id="@+id/forgotPasswordTextView"

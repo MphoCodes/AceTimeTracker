@@ -6,25 +6,23 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import com.example.acetimetracker.account.AccountActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class Categories : AppCompatActivity() {
+class Categories : AccountActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var categoryAdapter: CategoryAdapter
     private lateinit var firestore: FirebaseFirestore
-    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!sessionReady) return
         setContentView(R.layout.activity_categories)
 
         // Initialize Firebase
         firestore = FirebaseFirestore.getInstance()
-        auth = FirebaseAuth.getInstance()
 
         // Initialize views
         recyclerView = findViewById(R.id.recyclerViewCategories)
@@ -55,13 +53,14 @@ class Categories : AppCompatActivity() {
     }
 
     private fun fetchDataFromFirestore() {
-        val userId = auth.currentUser?.uid
+        val userId = currentSessionUid()
         if (userId != null) {
             firestore.collection("users")
                 .document(userId)
                 .collection("categories")
                 .get()
                 .addOnSuccessListener { result ->
+                    if (currentSessionUid() != userId) return@addOnSuccessListener
                     val categories = mutableListOf<Category>()
                     for (document in result) {
                         val name = document.getString("name") ?: ""
@@ -111,13 +110,14 @@ class Categories : AppCompatActivity() {
                 "timeSpent" to 0L // Consider if you need this field
             )
 
-            val userId = auth.currentUser?.uid
+            val userId = currentSessionUid()
             if (userId != null) {
                 firestore.collection("users")
                     .document(userId)
                     .collection("categories")
                     .add(categoryData)
                     .addOnSuccessListener { documentReference ->
+                        if (currentSessionUid() != userId) return@addOnSuccessListener
                         Log.d("Categories", "Category added with ID: ${documentReference.id}")
                         Toast.makeText(this, "Category added: $categoryName", Toast.LENGTH_SHORT).show()
                         // Clear input fields
@@ -144,7 +144,7 @@ class Categories : AppCompatActivity() {
 
     // Function to delete a category (add this inside the Categories activity)
     private fun deleteCategory(category: Category) {
-        val userId = auth.currentUser?.uid
+        val userId = currentSessionUid()
         if (userId != null) {
 
             firestore.collection("users")
@@ -153,6 +153,7 @@ class Categories : AppCompatActivity() {
                 .document(category.documentId) // Use category.documentId
                 .delete()
                 .addOnSuccessListener {
+                    if (currentSessionUid() != userId) return@addOnSuccessListener
                     Log.d("Categories", "Category deleted with ID: ${category.documentId}")
                     Toast.makeText(this, "Category deleted: ${category.name}", Toast.LENGTH_SHORT).show()
                     fetchDataFromFirestore()

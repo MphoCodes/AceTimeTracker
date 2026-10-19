@@ -15,9 +15,8 @@ import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import com.example.acetimetracker.account.AccountActivity
 import com.bumptech.glide.Glide
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -26,10 +25,9 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.UUID
 
-class Timesheet : AppCompatActivity() {
+class Timesheet : AccountActivity() {
 
     private lateinit var firestore: FirebaseFirestore
-    private lateinit var auth: FirebaseAuth
     private lateinit var adapter: ArrayAdapter<String>
     private val categoryList = ArrayList<String>()
     private var selectedImageUri: Uri? = null
@@ -41,7 +39,7 @@ class Timesheet : AppCompatActivity() {
     // Use ActivityResultLauncher for image selection
     private val startForResult =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
+            if (result.resultCode == Activity.RESULT_OK && currentSessionUid() != null) {
                 selectedImageUri = result.data?.data
                 if (selectedImageUri != null) {
                     // Preview the selected image using Glide
@@ -57,18 +55,11 @@ class Timesheet : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!sessionReady) return
         setContentView(R.layout.activity_timesheet)
 
         // Initialize Firebase
         firestore = FirebaseFirestore.getInstance()
-        auth = FirebaseAuth.getInstance()
-
-        // Check if user is authenticated
-        if (auth.currentUser == null) {
-            Toast.makeText(this, "User is not authenticated", Toast.LENGTH_SHORT).show()
-            finish() // Close the activity if the user is not authenticated
-            return
-        }
 
         // Initialize adapter
         adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoryList)
@@ -86,15 +77,17 @@ class Timesheet : AppCompatActivity() {
 
 
     private fun setupCategorySpinner() {
+        val userId = currentSessionUid() ?: return
         // Clear existing categoryList
         categoryList.clear()
 
         // Query Firestore for categories
         firestore.collection("users")
-            .document(auth.currentUser!!.uid)
+            .document(userId)
             .collection("categories")
             .get()
             .addOnSuccessListener { result ->
+                if (currentSessionUid() != userId) return@addOnSuccessListener
                 for (document in result) {
                     val categoryName = document.getString("name")
                     categoryName?.let { categoryList.add(it) }
@@ -125,6 +118,7 @@ class Timesheet : AppCompatActivity() {
     }
 
     private fun uploadImageToFirebaseStorage(imageUri: Uri?) {
+        val userId = currentSessionUid() ?: return
         if (imageUri != null) {
             val storageReference = FirebaseStorage.getInstance().reference
             val imageRef = storageReference.child("images/${UUID.randomUUID()}")
@@ -132,6 +126,7 @@ class Timesheet : AppCompatActivity() {
                 .addOnSuccessListener { taskSnapshot ->
                     // Image uploaded successfully, get the download URL
                     imageRef.downloadUrl.addOnSuccessListener { uri ->
+                        if (currentSessionUid() != userId) return@addOnSuccessListener
                         // Save the download URL to the timesheet entry and show success message
                         selectedImageUri = uri // Update the URI to use later
                         showToast("Image uploaded successfully")
@@ -222,7 +217,7 @@ class Timesheet : AppCompatActivity() {
         val timeSpentInMillis = calculateTimeSpent(startTime, endTime)
         val totalHoursWorked = timeSpentInMillis / (1000 * 60 * 60).toDouble()
 
-        val currentUserId = auth.currentUser?.uid ?: ""
+        val currentUserId = currentSessionUid() ?: return
 
         val entryData = hashMapOf(
             "date" to startDate,
@@ -234,6 +229,7 @@ class Timesheet : AppCompatActivity() {
         firestore.collection("users").document(currentUserId)
             .update("dailyTimesheetEntries", FieldValue.arrayUnion(entryData))
             .addOnSuccessListener {
+                if (currentSessionUid() != currentUserId) return@addOnSuccessListener
                 showToast("Timesheet entry saved successfully")
                 Log.d("TimesheetActivity", "Timesheet entry saved: $entryData")
                 // Clear input fields after successful save

@@ -10,7 +10,7 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import com.example.acetimetracker.account.AccountActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,17 +20,15 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class Myprogress : AppCompatActivity() {
+class Myprogress : AccountActivity() {
     private lateinit var categorySpinner: Spinner
     private lateinit var recyclerView: RecyclerView
     private lateinit var timesheetAdapter: TimesheetAdapter
     private lateinit var totalAllocatedTimeTextView: TextView
     private lateinit var barChart: BarChart
-    private val firestore = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
+    private lateinit var firestore: FirebaseFirestore
 
     companion object {
         const val DATE_FORMAT = "dd/MM"
@@ -39,6 +37,8 @@ class Myprogress : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!sessionReady) return
+        firestore = FirebaseFirestore.getInstance()
         setContentView(R.layout.activity_myprogress)
 
         recyclerView = findViewById(R.id.progRecyclerView)
@@ -83,7 +83,7 @@ class Myprogress : AppCompatActivity() {
     }
 
     private fun fetchCategories() {
-        val userId = auth.currentUser?.uid
+        val userId = currentSessionUid()
         if (userId != null) {
             Log.d(TAG, "Fetching categories for user: $userId")
 
@@ -91,6 +91,7 @@ class Myprogress : AppCompatActivity() {
                 .collection("categories")
                 .get()
                 .addOnSuccessListener { documents ->
+                    if (currentSessionUid() != userId) return@addOnSuccessListener
                     val fetchedCategories = mutableListOf<String>("Select Category")
                     Log.d(TAG, "Fetched ${documents.size()} categories")
 
@@ -126,7 +127,7 @@ class Myprogress : AppCompatActivity() {
     }
 
     private fun fetchAndDisplayProgressData(selectedCategory: String) {
-        val userId = auth.currentUser?.uid
+        val userId = currentSessionUid()
         if (userId != null) {
             Log.d(TAG, "Fetching progress data for category: $selectedCategory and user: $userId")
 
@@ -135,6 +136,7 @@ class Myprogress : AppCompatActivity() {
                 .whereEqualTo("name", selectedCategory)
                 .get()
                 .addOnSuccessListener { categoryDocuments ->
+                    if (currentSessionUid() != userId) return@addOnSuccessListener
                     if (categoryDocuments.isEmpty) {
                         Log.w(TAG, "No category document found for: $selectedCategory")
                         return@addOnSuccessListener
@@ -150,6 +152,7 @@ class Myprogress : AppCompatActivity() {
                         .orderBy("startDate")
                         .get()
                         .addOnSuccessListener { timesheetDocuments ->
+                            if (currentSessionUid() != userId) return@addOnSuccessListener
                             Log.d(TAG, "Fetched ${timesheetDocuments.size()} timesheet entries")
 
                             val timesheetEntries =
@@ -222,7 +225,7 @@ class Myprogress : AppCompatActivity() {
     }
 
     private fun fetchTimesheets() {
-        val userId = auth.currentUser?.uid
+        val userId = currentSessionUid()
         if (userId != null) {
             Log.d(TAG, "Fetching timesheets for user: $userId")
 
@@ -230,6 +233,7 @@ class Myprogress : AppCompatActivity() {
                 .whereEqualTo("userId", userId)
                 .get()
                 .addOnSuccessListener { documents ->
+                    if (currentSessionUid() != userId) return@addOnSuccessListener
                     Log.d(TAG, "Fetched ${documents.size()} timesheet entries")
 
                     val timesheets = mutableListOf<TimesheetEntry>()
