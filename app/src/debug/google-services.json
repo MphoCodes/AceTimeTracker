@@ -1,0 +1,19 @@
+{
+  "project_info": {
+    "project_number": "123456789012",
+    "project_id": "demo-acetimetracker",
+    "storage_bucket": "demo-acetimetracker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123456789012:android:0000000000000000000000",
+        "android_client_info": {
+          "package_name": "com.example.acetimetracker.debug"
+        }
+      },
+      "api_key": [{ "current_key": "debug-placeholder-not-a-production-api-key" }]
+    }
+  ],
+  "configuration_version": "1"
+}
