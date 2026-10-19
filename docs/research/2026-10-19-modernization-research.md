@@ -39,7 +39,7 @@ The resulting direction is a goal-first personal companion, not a billing system
 4. If the person opts in, use a simple local history-based suggestion before considering an ML model. A suggested time requires acceptance and respects quiet hours and manual choices.
 5. Evaluate complete goal periods and useful returns, with opt-out/frequency pressure as guardrails. Use credible controls before claiming reminder-driven improvement.
 
-The integrated spec fixes its own defaults: 21:00–08:00 quiet hours, at most one engagement nudge per local day, and a pause after three scheduled-day posting attempts without a subsequent completed session. These are proposed AceTimeTracker policies; they are not copied competitor settings. Validate denied permission, time-zone changes, daylight saving, reboot, canceled goals and delayed background execution. [Android notifications](https://developer.android.com/develop/ui/compose/notifications/notification-permission), [alarm guidance](https://developer.android.com/develop/background-work/services/alarms).
+The integrated spec fixes its own defaults: 21:00–08:00 quiet hours, at most one automatic nudge per account/device/local day, and one explicitly requested 20-minute snooze in the same day's reminder chain. Pause after three scheduled-day automatic posting attempts without a subsequent completed session; snoozes do not add to this counter. These are proposed AceTimeTracker policies; they are not copied competitor settings. Validate denied permission, time-zone changes, daylight saving, reboot, canceled goals and delayed background execution. [Android notifications](https://developer.android.com/develop/ui/compose/notifications/notification-permission), [alarm guidance](https://developer.android.com/develop/background-work/services/alarms).
 
 ## Data audit: verified source contracts
 
@@ -59,6 +59,7 @@ Other confirmed defects: repeated timer Stop/Save/Reset can recount the full ela
 
 - Inventory an allowlisted pilot in staging before live migration. No live data, deployed rules, production bucket ownership or signing setup was verified by this audit.
 - Import into one per-user goals/session contract; preserve the original source and a deterministic provenance mapping.
+- Imported categories require routine setup before scheduled completion or reminders, because the old source supplies no cadence, routine days or historical time zone.
 - Keep summary-only records explicitly incomplete. Do not manufacture endpoints, historical time zones, descriptions, image ownership or individual sessions from aggregates.
 - Preserve unowned global `Category.totalTime` untouched. Similar names do not establish user ownership.
 - Repeated imports must not duplicate records. Preserve multiplicity actually present in a source; do not merge records across sources just because date/category/duration match.

@@ -74,13 +74,15 @@ Profile display email and authentication email must have clear semantics. A disp
 - Archive a goal without deleting its sessions. Confirm destructive history deletion and offer undo where practical.
 - Goal details show progress, recent sessions, a prominent Start action, and the next scheduled opportunity.
 - Consistency rewards completing the chosen schedule. Rest days are legitimate; missing a day does not erase historical effort.
-- Daily periods begin at midnight in the goal's stored time zone; weekly periods begin Monday at midnight there. Target changes default to the next period and retain the previous target for historical comparisons. New goals begin immediately with the full chosen target for the first partial period, clearly labeled.
+- Daily periods begin at midnight in the goal's stored time zone; weekly periods begin Monday at midnight there. Retain effective-dated revisions of the target, cadence, routine and period time zone. Changes take effect at the next boundary of the existing period, recorded as an instant, and cannot rewrite completed historical periods. New goals begin immediately with the full chosen target for the first partial period, clearly labeled.
+- Imported categories start in a visible **Finish setup** state. Preserve their original hour targets and provenance, but require the person to choose cadence, routine days and a time zone before calculating scheduled completion or enabling reminders. Historical duration remains visible; do not invent a previous routine or retroactively mark it complete.
 
 ### Tracking and manual sessions
 
 - Support start, pause, resume, finish, and discard, with one active timer per local app installation.
 - Finish produces one stable session ID; Stop/Save/retry cannot create multiple records for the same timer.
 - Persist timer state and checkpoints outside the activity. Use monotonic elapsed time while a boot session remains valid; store wall-clock anchors for recovery.
+- Persist each active interval between Start/Resume and Pause/Finish, including its UTC endpoints and measured duration. A saved session retains these intervals and sums their durations; paused time earns no progress. A new uninterrupted manual entry has one interval. Complete new sessions require a positive total duration.
 - Rotation, navigation, backgrounding, screen lock, and process death do not discard a session. A reboot or implausible time change leads to an editable recovered draft rather than an invented duration.
 - Use an appropriate user-visible ongoing notification for an active session and verify platform/background rules during the tracking stage. Do not use WorkManager as a per-second clock.
 - Manual entry accepts a goal, start/end date-times, a note, and an optional image. Validate real calendar times and positive duration, including midnight, time zones, and daylight-saving ambiguity.
@@ -90,7 +92,7 @@ Profile display email and authentication email must have clear semantics. A disp
 
 ### Progress and visual design
 
-Use one trustworthy progress model for Today, Goals, and Progress. Calculate totals from canonical sessions; show minutes/hours with readable labels. Provide period filters and a text equivalent for every chart. Split complete sessions across local-day boundaries for daily totals without changing the original session; retain summary-only legacy records on their recorded date.
+Use one trustworthy progress model for Today, Goals, and Progress. Calculate totals from canonical sessions; show minutes/hours with readable labels. Provide period filters and a text equivalent for every chart. For goal progress, split active intervals at the boundaries defined by that goal's effective period/time-zone revision. Recording time zone is history-display metadata, not an alternative completion rule. Pauses earn no duration on either day. An all-goal report uses one explicitly displayed reporting zone, initially the device zone, rather than mixing incompatible day boundaries. Retain summary-only legacy records on their recorded date, labeled as summaries without fabricated interval allocations or historical target completion.
 
 The proposed visual direction is calm, confident, and encouraging: warm neutral surfaces, a refined coral/red brand accent, restrained success colors, generous spacing, clear typography, and a prominent time/progress display. A brief completion animation should reinforce a saved action. Animation is decorative and respects system settings; it must not obscure state or delay interaction. Specific tokens and representative screen previews are delivered with the Compose design-system stage before broad screen migration.
 
@@ -126,9 +128,9 @@ Use Room for the local goal/session/timer state that screens observe, DataStore 
 
 Record local writes and an outbox operation in one local transaction. Stable entity/operation IDs make retries idempotent. A connectivity-aware worker drains pending operations with bounded backoff and exposes pending/error state. Server-confirmed revisions and tombstones prevent a delayed offline edit from silently resurrecting deleted data; conflicting edits become a resolution state. New session identities do not depend on a mutable category name.
 
-Firestore already has offline caching and queued writes, with last-write-wins behavior for changes to a document. The sync stage must deliberately coordinate its confirmation/retry semantics with the local outbox rather than layering two untracked queues. See [Firestore offline behavior](https://firebase.google.com/docs/firestore/manage-data/enable-offline).
+Firestore already has offline caching and queued writes, with last-write-wins behavior for changes to a document. Room's outbox is the sole durable queue for new canonical goal/session mutations. Its remote adapter uses online transactions that validate the expected entity revision and atomically record an immutable operation receipt. A retry first checks that receipt; a committed operation with a lost acknowledgement is acknowledged locally without applying it twice. An offline failure remains pending in Room; do not issue a separate ordinary/batched Firestore write as a fallback. Legacy cached writes remain subject to the migration reconciliation policy. See [Firestore offline behavior](https://firebase.google.com/docs/firestore/manage-data/enable-offline) and [transaction semantics](https://firebase.google.com/docs/firestore/manage-data/transactions).
 
-Keep local records partitioned by account ID. On sign-out, stop account listeners and workers, cancel account reminders, and remove that account's data from active UI access. Warn about unsynced local work before a destructive local clear. Account A's drafts, attachments, and pending writes cannot appear or upload under account B.
+Keep local records partitioned by account ID. On sign-out/account replacement, first pause and checkpoint the originating account's active timer, cancel its notification/actions, then stop its listeners/workers and reminders and remove its data from active UI access. The paused timer does not block a different account from starting its own session; its owner must explicitly resume it after returning. Notification actions and in-flight async callbacks validate both the originating UID and timer/operation identity before acting. Warn about unsynced local work before a destructive local clear. Account A's drafts, attachments, and pending writes cannot appear or upload under account B.
 
 ### Proposed compatible toolchain snapshot
 
@@ -168,8 +170,9 @@ Compile against API 37 for current dependencies; start the foundation at target 
 | `users/{uid}/goals/{goalId}` | Goal identity, target/cadence, routine, archive state |
 | `users/{uid}/sessions/{sessionId}` | One canonical saved duration/session with optional note and attachment |
 | `users/{uid}/migrationRecords/{sourceKey}` | Provenance, deterministic mappings, imported/skipped/review status |
+| `users/{uid}/syncReceipts/{operationId}` | Immutable acknowledgement written atomically with a canonical mutation to make retries safe |
 
-Session duration is a nonnegative `Long` count of milliseconds. Complete new sessions have UTC start/end instants and the recording time zone. A legacy summary may have only its original local date and duration. Missing start/end times remain missing: no synthetic midnight timestamps or fabricated notes/images.
+Session duration is a `Long` count of milliseconds. Complete new sessions have a positive total, UTC outer start/end instants, recording time zone and ordered non-overlapping active intervals; their total duration is the sum of active interval durations. The outer interval alone must never be used to allocate paused-session progress. A legacy summary may have only its original local date and nonnegative duration. Missing start/end times or intervals remain missing: no synthetic midnight timestamps or fabricated notes/images.
 
 Each entity has a stable ID, schema version, revision/update metadata, and explicit deletion/archive semantics. A session preserves its goal-label snapshot for history even if the goal is renamed or later unavailable. Legacy goal mapping uses source document identity where available; ambiguous duplicate names require review rather than an arbitrary first match.
 
@@ -177,7 +180,7 @@ Each entity has a stable ID, schema version, revision/update metadata, and expli
 
 | Existing source | Existing usage | Migration policy |
 | --- | --- | --- |
-| `users/{uid}/categories` | Category management and manual selection | Import owned categories into goals; retain original fields/provenance |
+| `users/{uid}/categories` | Category management and manual selection | Import owned categories into goals requiring routine setup; retain original fields/provenance without inventing cadence/zone |
 | `users/{uid}.dailyTimesheetEntries` | Written by manual entry, read by pie chart | Import as summary-quality sessions using only fields actually stored |
 | `timesheetEntries` filtered by `userId` | Read by My Progress | Import only records with verified ownership; preserve available detail |
 | Global `Category` and `totalTime` | Timer selection/aggregate writes | Preserve untouched; do not assign aggregate values to a person or fabricate individual sessions |
@@ -198,10 +201,11 @@ Duolingo's published engineering describes selecting reminder copy using experim
 
 - Reminders are opt-in, attached to the person's selected routine and local time, with an editable schedule.
 - Default quiet hours are 21:00–08:00 in the device's current time zone. Settings clearly show the effective time. A reminder that falls inside quiet hours is skipped, not accumulated for a burst later.
-- Limit goal-engagement reminders to one per local day across all goals. A person can start, snooze, or disable reminders; ongoing active-timer status is a separate notification channel.
-- Recheck eligibility when work actually executes: permissions and channel enabled, correct account, goal active, due day, no current session, no goal completion in the relevant period, no quiet hours, and no prior reminder that day.
+- Limit automatic goal-engagement reminders to one per account per device per local day across all goals. A person can start, snooze, or disable reminders; ongoing active-timer status is a separate notification channel.
+- Allow one explicit 20-minute snooze of that day's original reminder. It replaces the notification within the same stable reminder chain; it is the sole exception to the automatic posting cap. Repeated Snooze taps cannot schedule additional follow-ups. If the follow-up would land in quiet hours or on another local day, skip it.
+- Recheck eligibility when work actually executes: permissions and channel enabled, correct account, configured/active goal, due day, no current session, no goal completion in the relevant period, and no quiet hours. An automatic nudge requires unused daily quota; a snoozed follow-up requires the original chain and its unused single snooze instead.
 - Suppress while the app is being used. Reschedule after routine, permission, time-zone, or device-time changes.
-- Pause engagement nudges after three scheduled-day posting attempts without a subsequent completed session. Show the paused state in settings; resume only when the person explicitly enables reminders again.
+- Pause engagement nudges after three scheduled-day automatic posting attempts without a subsequent completed session; snoozed follow-ups do not increment that counter. Show the paused state in settings; resume only when the person explicitly enables reminders again.
 - Use inexact scheduling for engagement nudges and communicate that Android may delay delivery. Do not request exact-alarm privileges for ordinary habit nudges. WorkManager coordinates durable deferrable work; AlarmManager is considered only for the appropriate scheduling need. See [Android alarm guidance](https://developer.android.com/develop/background-work/services/alarms) and [notification permission behavior](https://developer.android.com/develop/ui/compose/notifications/notification-permission).
 - No cloud push service or paid messaging infrastructure is required for the first local reminder implementation.
 
@@ -222,14 +226,14 @@ Stage IDs below are roadmap identifiers, not GitHub PR numbers. Each implementat
 | P0 | Research, proposed specification and roadmap | Current audit | Source links, legacy-source mapping, explicit assumptions and scope review |
 | P1 | Compatible build/toolchain and CI foundation | P0 approved | Reproducible clean checkout; debug assembly, lint and unit tests; dependency metadata/compatibility check; no credentials in tracked config |
 | P2 | Auth/profile correctness and app-session routing | P1 | Existing login/registration/reset work; profile bootstrap is idempotent; text-only edit works; persisted session routes correctly; account-switch tests |
-| P3 | Canonical goals/sessions repositories and migration | P2 | Precision, ownership and idempotency tests; migration dry-run/fixtures; emulator rules/index tests; old data retained |
-| P4 | Durable local tracking data and synchronization | P3 | Offline writes/readback; process-death persistence; retry/idempotency, account separation, conflict and tombstone tests |
+| P3 | Canonical goals/sessions repositories and migration | P2 | Precision, ownership and idempotency tests; migration dry-run/fixtures; imported routine-setup state; emulator rules/index tests; old data retained |
+| P4 | Durable local tracking data and synchronization | P3 | Offline writes/readback; process-death persistence; lost-ack receipt retries; active-timer sign-out/account separation; conflict and tombstone tests |
 | P5 | Compose design system, navigation and preferences | P2–P4 | Representative Today/Goal/Timer previews; auth/back navigation; light/dark/system themes; large text, TalkBack and adaptive-window checks |
 | P6 | Goal creation, editing, archive and routine UI | P5 | Create/edit/archive flows; daily/weekly boundaries; target-change history; historical sessions retained |
-| P7 | Reliable active timer | P6 | Monotonic-time state-machine tests; pause/resume/repeated finish; rotation, lock, background, process death and reboot recovery walkthroughs |
+| P7 | Reliable active timer | P6 | Monotonic-time state-machine tests; paused overnight interval allocation; repeated finish; rotation, lock, background, process death and reboot recovery walkthroughs |
 | P8 | Manual sessions, history editing and attachments | P7 | Overnight/DST validation; note/image preservation; pending/retry upload; edit/delete recalculates summaries; no duplicate saves |
 | P9 | Today and Progress summaries | P8 | All screens agree on totals; minute precision; period/zone boundaries; legacy quality labels; accessible chart/text equivalence |
-| P10 | Onboarding, reminders and optional measurement | P9 | Goal-first onboarding; denied permission, quiet-hours/day cap, completed-goal suppression, rescheduling and preference tests; event payload tests |
+| P10 | Onboarding, reminders and optional measurement | P9 | Goal-first onboarding; denied permission; daily cap/single snooze/quiet-hours tests; completed-goal suppression; rescheduling, preference and event payload tests |
 | P11 | Legacy removal and release-quality verification | P10 | Remove replaced activities/layouts/dependencies; current target behavior audit; min/latest representative device tests; critical flow, accessibility and performance evidence |
 
 Research chats completed for competitor/engagement research and data/migration audit. Their initial student-oriented assumption is superseded by the owner's confirmed general personal-goals audience. The integrated findings are recorded in [the research brief](../../research/2026-10-19-modernization-research.md). This coordinating chat owns the integrated specification, dependency order, review outcomes, and the active modernization goal. Implementation chats receive the approved stage contract and its predecessor state; do not launch every stage simultaneously.
