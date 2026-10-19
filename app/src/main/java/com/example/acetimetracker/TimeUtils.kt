@@ -9,8 +9,8 @@ object TimeUtils {
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
         return try {
-            val startDate = timeFormat.parse(startTime)
-            val endDate = timeFormat.parse(endTime)
+            val startDate = requireNotNull(timeFormat.parse(startTime))
+            val endDate = requireNotNull(timeFormat.parse(endTime))
 
             // Calculate the difference in milliseconds
             val difference = endDate.time - startDate.time
