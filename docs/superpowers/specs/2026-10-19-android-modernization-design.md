@@ -1,7 +1,7 @@
 # AceTimeTracker Android modernization: approved product and technical specification
 
 - Date: 19 October 2026
-- Status: Approved by the owner on 19 October 2026. P1 implementation is underway: the toolchain PR is verified; target-36 compatibility is awaiting its remaining runtime/CI checks.
+- Status: Approved by the owner on 19 October 2026. P1's two PR deliverables and required checks are complete and ready for review/integration. P2's implementation plan awaits owner review; the Android modernization goal remains in progress.
 - Baseline: `main` at `340958c1ccbc9f6b57cf9e1055ae671b8da7d27a`.
 - Audience confirmed by the owner: **anyone building personal goals and habits**.
 
@@ -264,4 +264,4 @@ Confirmed: general personal goals/habits audience; native Android/Compose modern
 
 Approved: time-based goals first, incremental migration, the four main destinations, offline local persistence with Firebase synchronization, the visual direction, opt-in reminders and simple personalization before ML, and the staged delivery sequence.
 
-The owner approved the [P1 implementation plan](../plans/2026-10-19-p1-android-foundation.md); its toolchain task is verified in PR #4 and its compatibility task is in draft [PR #5](https://github.com/MphoCodes/AceTimeTracker/pull/5). P1 ends at target 36 and P2 waits for both tasks' required evidence. A [proposed P2 plan](../plans/2026-10-19-p2-accounts-and-profiles.md) covers account/session routing followed by reliable profile editing and sign-in email changes. P2 implementation waits for its plan review. Later plans refine their own interfaces against this specification and the verified predecessor.
+The owner approved the [P1 implementation plan](../plans/2026-10-19-p1-android-foundation.md); its toolchain task is verified in PR #4 and its compatibility task is verified in [PR #5](https://github.com/MphoCodes/AceTimeTracker/pull/5). P1 ends at target 36, with host checks, API 27/36 CI and the required API 37 walkthrough complete. The PRs remain unmerged. A [proposed P2 plan](../plans/2026-10-19-p2-accounts-and-profiles.md) covers account/session routing followed by reliable profile editing and sign-in email changes. P2 implementation waits for its plan review. Later plans refine their own interfaces against this specification and the verified predecessor.
