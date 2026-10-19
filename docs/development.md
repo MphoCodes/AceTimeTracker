@@ -103,7 +103,8 @@ verification before release. iOS remains deferred.
 
 ## Account and profile behavior (P2)
 
-Startup checks the persisted Auth session immediately. Signed-out users see login;
+Startup checks the persisted Auth session immediately and listens for delayed
+Auth initialization. Signed-out users see login;
 signed-in users initialize their root profile before going home. Auth success
 followed by profile failure offers retry against the same UID, without creating a
 second account. Account screens capture their owner UID, reject stale saved state,

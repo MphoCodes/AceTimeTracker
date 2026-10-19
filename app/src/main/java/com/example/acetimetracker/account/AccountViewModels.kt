@@ -19,6 +19,14 @@ class AuthViewModel(private val services: AccountServices) : ViewModel() {
     private var preferredName: String? = null
     private var preferredUid: String? = null
     private val busy get() = mutable.value?.phase == AuthPhase.WORKING
+    private val stopObserving = services.auth.observe { account ->
+        val currentState = mutable.value!!
+        // A restored identity can arrive after onStart. In-flight registration owns
+        // its chosen-name bootstrap; same-UID setup failures still require retry.
+        if (!cleared && !busy && (account?.uid != currentState.uid || currentState.phase == AuthPhase.IDLE)) {
+            resume()
+        }
+    }
 
     fun resume() {
         if (busy) return
@@ -44,7 +52,11 @@ class AuthViewModel(private val services: AccountServices) : ViewModel() {
         mutable.value = AuthState(AuthPhase.WORKING)
         action().addOnCompleteListener { result ->
             if (cleared || request != generation) return@addOnCompleteListener
-            if (!result.isSuccessful) { fail(problem); return@addOnCompleteListener }
+            if (!result.isSuccessful) {
+                fail(problem)
+                if (services.auth.current != null) resume()
+                return@addOnCompleteListener
+            }
             val account = result.result
             if (!current(account.uid, request)) return@addOnCompleteListener
             preferredName = name; preferredUid = account.uid
@@ -73,6 +85,8 @@ class AuthViewModel(private val services: AccountServices) : ViewModel() {
         services.auth.resetPassword(email.trim()).addOnCompleteListener { result ->
             if (cleared || request != generation) return@addOnCompleteListener
             if (result.isSuccessful) mutable.value = AuthState(AuthPhase.RESET_SENT) else fail(AccountProblem.PASSWORD_RESET)
+            // Auth notifications are deferred while reset is working as well.
+            if (services.auth.current != null) resume()
         }
     }
     fun useDifferentAccount() {
@@ -81,7 +95,7 @@ class AuthViewModel(private val services: AccountServices) : ViewModel() {
     }
     fun acknowledgeReset() { if (mutable.value?.phase == AuthPhase.RESET_SENT) mutable.value = AuthState() }
     private fun fail(problem: AccountProblem) { mutable.value = AuthState(AuthPhase.ERROR, problem = problem) }
-    override fun onCleared() { cleared = true; ++generation }
+    override fun onCleared() { cleared = true; ++generation; stopObserving() }
 }
 
 data class ProfileState(val loading: Boolean = true, val loaded: Boolean = false, val name: String = "",

@@ -16,15 +16,19 @@ migration, rules deployment, and production Firebase operations remain out of sc
   saves editable and expose upload/download failures without blocking Back.
 - [x] Test preservation, failures/retries, stale callbacks, routing/back-stack
   flags, text-only saving and rotation with fake gateways and real UI components.
-- [ ] Run full metadata/build/test/lint checks, obtain review, open a separate P2
-  PR, and verify hosted CI. Do not merge P2 without a later request.
+- [x] Run full metadata/build/test/lint checks, obtain review, open a separate P2
+  PR, and submit hosted CI checks. Do not merge P2 without a later request.
 
 Validation uses demo configuration and in-memory gateway fixtures, never live
 accounts/data. Firebase adapter integration and deployed upload rules remain
 explicit staging/device checks before production rollout.
 
 Local validation: metadata check, debug APK, instrumentation APK compilation,
-39 JVM/Robolectric tests, and lint passed. Lint has zero errors and 192 warnings.
+46 JVM/Robolectric tests, and lint passed. Lint has zero errors and 192 warnings.
 Independent review found a destroyed-Activity callback and a delayed-listener
 resume edge case; both now have failing-before/passing-after regression tests,
-and follow-up review found no remaining actionable issues. Hosted CI is pending.
+and follow-up review found no remaining actionable issues. Late restored identity
+is also observed across authentication/reset completion; regressions cover retry
+gating, chosen-name ordering, and listener cleanup. Hosted CI passed the first
+revision; the final revision's status and logs are tracked on
+[PR #3](https://github.com/MphoCodes/AceTimeTracker/pull/3).

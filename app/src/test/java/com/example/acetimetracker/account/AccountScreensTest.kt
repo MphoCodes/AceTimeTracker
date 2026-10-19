@@ -51,6 +51,13 @@ class AccountScreensTest {
         val c = splash().setup(); drain()
         assertRoot(shadowOf(c.get()).nextStartedActivity, Login::class.java); c.pause().stop().destroy()
     }
+    @Test fun loginRoutesWhenPersistedIdentityArrivesAfterStartup() {
+        val c = Robolectric.buildActivity(Login::class.java).setup(); drain()
+        assertNull(shadowOf(c.get()).nextStartedActivity)
+        f.auth.change(a); drain()
+        assertRoot(shadowOf(c.get()).nextStartedActivity, MainActivity::class.java)
+        c.pause().stop().destroy(); assertTrue(f.auth.listeners.isEmpty())
+    }
     @Test fun persistedSessionOpensHomeAfterProfileInitialization() {
         f.auth.account = a
         val c = splash().setup(); drain()

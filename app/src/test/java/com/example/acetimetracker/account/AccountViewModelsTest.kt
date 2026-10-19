@@ -23,6 +23,52 @@ class AccountViewModelsTest {
         assertEquals(AuthPhase.SIGNED_OUT, vm.state.value!!.phase)
         assertTrue(f.profiles.ensures.isEmpty())
     }
+    @Test fun latePersistedIdentityRoutesWithoutAnotherActivityStart() {
+        val vm = AuthViewModel(f.services); vm.resume(); drain()
+        f.auth.change(a); drain()
+        assertEquals(AuthPhase.READY, vm.state.value!!.phase)
+        assertEquals("a", vm.state.value!!.uid)
+    }
+    @Test fun authNotificationBeforeRegistrationCompletionDoesNotLoseChosenName() {
+        val pending = TaskCompletionSource<Account>(); f.auth.signInResult = pending.task
+        val vm = AuthViewModel(f.services); vm.register("Chosen", "a@example.com", "password", "password")
+        f.auth.change(a); drain()
+        assertTrue(f.profiles.ensures.isEmpty())
+        pending.setResult(a); drain()
+        assertEquals(listOf("a" to "Chosen"), f.profiles.ensures)
+        assertEquals(AuthPhase.READY, vm.state.value!!.phase)
+    }
+    @Test fun sameAccountNotificationDoesNotAutoRetryFailedProfile() {
+        f.auth.account = a; f.profiles.ensureResult = Tasks.forException(IllegalStateException("offline"))
+        val vm = AuthViewModel(f.services); vm.resume(); drain()
+        val attempts = f.profiles.ensures.size
+        f.auth.change(a); drain()
+        assertEquals(attempts, f.profiles.ensures.size)
+        assertEquals(AuthPhase.PROFILE_RETRY, vm.state.value!!.phase)
+    }
+    @Test fun identityRestoredDuringPasswordResetIsReconciledWhenResetCompletes() {
+        val pending = TaskCompletionSource<Void>(); f.auth.resetResult = pending.task
+        val vm = AuthViewModel(f.services); vm.resetPassword("a@example.com")
+        f.auth.change(a); drain(); assertTrue(f.profiles.ensures.isEmpty())
+        pending.setResult(null); drain()
+        assertEquals(AuthPhase.READY, vm.state.value!!.phase)
+        assertEquals("a", vm.state.value!!.uid)
+    }
+    @Test fun identityRestoredDuringFailedSignInIsReconciledAfterFailure() {
+        val pending = TaskCompletionSource<Account>(); f.auth.signInResult = pending.task
+        val vm = AuthViewModel(f.services); vm.signIn("other@example.com", "password")
+        f.auth.change(a); drain(); assertTrue(f.profiles.ensures.isEmpty())
+        pending.setException(IllegalStateException("failed sign-in")); drain()
+        assertEquals(AuthPhase.READY, vm.state.value!!.phase)
+        assertEquals("a", vm.state.value!!.uid)
+    }
+    @Test fun authListenerIsRemovedWhenViewModelIsCleared() {
+        val vm = AuthViewModel(f.services)
+        assertEquals(1, f.auth.listeners.size)
+        val store = androidx.lifecycle.ViewModelStore(); store.put("auth", vm); store.clear()
+        assertTrue(f.auth.listeners.isEmpty())
+        f.auth.change(a); drain(); assertTrue(f.profiles.ensures.isEmpty())
+    }
     @Test fun signedInStartupInitializesBeforeRouting() {
         f.auth.account = a
         val pending = TaskCompletionSource<UserProfile>(); f.profiles.ensureResult = pending.task
