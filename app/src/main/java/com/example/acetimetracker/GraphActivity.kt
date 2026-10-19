@@ -3,23 +3,23 @@ package com.example.acetimetracker
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
+import com.example.acetimetracker.account.AccountActivity
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.PercentFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class GraphActivity : AppCompatActivity() {
+class GraphActivity : AccountActivity() {
 
     private lateinit var chart: PieChart
     private lateinit var firestore: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!sessionReady) return
         setContentView(R.layout.activity_graph)
 
         chart = findViewById(R.id.chart) // Assuming you change the ID in the layout
@@ -29,11 +29,12 @@ class GraphActivity : AppCompatActivity() {
     }
 
     private fun fetchAndDisplayChartData() {
-        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        val userId = currentSessionUid() ?: return
 
         firestore.collection("users").document(userId)
             .get()
             .addOnSuccessListener { document ->
+                if (currentSessionUid() != userId) return@addOnSuccessListener
                 val dailyTimesheetEntries = document.get("dailyTimesheetEntries") as List<Map<String, Any>>?
 
                 if (dailyTimesheetEntries != null) {

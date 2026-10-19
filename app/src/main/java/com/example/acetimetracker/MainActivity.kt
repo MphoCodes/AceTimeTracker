@@ -2,13 +2,11 @@ package com.example.acetimetracker
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -16,21 +14,20 @@ import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
+import com.example.acetimetracker.account.AccountActivity
+import com.example.acetimetracker.account.SessionRouting
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AccountActivity() {
 
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var navigationView: NavigationView
-    private lateinit var auth: FirebaseAuth
-    private lateinit var firestore: FirebaseFirestore
     private lateinit var profilePictureLoadingAnimation: LottieAnimationView // Initialize here
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!sessionReady) return
         setContentView(R.layout.activity_main)
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -40,8 +37,6 @@ class MainActivity : AppCompatActivity() {
 
         drawerLayout = findViewById(R.id.drawer_layout)
         navigationView = findViewById(R.id.nav_view)
-        auth = FirebaseAuth.getInstance()
-        firestore = FirebaseFirestore.getInstance()
 
         val toggle = ActionBarDrawerToggle(
             this, drawerLayout, toolbar,
@@ -94,10 +89,8 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
                 R.id.nav_logout -> {
-                    FirebaseAuth.getInstance().signOut()
-                    val intent = Intent(this, Login::class.java)
-                    startActivity(intent)
-                    finish()
+                    accounts.auth.signOut()
+                    SessionRouting.root(this, Login::class.java)
                 }
             }
             true
@@ -115,26 +108,24 @@ class MainActivity : AppCompatActivity() {
         profilePictureLoadingAnimation.repeatCount = LottieDrawable.INFINITE
         profilePictureLoadingAnimation.repeatMode = LottieDrawable.RESTART
         profilePictureLoadingAnimation.playAnimation()
+    }
 
-        fetchUserData()
+    override fun onResume() {
+        super.onResume()
+        if (currentSessionUid() != null) fetchUserData()
     }
 
     private fun fetchUserData() {
-        val userId = auth.currentUser?.uid ?: ""
-        if (userId.isNotEmpty()) {
-            firestore.collection("users").document(userId)
-                .get()
-                .addOnSuccessListener { document ->
-                    val displayName = document.getString("displayName")
-                    val email = document.getString("email")
-                    val profilePictureUrl = document.getString("profilePictureUrl")
-
-                    // Update the Navigation Drawer header
-                    updateNavDrawerHeader(displayName, email, profilePictureUrl)
-                }
-                .addOnFailureListener { exception ->
-                    Log.e("MainActivity", "Error fetching user data: ${exception.message}", exception)
-                }
+        val uid = currentSessionUid() ?: return
+        updateNavDrawerHeader(sessionAccount.displayName, sessionAccount.email, sessionAccount.photoUrl)
+        accounts.profiles.ensure(sessionAccount).addOnCompleteListener { result ->
+            if (currentSessionUid() != uid) return@addOnCompleteListener
+            profilePictureLoadingAnimation.cancelAnimation()
+            profilePictureLoadingAnimation.visibility = android.view.View.INVISIBLE
+            if (result.isSuccessful) {
+                val profile = result.result
+                updateNavDrawerHeader(profile.displayName, sessionAccount.email, profile.profilePictureUrl)
+            }
         }
     }
 
@@ -147,7 +138,7 @@ class MainActivity : AppCompatActivity() {
         val emailTextView = headerView.findViewById<TextView>(R.id.nav_email_textview)
 
         // Load the profile picture (if available)
-        if (profilePictureUrl != null) {
+        if (!profilePictureUrl.isNullOrBlank()) {
             Glide.with(this)
                 .load(profilePictureUrl)
                 .transform(CircleCrop())
@@ -158,7 +149,7 @@ class MainActivity : AppCompatActivity() {
 
         // Set the display name and email
         nameTextView.text = displayName ?: "Ace! Time Tracker"
-        emailTextView.text = email ?: "st10203065@vcconnect.edu.za"
+        emailTextView.text = email.orEmpty()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

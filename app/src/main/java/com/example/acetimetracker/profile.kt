@@ -2,73 +2,35 @@ package com.example.acetimetracker
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CircleCrop
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.acetimetracker.account.*
 
-class profile : AppCompatActivity() {
-
-    private lateinit var auth: FirebaseAuth
-    private lateinit var firestore: FirebaseFirestore
-
+class profile : AccountActivity() {
+    private val model by lazy { ViewModelProvider(this, AccountViewModelFactory(accounts))[ProfileViewModel::class.java] }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!sessionReady) return
         setContentView(R.layout.activity_profile)
-
-        auth = FirebaseAuth.getInstance()
-        firestore = FirebaseFirestore.getInstance()
-
-        val btnBack = findViewById<ImageButton>(R.id.btnBack)
-        btnBack.setOnClickListener {
-            onBackPressed()
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        findViewById<Button>(R.id.editProfileButton).setOnClickListener { startActivity(Intent(this, EditProfileActivity::class.java)) }
+        findViewById<TextView>(R.id.emailTextView).text = sessionAccount.email.orEmpty()
+        model.state.observe(this) { state ->
+            if (currentSessionUid() == null) return@observe
+            findViewById<TextView>(R.id.displayNameTextView).text = state.name.ifBlank { sessionAccount.displayName.orEmpty() }
+            val image = findViewById<ImageView>(R.id.profileImageView)
+            if (state.photo.isBlank()) image.setImageResource(R.drawable.ic_account_circle)
+            else Glide.with(this).load(state.photo).transform(CircleCrop()).into(image)
         }
-
-        val editProfileButton = findViewById<Button>(R.id.editProfileButton)
-        editProfileButton.setOnClickListener {
-            val intent = Intent(this, EditProfileActivity::class.java)
-            startActivity(intent)
-        }
-
-        fetchUserData()
+        model.load(sessionAccount)
     }
-
-    private fun fetchUserData() {
-        val userId = auth.currentUser?.uid ?: ""
-        firestore.collection("users").document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                val displayName = document.getString("displayName")
-                val email = document.getString("email")
-                val profilePictureUrl = document.getString("profilePictureUrl")
-
-                val displayNameTextView = findViewById<TextView>(R.id.displayNameTextView)
-                val emailTextView = findViewById<TextView>(R.id.emailTextView)
-                val profileImageView = findViewById<ImageView>(R.id.profileImageView)
-
-                displayNameTextView.text = displayName ?: "Display Name"
-                emailTextView.text = email ?: "Email Address"
-
-                // Load the profile picture using Glide (if available)
-                if (profilePictureUrl != null) {
-                    Glide.with(this)
-                        .load(profilePictureUrl)
-                        .transform(CircleCrop()) // Apply the circular transformation
-                        .into(profileImageView)
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.e("profileActivity", "Error fetching user data: ${exception.message}", exception)
-            }
-
-            .addOnFailureListener { exception ->
-                Log.e("profileActivity", "Error fetching user data: ${exception.message}", exception)
-            }
+    override fun onResume() {
+        super.onResume()
+        if (sessionReady && model.state.value?.loaded == true) model.reload()
     }
 }

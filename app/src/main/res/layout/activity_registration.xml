@@ -20,7 +20,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="455dp"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp"
             tools:ignore="TextSizeCheck">
@@ -69,7 +69,8 @@
                     android:id="@+id/etPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword" />
+                    android:inputType="textPassword"
+                    android:saveEnabled="false" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -83,7 +84,8 @@
                     android:id="@+id/etConfirmPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword" />
+                    android:inputType="textPassword"
+                    android:saveEnabled="false" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -93,6 +95,9 @@ android:backgroundTint="@color/red"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/btn_register" />
+            <TextView android:id="@+id/authStatusTextView" android:layout_width="match_parent" android:layout_height="wrap_content" android:accessibilityLiveRegion="polite" />
+            <Button android:id="@+id/buttonDifferentAccount" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/account_different" android:visibility="gone" />
+
 
             <TextView
                 android:id="@+id/tvLoginLink"

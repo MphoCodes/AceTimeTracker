@@ -79,9 +79,17 @@ AndroidX drawer/Back dispatcher on API 36, covering drawer dismissal and default
 Back navigation without initializing Firebase clients. The first run downloads
 Robolectric's Android runtime from Maven Central.
 
-The suite does not claim timer, overnight date handling, migration, or account
-isolation correctness; those require behavior changes and tests in their owning
-stages.
+P2 also uses fake account/profile/photo gateways injected through `AceApplication`
+to exercise the real login, registration, profile editor, and routing screens.
+It covers session changes, restored owners, task-clearing navigation, registration
+setup retry, rotation during in-flight work, password-reset dialog retries,
+text-only edits, save acknowledgment, and failed uploads. Pure profile-field tests
+check that legacy arrays, custom fields, email, and old photo references survive.
+Only the decorative native splash GIF is substituted in Robolectric.
+
+These tests never initialize Firebase clients or contact a backend. They do not
+claim deployed-rules or server integration correctness. Timer totals, overnight
+date handling, and historical migration remain deferred to their owning stages.
 
 The obsolete manifest entry for the absent `timetracker` activity was removed,
 the drawer uses `OnBackPressedDispatcher` for API 36 gestures, and the GIF library
@@ -92,3 +100,37 @@ or device (`./gradlew :app:connectedDebugAndroidTest`); compilation alone does n
 count as an on-device test run. Target-SDK behavior, edge-to-edge layouts, storage
 permissions, accessibility, and the deferred functional defects need device
 verification before release. iOS remains deferred.
+
+## Account and profile behavior (P2)
+
+Startup checks the persisted Auth session immediately. Signed-out users see login;
+signed-in users initialize their root profile before going home. Auth success
+followed by profile failure offers retry against the same UID, without creating a
+second account. Account screens capture their owner UID, reject stale saved state,
+and return through a task-clearing entry route on sign-out or account switch.
+
+`users/{uid}` keeps its existing schema. Profile bootstrap uses a transaction and
+merge to add only absent `displayName`, `email`, and `profilePictureUrl` fields.
+Existing values (including blank/null values), summaries, and unrelated fields are
+preserved. An existing cached document can open offline if the transaction fails;
+a missing profile exposes retry. Text-only edits merge only `displayName`, and an
+explicit successful photo selection adds `profilePictureUrl`. Saves finish only
+after the write task succeeds; failures retain the draft. No sign-in email editing
+is offered: the displayed read-only email comes from Auth, while the legacy
+Firestore email stays intact.
+
+Profile uploads use `profile_pictures/{uid}/{uuid}` with `ownerUid` metadata.
+Existing URLs and objects are retained; no cleanup or migration is performed.
+Upload and download-URL failures share a retryable UI state. ViewModels retain
+in-flight work across configuration changes and callbacks check their owner UID.
+Passwords are not retained in saved view state. Process death can discard unsaved
+editor drafts and the preferred registration name before bootstrap is acknowledged;
+the next launch retries setup from the surviving Auth identity.
+
+Before production rollout, use an isolated development project/emulator and a
+device to verify registration, persisted startup, offline cache/reconnect, denied
+Firestore writes, upload/download failures, account switching, and rotation. Check
+that the deployed Storage rules permit the UID-scoped upload path for its owner
+and deny other users. Production rules were not read or deployed by this work.
+No commands here modify existing Firebase data. Debug CI stays on demo config.
+iOS remains deferred.

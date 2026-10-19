@@ -14,12 +14,11 @@ import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import com.example.acetimetracker.account.AccountActivity
 import androidx.core.content.ContextCompat
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class Timer : AppCompatActivity() {
+class Timer : AccountActivity() {
 
     private lateinit var timerTextView: TextView
     private lateinit var startButton: Button
@@ -30,7 +29,7 @@ class Timer : AppCompatActivity() {
     private lateinit var feedbackTextView: TextView
     private lateinit var btnBack: ImageButton
     private val handler = Handler()
-    private val firestore = FirebaseFirestore.getInstance()
+    private lateinit var firestore: FirebaseFirestore
 
     private var isRunning = false
     private var elapsedTime = 0L
@@ -81,10 +80,12 @@ class Timer : AppCompatActivity() {
     }
 
     private fun fetchCategories() {
+        val userId = currentSessionUid() ?: return
         val categories = mutableListOf<String>()
         firestore.collection("Category")
             .get()
             .addOnSuccessListener { documents ->
+                if (currentSessionUid() != userId) return@addOnSuccessListener
                 for (document in documents) {
                     val category = document.getString("name")
                     category?.let {
@@ -108,6 +109,8 @@ class Timer : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!sessionReady) return
+        firestore = FirebaseFirestore.getInstance()
         setContentView(R.layout.activity_timer)
 
         editTextMinGoal = findViewById(R.id.editTextMinGoal)
@@ -142,7 +145,13 @@ class Timer : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        handler.removeCallbacks(timerRunnable)
+        super.onDestroy()
+    }
+
     private fun startTimer() {
+        if (currentSessionUid() == null) return
         startTime = SystemClock.elapsedRealtime()
         handler.postDelayed(timerRunnable, 1000)
         isRunning = true
@@ -173,6 +182,7 @@ class Timer : AppCompatActivity() {
     }
 
     private fun updateTotalTime() {
+        val currentUserId = currentSessionUid() ?: return
         val selectedCategory = categorySpinner.selectedItem.toString()
         val totalTimeRef = firestore.collection("Category").document(selectedCategory)
 
@@ -180,7 +190,6 @@ class Timer : AppCompatActivity() {
         val maxGoal = editTextMaxGoal.text.toString().toFloatOrNull()
 
         if (minGoal != null && maxGoal != null && minGoal <= maxGoal) {
-            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
             // Use safe cast operator and null check for minGoal and maxGoal
             val minGoalFloat = minGoal as? Float
@@ -201,6 +210,7 @@ class Timer : AppCompatActivity() {
 
                 totalTimeRef.get()
                     .addOnSuccessListener { document ->
+                        if (currentSessionUid() != currentUserId) return@addOnSuccessListener
                         val currentTotalTime = document.getLong("totalTime") ?: 0L
                         val updatedTotalTime = currentTotalTime + elapsedTime
 
