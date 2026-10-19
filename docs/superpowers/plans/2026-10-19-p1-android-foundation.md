@@ -10,7 +10,7 @@
 
 **Spec:** [Approved Android design](../specs/2026-10-19-android-modernization-design.md), especially sections 4, 7 and 8.
 
-**Status:** Written for owner review; no implementation or dependency installation has started. The specification was approved on 19 October 2026. This plan's approval is the remaining execution prerequisite.
+**Status:** Approved by the owner in this chat on 19 October 2026 with “Approve P1 and begin implementation.” The specification is also approved. Execute Task 1 first, then Task 2; no further design/plan approval is pending for P1.
 
 ## Global Constraints
 
@@ -140,4 +140,4 @@ Task 2 uses `codex/p1-target36-compatibility`, based on the verified Task 1 head
 
 Record each PR URL, exact head SHA, host/device results and any remaining limitations in its description. Do not call P1 complete when dependency publication is the only evidence or a required runtime check is still missing. P2's account/profile and app-session behavior is a separate plan and PR; timer/data-model and Compose product-screen changes remain in their approved later stages.
 
-The next action is owner review of this plan. After approval, start the dedicated Task 1 implementation chat with this plan and the approved spec. The coordinator remains responsible for checking results and the PR sequence.
+The next action is the dedicated Task 1 implementation chat using this approved plan and specification. The coordinator remains responsible for checking results and the PR sequence.
