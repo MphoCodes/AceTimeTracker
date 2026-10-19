@@ -14,12 +14,11 @@ import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class Timer : AppCompatActivity() {
+class Timer : LegacyActivity() {
 
     private lateinit var timerTextView: TextView
     private lateinit var startButton: Button
@@ -121,7 +120,7 @@ class Timer : AppCompatActivity() {
         feedbackTextView = findViewById(R.id.feedbackTextView)
 
         btnBack.setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         fetchCategories()

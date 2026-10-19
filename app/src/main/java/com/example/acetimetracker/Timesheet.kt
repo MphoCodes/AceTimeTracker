@@ -15,7 +15,6 @@ import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -26,7 +25,7 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.UUID
 
-class Timesheet : AppCompatActivity() {
+class Timesheet : LegacyActivity() {
 
     private lateinit var firestore: FirebaseFirestore
     private lateinit var auth: FirebaseAuth

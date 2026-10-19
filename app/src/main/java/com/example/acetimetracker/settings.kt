@@ -7,10 +7,9 @@ import android.widget.ImageButton
 import android.widget.RadioGroup
 import android.widget.Switch
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 
-class settings : AppCompatActivity() {
+class settings : LegacyActivity() {
 
     private lateinit var btnBack: ImageButton
     private lateinit var themeRadioGroup: RadioGroup
@@ -27,7 +26,7 @@ class settings : AppCompatActivity() {
         val saveSettingsButton = findViewById<Button>(R.id.saveSettingsButton)
 
         btnBack.setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         // Initialize SharedPreferences
