@@ -1,7 +1,7 @@
-# AceTimeTracker Android modernization: proposed product and technical specification
+# AceTimeTracker Android modernization: approved product and technical specification
 
 - Date: 19 October 2026
-- Status: Draft for product/design review; implementation has not started.
+- Status: Approved by the owner in this chat on 19 October 2026; implementation has not started.
 - Baseline: `main` at `340958c1ccbc9f6b57cf9e1055ae671b8da7d27a`.
 - Audience confirmed by the owner: **anyone building personal goals and habits**.
 
@@ -11,7 +11,7 @@ Make AceTimeTracker a beautiful, useful daily companion for turning personal goa
 
 The owner requested native Android modernization with Compose, competitor research including Duolingo's engagement/reminder practices, code cleanup, separate work chats, and one pull request per implementation task. Android comes first. iOS work, its implementation chat, and a detailed iOS specification are deferred until the Android goal is met.
 
-This document proposes the scope and decisions for review. It is not evidence that any new behavior has been implemented. The delivery sequence is a roadmap; each stage receives its own executable implementation plan before code is written.
+The owner approved this scope and these decisions on 19 October 2026. Approval is not evidence that any new behavior has been implemented. The delivery sequence is a roadmap; each stage receives its own executable implementation plan before code is written.
 
 ### Proposed success criteria
 
@@ -143,7 +143,7 @@ Research date: 19 October 2026. These are proposed pins for the P1 plan, **not a
 | Gradle runtime | JBR/JDK 21; keep machine-specific paths untracked |
 | Kotlin and Compose compiler plugin | `2.4.21`, same compiler/plugin version |
 | Java/Kotlin bytecode | 17, independently of the Gradle runtime |
-| Android SDK | `compileSdk 37`, `targetSdk 36` in P1, `minSdk 27` retained |
+| Android SDK | `compileSdk 37`, `targetSdk 36` by P1 completion, `minSdk 27` retained; the toolchain-only task temporarily retains target 34 until its paired compatibility task passes |
 | Compose BOM | `2026.09.00` |
 | [Activity Compose](https://developer.android.com/jetpack/androidx/releases/activity) / [Lifecycle](https://developer.android.com/jetpack/androidx/releases/lifecycle) | `1.13.0` / `2.11.0` |
 | [Navigation 3](https://developer.android.com/jetpack/androidx/releases/navigation3) / [Material 3 Adaptive](https://developer.android.com/jetpack/androidx/releases/compose-material3-adaptive) | `1.2.0` / `1.3.0` |
@@ -224,7 +224,7 @@ Stage IDs below are roadmap identifiers, not GitHub PR numbers. Each implementat
 | Stage | Deliverable | Depends on | Minimum acceptance evidence |
 | --- | --- | --- | --- |
 | P0 | Research, proposed specification and roadmap | Current audit | Source links, legacy-source mapping, explicit assumptions and scope review |
-| P1 | Compatible build/toolchain and CI foundation | P0 approved | Reproducible clean checkout; debug assembly, lint and unit tests; dependency metadata/compatibility check; no credentials in tracked config |
+| P1 | Compatible build/toolchain and CI foundation, then target-36 runtime compatibility in a separate PR | P0 approved | Reproducible clean checkout; debug assembly, lint and unit tests; dependency metadata/compatibility check; system-bar/back compatibility; no credentials in tracked config |
 | P2 | Auth/profile correctness and app-session routing | P1 | Existing login/registration/reset work; profile bootstrap is idempotent; text-only edit works; persisted session routes correctly; account-switch tests |
 | P3 | Canonical goals/sessions repositories and migration | P2 | Precision, ownership and idempotency tests; migration dry-run/fixtures; imported routine-setup state; emulator rules/index tests; old data retained |
 | P4 | Durable local tracking data and synchronization | P3 | Offline writes/readback; process-death persistence; lost-ack receipt retries; active-timer sign-out/account separation; conflict and tombstone tests |
@@ -260,6 +260,6 @@ The Android goal is met when the agreed P1–P11 behavior is implemented, its va
 
 Confirmed: general personal goals/habits audience; native Android/Compose modernization; stepwise PR delivery; separate chats; iOS deferred.
 
-Proposed for review: time-based goals first, incremental migration, the four main destinations, offline local persistence with Firebase synchronization, the visual direction, opt-in reminders and simple personalization before ML, and the staged delivery sequence.
+Approved: time-based goals first, incremental migration, the four main destinations, offline local persistence with Firebase synchronization, the visual direction, opt-in reminders and simple personalization before ML, and the staged delivery sequence.
 
-After this written specification is approved, write the executable P1 implementation plan, review its exact compatible toolchain and checks, and begin the first bounded implementation task. Later stage plans refine their own interfaces against this specification and the verified previous stage.
+Next: review the [P1 implementation plan](../plans/2026-10-19-p1-android-foundation.md), then execute its two bounded PR tasks in order. Splitting P1 separates build changes from the system-bar/back behavior changes required by target 36; P1 still ends at the approved target 36 and P2 waits for both tasks. Later stage plans refine their own interfaces against this specification and the verified previous stage.
