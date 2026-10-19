@@ -1,7 +1,7 @@
 # AceTimeTracker Android modernization: approved product and technical specification
 
 - Date: 19 October 2026
-- Status: Approved by the owner in this chat on 19 October 2026; implementation has not started.
+- Status: Approved by the owner on 19 October 2026. P1 implementation is underway: the toolchain PR is verified; target-36 compatibility is awaiting its remaining runtime/CI checks.
 - Baseline: `main` at `340958c1ccbc9f6b57cf9e1055ae671b8da7d27a`.
 - Audience confirmed by the owner: **anyone building personal goals and habits**.
 
@@ -132,9 +132,9 @@ Firestore already has offline caching and queued writes, with last-write-wins be
 
 Keep local records partitioned by account ID. On sign-out/account replacement, first pause and checkpoint the originating account's active timer, cancel its notification/actions, then stop its listeners/workers and reminders and remove its data from active UI access. The paused timer does not block a different account from starting its own session; its owner must explicitly resume it after returning. Notification actions and in-flight async callbacks validate both the originating UID and timer/operation identity before acting. Warn about unsynced local work before a destructive local clear. Account A's drafts, attachments, and pending writes cannot appear or upload under account B.
 
-### Proposed compatible toolchain snapshot
+### Approved compatible toolchain snapshot
 
-Research date: 19 October 2026. These are proposed pins for the P1 plan, **not a combination already built in this repository**. Freeze resolved versions in a version catalog and wrapper checksum; do not use dynamic versions or preview dependencies by default.
+Research date: 19 October 2026. P1 Task 1 built this combination locally, from a clean tracked-source export, and in submitted-head CI in [PR #4](https://github.com/MphoCodes/AceTimeTracker/pull/4). The catalog and wrapper checksum pin the resolved versions. Later-stage libraries remain unimplemented decisions until their owning stages validate them; publication alone is not a passing build.
 
 | Component | Proposed pin/decision |
 | --- | --- |
@@ -242,6 +242,8 @@ Research chats completed for competitor/engagement research and data/migration a
 
 ### Baseline facts
 
+This is the pre-implementation snapshot. Current build/runtime evidence is recorded in the P1 plan and implementation PRs.
+
 - Nineteen Kotlin source files; activity-based XML screens; direct Firebase calls; no implemented repository/ViewModel separation.
 - Existing tests are generated arithmetic and package-name examples, not behavior coverage.
 - All 55 resource XML files parsed successfully during repository familiarization; this is not an Android compilation check.
@@ -262,4 +264,4 @@ Confirmed: general personal goals/habits audience; native Android/Compose modern
 
 Approved: time-based goals first, incremental migration, the four main destinations, offline local persistence with Firebase synchronization, the visual direction, opt-in reminders and simple personalization before ML, and the staged delivery sequence.
 
-Next: review the [P1 implementation plan](../plans/2026-10-19-p1-android-foundation.md), then execute its two bounded PR tasks in order. Splitting P1 separates build changes from the system-bar/back behavior changes required by target 36; P1 still ends at the approved target 36 and P2 waits for both tasks. Later stage plans refine their own interfaces against this specification and the verified previous stage.
+The owner approved the [P1 implementation plan](../plans/2026-10-19-p1-android-foundation.md); its toolchain task is verified in PR #4 and its compatibility task is in draft [PR #5](https://github.com/MphoCodes/AceTimeTracker/pull/5). P1 ends at target 36 and P2 waits for both tasks' required evidence. A [proposed P2 plan](../plans/2026-10-19-p2-accounts-and-profiles.md) covers account/session routing followed by reliable profile editing and sign-in email changes. P2 implementation waits for its plan review. Later plans refine their own interfaces against this specification and the verified predecessor.
