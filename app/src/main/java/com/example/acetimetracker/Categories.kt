@@ -6,13 +6,12 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class Categories : AppCompatActivity() {
+class Categories : LegacyActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var categoryAdapter: CategoryAdapter
     private lateinit var firestore: FirebaseFirestore
@@ -45,7 +44,7 @@ class Categories : AppCompatActivity() {
 
         // Back button listener
         btnBack.setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         // Add Category button listener

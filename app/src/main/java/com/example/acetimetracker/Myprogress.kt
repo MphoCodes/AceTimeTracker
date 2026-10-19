@@ -10,7 +10,6 @@ import android.widget.ArrayAdapter
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,7 +22,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class Myprogress : AppCompatActivity() {
+class Myprogress : LegacyActivity() {
     private lateinit var categorySpinner: Spinner
     private lateinit var recyclerView: RecyclerView
     private lateinit var timesheetAdapter: TimesheetAdapter

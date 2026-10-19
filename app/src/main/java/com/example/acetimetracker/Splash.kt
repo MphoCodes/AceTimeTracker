@@ -5,9 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.appcompat.app.AppCompatActivity
 
-class Splash : AppCompatActivity() {
+class Splash : LegacyActivity() {
     private val SPLASH_DELAY: Long = 4000 // 4 seconds
 
     private lateinit var handler: Handler

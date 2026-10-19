@@ -13,8 +13,7 @@ android {
     defaultConfig {
         applicationId = "com.example.acetimetracker"
         minSdk = 27
-        // Task 2 owns the target-36 system-bar and Back compatibility change.
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

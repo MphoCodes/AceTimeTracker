@@ -3,7 +3,6 @@ package com.example.acetimetracker
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
@@ -13,7 +12,7 @@ import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class GraphActivity : AppCompatActivity() {
+class GraphActivity : LegacyActivity() {
 
     private lateinit var chart: PieChart
     private lateinit var firestore: FirebaseFirestore

@@ -58,8 +58,16 @@ jobs:
           :app:checkDebugAarMetadata :app:assembleDebug :app:assembleDebugAndroidTest
           :app:lintDebug :app:testDebugUnitTest
 
-  api27:
-    name: API 27 package smoke
+  devices:
+    name: API ${{ matrix.api-level }} legacy compatibility
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api-level: 27
+            target: default
+          - api-level: 36
+            target: google_apis
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -99,13 +107,22 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Package instrumentation on clean API 27
+      - name: Legacy instrumentation on clean emulator
         uses: ReactiveCircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:
-          api-level: 27
-          target: default
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
           arch: x86_64
-          avd-name: foundation-api27
+          avd-name: foundation-api${{ matrix.api-level }}
           force-avd-creation: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -wipe-data
-          script: ./gradlew --no-daemon --stacktrace :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.example.acetimetracker.ExampleInstrumentedTest
+          script: ./gradlew --no-daemon --stacktrace :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.example.acetimetracker.ExampleInstrumentedTest,com.example.acetimetracker.LegacyWindowInsetsTest,com.example.acetimetracker.MainActivityBackTest,com.example.acetimetracker.LegacyWindowRuntimeTest
+
+      - name: Retain device reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: legacy-api${{ matrix.api-level }}
+          path: |
+            app/build/reports/androidTests/connected/
+            app/build/outputs/androidTest-results/connected/

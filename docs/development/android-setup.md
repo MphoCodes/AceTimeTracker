@@ -1,9 +1,9 @@
 # Android development setup
 
-This is P1 Task 1: a Compose-ready build alongside the existing View screens.
+P1 provides a Compose-ready build alongside the existing View screens.
 The app ID/namespace remains `com.example.acetimetracker`; minimum SDK is 27,
-compile SDK is 37, and target SDK is deliberately 34. Task 2 owns target 36
-and its system-bar/Back compatibility work. No Firebase credentials, signing
+compile SDK is 37, and target SDK is 36. The thirteen XML activities share a
+temporary edge-to-edge and dispatcher Back compatibility boundary. No Firebase credentials, signing
 secrets, production writes or service deployment are needed for these checks.
 
 ## Java and Gradle
@@ -115,8 +115,11 @@ Inspect these outputs after successful checks:
 - Device tests: `app/build/reports/androidTests/connected/debug/` and
   `app/build/outputs/androidTest-results/connected/debug/`.
 
-Existing tests are generated arithmetic and package-name examples. They are
-build/package smoke evidence, not auth, timer, migration or user-flow coverage.
+The generated arithmetic and package-name examples provide build/package smoke
+evidence. Legacy instrumentation additionally covers inset padding/reset, real IME
+show/hide and usable content bounds, drawer/system Back, form navigation and a
+visible Back button, plus focused Login password/Registration confirmation visibility
+above the IME. These checks do not establish auth, timer or migration correctness.
 Existing lint warnings remain visible; lint errors must fail the build.
 
 For clean-source reproduction, commit your changes and export tracked files with
@@ -126,29 +129,57 @@ No IDE state, `local.properties`, project `.gradle` directory or build output
 should be copied. A fresh source tree plus a warm dependency cache tests missing
 source inputs; it does not claim offline or independent mirror availability.
 
-## API 27 package smoke and CI
+## Legacy runtime verification and CI
 
-Use a clean supported x86-64 emulator host for API 27, with package
-`system-images;android-27;default;x86_64`, platform 27 and the emulator installed
-through SDK Manager. Apple Silicon hosts may not have a supported API 27 image.
-Start a fresh AVD with `-wipe-data -no-snapshot`, then run:
+Use clean AVDs (`-wipe-data -no-snapshot`) with these published image packages:
+
+| Runtime | Linux CI | Apple Silicon local |
+| --- | --- | --- |
+| API 27 | `system-images;android-27;default;x86_64` | `system-images;android-27;google_apis;arm64-v8a` |
+| API 36 | `system-images;android-36;google_apis;x86_64` | `system-images;android-36;google_apis;arm64-v8a` |
+| API 37 walkthrough | Not in CI | `system-images;android-37.0;google_apis;arm64-v8a` |
+
+Install the selected image and emulator through SDK Manager. Select one connected
+device via `ANDROID_SERIAL`, then run the complete instrumentation suite:
 
 ```bash
-./gradlew --no-daemon --stacktrace :app:connectedDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.class=com.example.acetimetracker.ExampleInstrumentedTest
+./gradlew --no-daemon --stacktrace :app:connectedDebugAndroidTest
 ```
 
-This checks installation/instrumentation and the package name; it never enters
-credentials or mutates Firebase records. Unavailable device execution must be
-reported as unavailable, not passed.
+CI selects `LegacyWindowInsetsTest`, `MainActivityBackTest`,
+`LegacyWindowRuntimeTest` and the existing `ExampleInstrumentedTest`. The helper
+uses real FrameLayouts and listener dispatch. Typed synthetic cutout/IME fixtures
+run on API 30+ because older platform dispatch discards those compat overrides;
+API 27 still checks bars, hidden/reset/reinstall, actual keyboard bounds and Back.
 
-`.github/workflows/android.yml` runs the five host acceptance tasks and a separate
-clean API 27 package-smoke job on Ubuntu 24.04/JDK 21. Each job bootstraps CLI 23
-and the SDK in runner temporary storage instead of trusting the hosted SDK layout.
-Actions are pinned by commit SHA. Gradle setup owns caching and wrapper validation.
-Triggers are pull requests, main pushes and manual dispatch; permissions are
-`contents: read`, superseded workflow/ref runs are canceled, and each job has a
-30-minute timeout. No signing or production-service secrets are used.
+On API 36 and 37, also walk through system Back with gesture and three-button
+navigation, launcher to registration, the Login link, IME show/hide, drawer
+open/close, the About visible Back button and an expanded window. Do not submit
+credentials or save records. Record image build, dimensions/density, navigation
+mode and evidence. Unavailable execution must be reported as unavailable.
+
+`LegacyActivity` enables edge-to-edge and `adjustResize` for pre-30 IME delivery.
+The content root records initial padding once, owns bars/cutout and the maximum
+of IME/navigation bottom, then forwards unhandled inset types to children. Both
+old `fitsSystemWindows` consumers were in `activity_main.xml`; the navigation
+header's ordinary design padding is preserved. The future Compose shell must own
+its own insets, without also installing this temporary XML boundary. MainActivity
+closes its drawer first and temporarily disables its dispatcher callback while
+delegating, restoring it in `finally`. Existing save/auth `finish()` paths remain. Login adds a `fillViewport` scroll
+container around its unchanged form: the explicit resize/inset policy otherwise
+obscured the focused password on API 27, whereas the predecessor panned it clear.
+Registration already keeps its focused confirmation visible without a layout change.
+See Android's [edge-to-edge guidance](https://developer.android.com/develop/ui/views/layout/edge-to-edge),
+[keyboard guidance](https://developer.android.com/develop/ui/views/layout/sw-keyboard)
+and [target-36 Back behavior](https://developer.android.com/about/versions/16/behavior-changes-16#predictive-back).
+
+`.github/workflows/android.yml` runs the five host tasks and clean API 27/36
+instrumentation jobs on Ubuntu 24.04/JDK 21. Each bootstraps CLI 23 and the SDK in
+runner temporary storage. Actions are pinned by publisher commit SHA; Gradle
+setup owns caching/wrapper validation. Device XML, HTML and logcat results upload
+as `legacy-api27` / `legacy-api36` artifacts even on failure. Triggers are pull
+requests, main pushes and manual dispatch, with `contents: read`, superseded-run
+cancellation and a 30-minute timeout per job. No signing/production secrets.
 
 ## Task 1 evidence and plan rulings
 
