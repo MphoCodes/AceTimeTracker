@@ -248,8 +248,8 @@ class Timesheet : AppCompatActivity() {
     private fun calculateTimeSpent(startTime: String, endTime: String): Long {
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         return try {
-            val startDate = timeFormat.parse(startTime)
-            val endDate = timeFormat.parse(endTime)
+            val startDate = requireNotNull(timeFormat.parse(startTime))
+            val endDate = requireNotNull(timeFormat.parse(endTime))
             endDate.time - startDate.time
         } catch (e: Exception) {
             Log.e("TimesheetActivity", "Error calculating time spent", e)
