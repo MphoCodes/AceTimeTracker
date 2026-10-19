@@ -20,7 +20,10 @@ To get started with TimeTracker, follow these steps:
 
 1. Clone the repository to your local machine.
 2. Open the project in Android Studio.
-3. Build and run the application on an Android device or emulator.
+3. Follow the [Android development guide](docs/development.md) to configure JDK 21,
+   install the pinned SDK packages, and run the build, tests, and lint checks.
+   Debug builds use a separate demo Firebase configuration; see the guide before
+   testing account or cloud features.
 
 ## Usage
 
