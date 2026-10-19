@@ -24,7 +24,7 @@ Debug has a distinct application ID and a non-production demo Firebase config.
   blocking findings and document remaining legacy warnings.
 - [x] Add a least-privilege, pinned GitHub Actions workflow using the same commands,
   with test/lint reports and a debug APK artifact, plus local build documentation.
-- [ ] Verify a clean build and the workflow, review the final diff, and open a PR.
+- [x] Verify a clean build and workflow syntax, review the final diff, and open a PR.
 
 ## Acceptance
 
@@ -63,4 +63,4 @@ product defects are not claimed fixed by this foundation.
 - Actionlint 1.7.12 and `git diff --check` passed. Wrapper JAR and distribution
   hashes match Gradle's published checksums.
 - Instrumentation APK compiled; no emulator/device test run or release-quality
-  claim is made. CI execution is the remaining integration check.
+  claim is made. Hosted CI results are recorded in the pull request.
