@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.acetimetracker">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
     <application
         android:allowBackup="true"
@@ -15,57 +17,65 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AceTimeTracker"
         tools:targetApi="31">
+
         <activity
-            android:name=".EditProfileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".GraphActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Myprogress"
-            android:exported="false" />
-        <activity
-            android:name=".Categories"
-            android:exported="false" />
-        <activity
-            android:name=".Timesheet"
-            android:exported="false" />
-        <activity
-            android:name=".Timer"
-            android:exported="false" />
-        <activity
-            android:name=".About"
-            android:exported="false" />
-        <activity
-            android:name=".profile"
-            android:exported="false" />
-        <activity
-            android:name=".settings"
-            android:exported="false" />
-        <activity
-            android:name=".timetracker"
-            android:exported="false"
-            android:label="@string/title_activity_timetracker"
-            android:theme="@style/Widget.AppCompat.PopupMenu" />
-        <activity
-            android:name=".Registration"
-            android:exported="false" />
-        <activity
-            android:name=".Login"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Splash"
+            android:name=".ui.activity.SplashActivity"
             android:exported="true"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.activity.MainActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activity.LoginActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activity.RegistrationActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activity.CategoriesActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activity.TimesheetActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activity.TimerActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activity.MyProgressActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activity.GraphActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activity.ProfileActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activity.EditProfileActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activity.SettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.activity.AboutActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
