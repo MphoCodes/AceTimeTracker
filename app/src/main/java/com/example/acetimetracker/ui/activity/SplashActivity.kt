@@ -7,21 +7,21 @@ import android.os.Handler
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.acetimetracker.R
 import com.example.acetimetracker.data.repository.AuthRepository
+import com.example.acetimetracker.ui.theme.AceRed
 import com.example.acetimetracker.ui.theme.AceTimeTrackerTheme
 
 @SuppressLint("CustomSplashScreen")
@@ -73,20 +73,11 @@ fun SplashScreen() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.size(88.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Logo",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(52.dp)
-                    )
-                }
-            }
+            Image(
+                painter = painterResource(id = R.drawable.acelogo),
+                contentDescription = "Ace Logo",
+                modifier = Modifier.size(180.dp)
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -94,7 +85,7 @@ fun SplashScreen() {
                 text = "AceTimeTracker",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = AceRed
             )
 
             Spacer(modifier = Modifier.height(6.dp))

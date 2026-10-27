@@ -13,9 +13,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.acetimetracker.ui.theme.AceRed
+import com.example.acetimetracker.ui.theme.AceRedLight
 import com.example.acetimetracker.util.Resource
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
@@ -36,16 +39,16 @@ fun GraphScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Visual Analytics", fontWeight = FontWeight.Bold) },
+                title = { Text("Visual Analytics", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = AceRed,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }
@@ -58,7 +61,7 @@ fun GraphScreen(
         ) {
             when {
                 chartDataState is Resource.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = AceRed)
                 }
                 categoryTimeMap.isEmpty() -> {
                     Column(
@@ -70,14 +73,14 @@ fun GraphScreen(
                     ) {
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                            color = AceRedLight.copy(alpha = 0.5f),
                             modifier = Modifier.size(72.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.BarChart,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
+                                    tint = AceRed,
                                     modifier = Modifier.size(36.dp)
                                 )
                             }
@@ -200,14 +203,14 @@ fun GraphScreen(
 
                                     Surface(
                                         shape = RoundedCornerShape(8.dp),
-                                        color = MaterialTheme.colorScheme.secondaryContainer
+                                        color = AceRedLight.copy(alpha = 0.5f)
                                     ) {
                                         Text(
                                             text = "$percentage%",
                                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                                             style = MaterialTheme.typography.labelLarge,
                                             fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                                            color = AceRed
                                         )
                                     }
                                 }

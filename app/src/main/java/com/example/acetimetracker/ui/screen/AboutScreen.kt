@@ -12,12 +12,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.acetimetracker.R
+import com.example.acetimetracker.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,16 +29,16 @@ fun AboutScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("About AceTimeTracker", fontWeight = FontWeight.Bold) },
+                title = { Text("About AceTimeTracker", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = AceRed,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }
@@ -65,18 +67,19 @@ fun AboutScreen(
                 text = "AceTimeTracker",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = AceRed
             )
 
             Surface(
                 shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                color = AceRedLight.copy(alpha = 0.5f)
             ) {
                 Text(
                     text = "Version 1.0.0 (Compose Edition)",
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = AceRed,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -90,7 +93,8 @@ fun AboutScreen(
                     Text(
                         text = "Our Mission",
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = AceRed
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -112,25 +116,29 @@ fun AboutScreen(
             FeatureItem(
                 icon = Icons.Default.Folder,
                 title = "Category Management",
-                description = "Set minimum and maximum hour goals per category."
+                description = "Set minimum and maximum hour goals per category.",
+                tint = AceOrange
             )
 
             FeatureItem(
                 icon = Icons.Default.Timer,
                 title = "Live Productivity Stopwatch",
-                description = "Track time in real-time with dynamic progress alerts."
+                description = "Track time in real-time with dynamic progress alerts.",
+                tint = AceRed
             )
 
             FeatureItem(
                 icon = Icons.Default.BarChart,
                 title = "Visual Analytics",
-                description = "Interactive pie charts and progress bars breakdown."
+                description = "Interactive pie charts and progress bars breakdown.",
+                tint = AceGreen
             )
 
             FeatureItem(
                 icon = Icons.Default.CloudSync,
                 title = "Offline & Cloud Sync",
-                description = "Test offline credentials or sync seamlessly with Firebase."
+                description = "Test offline credentials or sync seamlessly with Firebase.",
+                tint = AceBlue
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -149,12 +157,14 @@ fun AboutScreen(
 fun FeatureItem(
     icon: ImageVector,
     title: String,
-    description: String
+    description: String,
+    tint: Color = AceRed
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
@@ -163,16 +173,16 @@ fun FeatureItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.size(40.dp)
+                shape = RoundedCornerShape(10.dp),
+                color = tint.copy(alpha = 0.15f),
+                modifier = Modifier.size(42.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(22.dp)
+                        tint = tint,
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }

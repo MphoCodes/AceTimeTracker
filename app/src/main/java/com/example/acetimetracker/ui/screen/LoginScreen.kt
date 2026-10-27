@@ -1,6 +1,8 @@
 package com.example.acetimetracker.ui.screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,8 +11,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -18,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -25,7 +28,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.acetimetracker.R
+import com.example.acetimetracker.ui.theme.AceRed
+import com.example.acetimetracker.ui.theme.AceRedLight
 import com.example.acetimetracker.util.Resource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,45 +60,34 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 32.dp),
+                .padding(horizontal = 24.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // App Brand Header
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.size(72.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "AceTimeTracker Logo",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
+            // Authentic Ace Logo
+            Image(
+                painter = painterResource(id = R.drawable.acelogo),
+                contentDescription = "AceTimeTracker Logo",
+                modifier = Modifier
+                    .size(150.dp)
+                    .padding(bottom = 8.dp)
+            )
 
             Text(
                 text = "AceTimeTracker",
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
+                color = AceRed,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
-                text = "Sign in to manage and track your time",
+                text = "Track your time with precision and ease",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Login Card
             Card(
@@ -102,19 +96,28 @@ fun LoginScreen(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(20.dp)
                 ) {
+                    Text(
+                        text = "Sign In",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Email Address") },
                         leadingIcon = {
-                            Icon(Icons.Default.Email, contentDescription = "Email Icon")
+                            Icon(Icons.Default.Email, contentDescription = "Email Icon", tint = AceRed)
                         },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
@@ -132,7 +135,7 @@ fun LoginScreen(
                         onValueChange = { password = it },
                         label = { Text("Password") },
                         leadingIcon = {
-                            Icon(Icons.Default.Lock, contentDescription = "Password Icon")
+                            Icon(Icons.Default.Lock, contentDescription = "Password Icon", tint = AceRed)
                         },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -171,13 +174,15 @@ fun LoginScreen(
                             Text(
                                 text = "Forgot password?",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary
+                                color = AceRed,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    // Solid Ace Red Sign In Button
                     Button(
                         onClick = {
                             focusManager.clearFocus()
@@ -187,7 +192,11 @@ fun LoginScreen(
                             .fillMaxWidth()
                             .height(50.dp),
                         enabled = !isLoading,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AceRed,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
@@ -206,14 +215,15 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Quick Offline Test Login Card
+            // Quick Offline Test Login (Distinct Ace Red outline)
             OutlinedCard(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.5.dp, AceRed),
                 colors = CardDefaults.outlinedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    containerColor = AceRedLight.copy(alpha = 0.35f)
                 ),
                 onClick = onTestLoginClick
             ) {
@@ -225,29 +235,29 @@ fun LoginScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.PlayArrow,
+                        imageVector = Icons.Default.FlashOn,
                         contentDescription = "Test Login",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
+                        tint = AceRed,
+                        modifier = Modifier.size(28.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
                     Column {
                         Text(
                             text = "Quick Test Login (Bypass Server)",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = AceRed
                         )
                         Text(
-                            text = "Instant offline session for grading and testing",
+                            text = "One-tap instant offline session for testing & grading",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Register Redirect
             Row(
@@ -264,7 +274,7 @@ fun LoginScreen(
                         text = "Sign Up",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = AceRed
                     )
                 }
             }
@@ -274,7 +284,7 @@ fun LoginScreen(
         if (showForgotDialog) {
             AlertDialog(
                 onDismissRequest = { showForgotDialog = false },
-                title = { Text("Reset Password") },
+                title = { Text("Reset Password", fontWeight = FontWeight.Bold) },
                 text = {
                     Column {
                         Text(
@@ -293,10 +303,13 @@ fun LoginScreen(
                     }
                 },
                 confirmButton = {
-                    Button(onClick = {
-                        showForgotDialog = false
-                        onForgotPasswordClick(forgotEmail)
-                    }) {
+                    Button(
+                        onClick = {
+                            showForgotDialog = false
+                            onForgotPasswordClick(forgotEmail)
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = AceRed)
+                    ) {
                         Text("Send Reset Link")
                     }
                 },

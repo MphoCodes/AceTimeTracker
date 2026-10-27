@@ -12,9 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.acetimetracker.data.repository.SettingsRepository
+import com.example.acetimetracker.ui.theme.AceRed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,16 +32,16 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("App Settings", fontWeight = FontWeight.Bold) },
+                title = { Text("App Settings", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = AceRed,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }
@@ -76,10 +78,11 @@ fun SettingsScreen(
                     ) {
                         RadioButton(
                             selected = selectedTheme == SettingsRepository.THEME_LIGHT,
-                            onClick = { selectedTheme = SettingsRepository.THEME_LIGHT }
+                            onClick = { selectedTheme = SettingsRepository.THEME_LIGHT },
+                            colors = RadioButtonDefaults.colors(selectedColor = AceRed)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(Icons.Default.LightMode, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.LightMode, contentDescription = null, tint = AceRed)
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("Light Theme", style = MaterialTheme.typography.bodyLarge)
                     }
@@ -94,10 +97,11 @@ fun SettingsScreen(
                     ) {
                         RadioButton(
                             selected = selectedTheme == SettingsRepository.THEME_DARK,
-                            onClick = { selectedTheme = SettingsRepository.THEME_DARK }
+                            onClick = { selectedTheme = SettingsRepository.THEME_DARK },
+                            colors = RadioButtonDefaults.colors(selectedColor = AceRed)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(Icons.Default.DarkMode, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.DarkMode, contentDescription = null, tint = AceRed)
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("Dark Theme", style = MaterialTheme.typography.bodyLarge)
                     }
@@ -122,7 +126,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Icon(Icons.Default.Notifications, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.Notifications, contentDescription = null, tint = AceRed)
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
@@ -140,7 +144,11 @@ fun SettingsScreen(
 
                     Switch(
                         checked = notificationsEnabled,
-                        onCheckedChange = { notificationsEnabled = it }
+                        onCheckedChange = { notificationsEnabled = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = AceRed
+                        )
                     )
                 }
             }
@@ -151,7 +159,8 @@ fun SettingsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White)
             ) {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))

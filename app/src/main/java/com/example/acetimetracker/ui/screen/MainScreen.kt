@@ -14,12 +14,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
+import com.airbnb.lottie.LottieAnimationView
+import com.airbnb.lottie.LottieDrawable
+import com.example.acetimetracker.R
 import com.example.acetimetracker.data.model.UserProfile
+import com.example.acetimetracker.ui.theme.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,11 +44,19 @@ fun MainScreen(
             ModalDrawerSheet(
                 modifier = Modifier.width(300.dp)
             ) {
-                // Drawer Header
+                // Signature Side Nav Gradient Header (matching side_nav_bar.xml)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .background(
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    DrawerGradientStart,
+                                    DrawerGradientCenter,
+                                    DrawerGradientEnd
+                                )
+                            )
+                        )
                         .padding(24.dp)
                 ) {
                     Column {
@@ -57,32 +72,32 @@ fun MainScreen(
                         } else {
                             Surface(
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = Color.White,
                                 modifier = Modifier.size(64.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         imageVector = Icons.Default.Person,
                                         contentDescription = "Avatar",
-                                        tint = MaterialTheme.colorScheme.onPrimary,
-                                        modifier = Modifier.size(36.dp)
+                                        tint = AceRed,
+                                        modifier = Modifier.size(38.dp)
                                     )
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
                         Text(
                             text = if (userProfile?.displayName?.isNotEmpty() == true) userProfile.displayName else "Ace! Time Tracker",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            color = Color.White
                         )
                         Text(
                             text = if (userProfile?.email?.isNotEmpty() == true) userProfile.email else "user@acetimetracker.com",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                            color = Color.White.copy(alpha = 0.85f)
                         )
                     }
                 }
@@ -91,14 +106,14 @@ fun MainScreen(
 
                 // Navigation Items
                 val navItems = listOf(
-                    DrawerItem("Profile", Icons.Default.Person, Destination.Profile),
-                    DrawerItem("Categories", Icons.Default.Folder, Destination.Categories),
-                    DrawerItem("Timesheet", Icons.Default.DateRange, Destination.Timesheet),
-                    DrawerItem("Timer / Stopwatch", Icons.Default.PlayArrow, Destination.Timer),
-                    DrawerItem("My Progress", Icons.Default.TrendingUp, Destination.MyProgress),
-                    DrawerItem("Analytics Graph", Icons.Default.BarChart, Destination.Graph),
-                    DrawerItem("Settings", Icons.Default.Settings, Destination.Settings),
-                    DrawerItem("About", Icons.Default.Info, Destination.About)
+                    DrawerItem("Profile", Icons.Default.Person, Destination.Profile, AceBlue),
+                    DrawerItem("Categories", Icons.Default.Folder, Destination.Categories, AceOrange),
+                    DrawerItem("Timesheet", Icons.Default.DateRange, Destination.Timesheet, AceDarkBlue),
+                    DrawerItem("Timer / Stopwatch", Icons.Default.PlayArrow, Destination.Timer, AceRed),
+                    DrawerItem("My Progress", Icons.Default.TrendingUp, Destination.MyProgress, AceDarkGreen),
+                    DrawerItem("Analytics Graph", Icons.Default.BarChart, Destination.Graph, AceYellow),
+                    DrawerItem("Settings", Icons.Default.Settings, Destination.Settings, AceDarkOrange),
+                    DrawerItem("About", Icons.Default.Info, Destination.About, AceBlue)
                 )
 
                 Column(
@@ -109,8 +124,8 @@ fun MainScreen(
                 ) {
                     navItems.forEach { item ->
                         NavigationDrawerItem(
-                            icon = { Icon(item.icon, contentDescription = item.label) },
-                            label = { Text(item.label) },
+                            icon = { Icon(item.icon, contentDescription = item.label, tint = item.tint) },
+                            label = { Text(item.label, fontWeight = FontWeight.Medium) },
                             selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
@@ -124,8 +139,8 @@ fun MainScreen(
                 Divider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
 
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.ExitToApp, contentDescription = "Log Out") },
-                    label = { Text("Log Out", color = MaterialTheme.colorScheme.error) },
+                    icon = { Icon(Icons.Default.ExitToApp, contentDescription = "Log Out", tint = AceRed) },
+                    label = { Text("Log Out", color = AceRed, fontWeight = FontWeight.Bold) },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
@@ -140,37 +155,40 @@ fun MainScreen(
     ) {
         Scaffold(
             topBar = {
+                // Classic Bold Ace Red App Bar
                 TopAppBar(
                     title = {
                         Text(
                             text = "AceTimeTracker",
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Open Drawer")
+                            Icon(Icons.Default.Menu, contentDescription = "Open Drawer", tint = Color.White)
                         }
                     },
                     actions = {
                         IconButton(onClick = { onNavigate(Destination.Profile) }) {
-                            Icon(Icons.Default.AccountCircle, contentDescription = "Profile")
+                            Icon(Icons.Default.AccountCircle, contentDescription = "Profile", tint = Color.White)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        containerColor = AceRed,
+                        titleContentColor = Color.White,
+                        navigationIconContentColor = Color.White,
+                        actionIconContentColor = Color.White
                     )
                 )
             },
             floatingActionButton = {
                 FloatingActionButton(
                     onClick = { onNavigate(Destination.Timesheet) },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    shape = RoundedCornerShape(16.dp)
+                    containerColor = AceRed,
+                    contentColor = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "New Timesheet Entry")
                 }
@@ -183,13 +201,14 @@ fun MainScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp)
             ) {
-                // Welcome Banner
+                // Welcome Banner in Ace Red tint
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-                    )
+                        containerColor = AceRedLight.copy(alpha = 0.45f)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -207,11 +226,11 @@ fun MainScreen(
                                 text = if (userProfile?.displayName?.isNotEmpty() == true) userProfile.displayName else "Ace Tracker!",
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = AceRed
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Keep up your productivity goals today.",
+                                text = "Track every minute with speed and precision.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -219,7 +238,28 @@ fun MainScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                // Authentic Running Dino Lottie Animation
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AndroidView(
+                        factory = { context ->
+                            LottieAnimationView(context).apply {
+                                setAnimation(R.raw.runningdino)
+                                repeatCount = LottieDrawable.INFINITE
+                                repeatMode = LottieDrawable.RESTART
+                                playAnimation()
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(200.dp)
+                    )
+                }
 
                 Text(
                     text = "Quick Actions",
@@ -230,20 +270,22 @@ fun MainScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Action Grid
+                // Vibrant Action Grid
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    QuickActionCard(
+                    VibrantQuickActionCard(
                         title = "Timesheet",
                         subtitle = "Log & view hours",
                         icon = Icons.Default.DateRange,
+                        badgeColor = AceBlue,
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigate(Destination.Timesheet) }
                     )
                     Spacer(modifier = Modifier.width(12.dp))
-                    QuickActionCard(
+                    VibrantQuickActionCard(
                         title = "Timer",
                         subtitle = "Track real-time",
                         icon = Icons.Default.PlayArrow,
+                        badgeColor = AceRed,
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigate(Destination.Timer) }
                     )
@@ -252,18 +294,20 @@ fun MainScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    QuickActionCard(
+                    VibrantQuickActionCard(
                         title = "Categories",
                         subtitle = "Organize tasks",
                         icon = Icons.Default.Folder,
+                        badgeColor = AceOrange,
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigate(Destination.Categories) }
                     )
                     Spacer(modifier = Modifier.width(12.dp))
-                    QuickActionCard(
+                    VibrantQuickActionCard(
                         title = "Analytics",
                         subtitle = "Visual charts",
                         icon = Icons.Default.BarChart,
+                        badgeColor = AceGreen,
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigate(Destination.Graph) }
                     )
@@ -272,32 +316,37 @@ fun MainScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    QuickActionCard(
+                    VibrantQuickActionCard(
                         title = "My Progress",
                         subtitle = "Goal tracking",
                         icon = Icons.Default.TrendingUp,
+                        badgeColor = AceDarkGreen,
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigate(Destination.MyProgress) }
                     )
                     Spacer(modifier = Modifier.width(12.dp))
-                    QuickActionCard(
+                    VibrantQuickActionCard(
                         title = "Settings",
                         subtitle = "App preferences",
                         icon = Icons.Default.Settings,
+                        badgeColor = AceDarkOrange,
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigate(Destination.Settings) }
                     )
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
 
 @Composable
-fun QuickActionCard(
+fun VibrantQuickActionCard(
     title: String,
     subtitle: String,
     icon: ImageVector,
+    badgeColor: Color,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
@@ -318,15 +367,15 @@ fun QuickActionCard(
         ) {
             Surface(
                 shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.size(42.dp)
+                color = badgeColor.copy(alpha = 0.15f),
+                modifier = Modifier.size(44.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = icon,
                         contentDescription = title,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(24.dp)
+                        tint = badgeColor,
+                        modifier = Modifier.size(26.dp)
                     )
                 }
             }
@@ -352,7 +401,8 @@ fun QuickActionCard(
 data class DrawerItem(
     val label: String,
     val icon: ImageVector,
-    val destination: Destination
+    val destination: Destination,
+    val tint: Color = Color.Unspecified
 )
 
 enum class Destination {

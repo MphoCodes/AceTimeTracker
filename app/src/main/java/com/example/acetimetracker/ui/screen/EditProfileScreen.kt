@@ -14,12 +14,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.acetimetracker.data.model.UserProfile
+import com.example.acetimetracker.ui.theme.AceRed
 import com.example.acetimetracker.util.Resource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,16 +59,16 @@ fun EditProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Profile", fontWeight = FontWeight.Bold) },
+                title = { Text("Edit Profile", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = AceRed,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }
@@ -95,15 +97,15 @@ fun EditProfileScreen(
                 } else {
                     Surface(
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = AceRed,
                         modifier = Modifier.size(110.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = "Avatar",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(60.dp)
+                                tint = Color.White,
+                                modifier = Modifier.size(64.dp)
                             )
                         }
                     }
@@ -111,27 +113,28 @@ fun EditProfileScreen(
 
                 FilledIconButton(
                     onClick = onUploadPhotoClick,
-                    modifier = Modifier.size(36.dp),
-                    shape = CircleShape
+                    modifier = Modifier.size(38.dp),
+                    shape = CircleShape,
+                    colors = IconButtonDefaults.filledIconButtonColors(containerColor = AceRed, contentColor = Color.White)
                 ) {
                     if (isUploading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(18.dp),
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = Color.White,
                             strokeWidth = 2.dp
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Default.CameraAlt,
                             contentDescription = "Change Photo",
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
             }
 
             TextButton(onClick = onUploadPhotoClick, enabled = !isUploading) {
-                Text(if (isUploading) "Uploading Photo..." else "Change Profile Photo")
+                Text(if (isUploading) "Uploading Photo..." else "Change Profile Photo", color = AceRed, fontWeight = FontWeight.SemiBold)
             }
 
             // Input Fields Card
@@ -151,7 +154,7 @@ fun EditProfileScreen(
                         value = displayName,
                         onValueChange = { displayName = it },
                         label = { Text("Display Name") },
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = AceRed) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
@@ -161,7 +164,7 @@ fun EditProfileScreen(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Email Address") },
-                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = AceRed) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -177,12 +180,13 @@ fun EditProfileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White)
             ) {
                 if (isSaving) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = Color.White,
                         strokeWidth = 2.5.dp
                     )
                 } else {

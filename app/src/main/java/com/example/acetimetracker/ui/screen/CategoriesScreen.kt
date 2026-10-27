@@ -15,11 +15,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.acetimetracker.data.model.Category
+import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,31 +40,32 @@ fun CategoriesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Categories", fontWeight = FontWeight.Bold) },
+                title = { Text("Categories", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 actions = {
                     IconButton(onClick = { showAddDialog = true }) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Category")
+                        Icon(Icons.Default.Add, contentDescription = "Add Category", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = AceRed,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
                 )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                shape = RoundedCornerShape(16.dp)
+                containerColor = AceRed,
+                contentColor = Color.White,
+                shape = RoundedCornerShape(16.dp),
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Category")
             }
@@ -77,7 +80,8 @@ fun CategoriesScreen(
             when (categoriesState) {
                 is Resource.Loading -> {
                     CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+                        modifier = Modifier.align(Alignment.Center),
+                        color = AceRed
                     )
                 }
                 is Resource.Success -> {
@@ -92,15 +96,15 @@ fun CategoriesScreen(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(20.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-                                modifier = Modifier.size(72.dp)
+                                color = AceRedLight.copy(alpha = 0.5f),
+                                modifier = Modifier.size(76.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         imageVector = Icons.Default.FolderOpen,
                                         contentDescription = "No Categories",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(36.dp)
+                                        tint = AceRed,
+                                        modifier = Modifier.size(40.dp)
                                     )
                                 }
                             }
@@ -117,7 +121,10 @@ fun CategoriesScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(20.dp))
-                            Button(onClick = { showAddDialog = true }) {
+                            Button(
+                                onClick = { showAddDialog = true },
+                                colors = ButtonDefaults.buttonColors(containerColor = AceRed)
+                            ) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Add Your First Category")
@@ -176,7 +183,7 @@ fun CategoriesScreen(
         val cat = selectedCategoryForDetails!!
         AlertDialog(
             onDismissRequest = { selectedCategoryForDetails = null },
-            icon = { Icon(Icons.Default.Folder, contentDescription = null) },
+            icon = { Icon(Icons.Default.Folder, contentDescription = null, tint = AceOrange) },
             title = { Text(cat.name, fontWeight = FontWeight.Bold) },
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -188,18 +195,21 @@ fun CategoriesScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                     cat.goal?.let {
-                        Text("Target Goal: $it hours", style = MaterialTheme.typography.bodySmall)
+                        Text("Target Goal: $it hours", style = MaterialTheme.typography.bodyMedium, color = AceDarkGreen)
                     }
                     cat.minGoal?.let {
-                        Text("Minimum Goal: $it hours", style = MaterialTheme.typography.bodySmall)
+                        Text("Minimum Goal: $it hours", style = MaterialTheme.typography.bodyMedium, color = AceDarkBlue)
                     }
                     cat.maxGoal?.let {
-                        Text("Maximum Goal: $it hours", style = MaterialTheme.typography.bodySmall)
+                        Text("Maximum Goal: $it hours", style = MaterialTheme.typography.bodyMedium, color = AceDarkOrange)
                     }
                 }
             },
             confirmButton = {
-                Button(onClick = { selectedCategoryForDetails = null }) {
+                Button(
+                    onClick = { selectedCategoryForDetails = null },
+                    colors = ButtonDefaults.buttonColors(containerColor = AceRed)
+                ) {
                     Text("Close")
                 }
             }
@@ -211,7 +221,7 @@ fun CategoriesScreen(
         val cat = categoryToDelete!!
         AlertDialog(
             onDismissRequest = { categoryToDelete = null },
-            icon = { Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            icon = { Icon(Icons.Default.Delete, contentDescription = null, tint = AceRed) },
             title = { Text("Delete Category?") },
             text = { Text("Are you sure you want to delete '${cat.name}'? This cannot be undone.") },
             confirmButton = {
@@ -220,7 +230,7 @@ fun CategoriesScreen(
                         onDeleteCategory(cat)
                         categoryToDelete = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    colors = ButtonDefaults.buttonColors(containerColor = AceRed)
                 ) {
                     Text("Delete")
                 }
@@ -257,16 +267,16 @@ fun CategoryCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
-                shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.size(44.dp)
+                shape = RoundedCornerShape(12.dp),
+                color = AceOrange.copy(alpha = 0.15f),
+                modifier = Modifier.size(46.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.Folder,
                         contentDescription = "Folder",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(24.dp)
+                        tint = AceOrange,
+                        modifier = Modifier.size(26.dp)
                     )
                 }
             }
@@ -293,13 +303,13 @@ fun CategoryCard(
                 Spacer(modifier = Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     category.minGoal?.let { min ->
-                        GoalChip(label = "Min: ${min}h")
+                        GoalChip(label = "Min: ${min}h", bg = AceLightBlue, textCol = AceDarkBlue)
                     }
                     category.maxGoal?.let { max ->
-                        GoalChip(label = "Max: ${max}h")
+                        GoalChip(label = "Max: ${max}h", bg = AceLightYellow, textCol = Color(0xFF7A5800))
                     }
                     category.goal?.let { goal ->
-                        GoalChip(label = "Target: ${goal}h")
+                        GoalChip(label = "Target: ${goal}h", bg = AceLightGreen, textCol = AceDarkGreen)
                     }
                 }
             }
@@ -308,7 +318,7 @@ fun CategoryCard(
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
+                    tint = AceRed.copy(alpha = 0.8f)
                 )
             }
         }
@@ -316,16 +326,17 @@ fun CategoryCard(
 }
 
 @Composable
-fun GoalChip(label: String) {
+fun GoalChip(label: String, bg: Color, textCol: Color) {
     Surface(
         shape = RoundedCornerShape(6.dp),
-        color = MaterialTheme.colorScheme.secondaryContainer
+        color = bg
     ) {
         Text(
             text = label,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
+            fontWeight = FontWeight.SemiBold,
+            color = textCol
         )
     }
 }
@@ -345,7 +356,7 @@ fun AddCategoryDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("New Category", fontWeight = FontWeight.Bold) },
+        title = { Text("New Category", fontWeight = FontWeight.Bold, color = AceRed) },
         text = {
             Column(
                 modifier = Modifier
@@ -406,9 +417,10 @@ fun AddCategoryDialog(
                     val max = maxGoalText.toFloatOrNull()
                     onConfirm(name.trim(), desc.trim(), goal, min, max)
                 },
-                enabled = name.isNotBlank() && !isLoading
+                enabled = name.isNotBlank() && !isLoading,
+                colors = ButtonDefaults.buttonColors(containerColor = AceRed)
             ) {
-                Text("Save")
+                Text("Save Category")
             }
         },
         dismissButton = {

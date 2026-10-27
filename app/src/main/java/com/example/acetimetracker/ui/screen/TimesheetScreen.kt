@@ -16,12 +16,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.acetimetracker.data.model.Category
+import com.example.acetimetracker.ui.theme.AceRed
+import com.example.acetimetracker.ui.theme.AceBlue
 import com.example.acetimetracker.util.Resource
 import java.util.Calendar
 import java.util.Locale
@@ -82,16 +85,17 @@ fun TimesheetScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Log Timesheet Entry", fontWeight = FontWeight.Bold) },
+                title = { Text("Log Timesheet Entry", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = AceRed,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
                 )
             )
         }
@@ -120,6 +124,7 @@ fun TimesheetScreen(
                     value = if (selectedCategory.isNotEmpty()) selectedCategory else "Select Category",
                     onValueChange = {},
                     readOnly = true,
+                    leadingIcon = { Icon(Icons.Default.Folder, contentDescription = null, tint = AceRed) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -133,7 +138,7 @@ fun TimesheetScreen(
                 ) {
                     categories.forEach { cat ->
                         DropdownMenuItem(
-                            text = { Text(cat.name) },
+                            text = { Text(cat.name, fontWeight = FontWeight.Medium) },
                             onClick = {
                                 selectedCategory = cat.name
                                 categoryExpanded = false
@@ -156,7 +161,7 @@ fun TimesheetScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Start Date") },
-                    leadingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null) },
+                    leadingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null, tint = AceBlue) },
                     modifier = Modifier
                         .weight(1f)
                         .clickable { showDatePicker { startDate = it } },
@@ -165,7 +170,7 @@ fun TimesheetScreen(
                         disabledTextColor = MaterialTheme.colorScheme.onSurface,
                         disabledBorderColor = MaterialTheme.colorScheme.outline,
                         disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        disabledLeadingIconColor = MaterialTheme.colorScheme.primary
+                        disabledLeadingIconColor = AceBlue
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -177,7 +182,7 @@ fun TimesheetScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Start Time") },
-                    leadingIcon = { Icon(Icons.Default.Schedule, contentDescription = null) },
+                    leadingIcon = { Icon(Icons.Default.Schedule, contentDescription = null, tint = AceBlue) },
                     modifier = Modifier
                         .weight(1f)
                         .clickable { showTimePicker { startTime = it } },
@@ -186,7 +191,7 @@ fun TimesheetScreen(
                         disabledTextColor = MaterialTheme.colorScheme.onSurface,
                         disabledBorderColor = MaterialTheme.colorScheme.outline,
                         disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        disabledLeadingIconColor = MaterialTheme.colorScheme.primary
+                        disabledLeadingIconColor = AceBlue
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -205,7 +210,7 @@ fun TimesheetScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("End Date") },
-                    leadingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null) },
+                    leadingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null, tint = AceRed) },
                     modifier = Modifier
                         .weight(1f)
                         .clickable { showDatePicker { endDate = it } },
@@ -214,7 +219,7 @@ fun TimesheetScreen(
                         disabledTextColor = MaterialTheme.colorScheme.onSurface,
                         disabledBorderColor = MaterialTheme.colorScheme.outline,
                         disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        disabledLeadingIconColor = MaterialTheme.colorScheme.primary
+                        disabledLeadingIconColor = AceRed
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -226,7 +231,7 @@ fun TimesheetScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("End Time") },
-                    leadingIcon = { Icon(Icons.Default.Schedule, contentDescription = null) },
+                    leadingIcon = { Icon(Icons.Default.Schedule, contentDescription = null, tint = AceRed) },
                     modifier = Modifier
                         .weight(1f)
                         .clickable { showTimePicker { endTime = it } },
@@ -235,7 +240,7 @@ fun TimesheetScreen(
                         disabledTextColor = MaterialTheme.colorScheme.onSurface,
                         disabledBorderColor = MaterialTheme.colorScheme.outline,
                         disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        disabledLeadingIconColor = MaterialTheme.colorScheme.primary
+                        disabledLeadingIconColor = AceRed
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -269,8 +274,9 @@ fun TimesheetScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                )
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -296,15 +302,15 @@ fun TimesheetScreen(
                         enabled = !isUploading,
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Icon(Icons.Default.AttachFile, contentDescription = null)
+                        Icon(Icons.Default.AttachFile, contentDescription = null, tint = AceRed)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(if (selectedImageUri != null) "Change Photo" else "Attach Photo Proof")
+                        Text(if (selectedImageUri != null) "Change Photo" else "Attach Photo Proof", color = AceRed)
                     }
 
                     if (isUploading) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = AceRed)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Uploading photo...", style = MaterialTheme.typography.bodySmall)
                         }
@@ -314,7 +320,7 @@ fun TimesheetScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Save Button
+            // Save Button in Ace Red
             Button(
                 onClick = {
                     onSaveClick(
@@ -335,12 +341,16 @@ fun TimesheetScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AceRed,
+                    contentColor = Color.White
+                )
             ) {
                 if (isSaving) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = Color.White,
                         strokeWidth = 2.5.dp
                     )
                 } else {

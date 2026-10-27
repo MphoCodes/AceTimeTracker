@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.example.acetimetracker.data.model.Category
 import com.example.acetimetracker.data.model.TimesheetEntry
+import com.example.acetimetracker.ui.theme.AceRed
 import com.example.acetimetracker.util.Resource
 import com.example.acetimetracker.util.TimeUtils
 import com.github.mikephil.charting.charts.BarChart
@@ -62,16 +64,16 @@ fun MyProgressScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Progress", fontWeight = FontWeight.Bold) },
+                title = { Text("My Progress", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = AceRed,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }
@@ -107,7 +109,7 @@ fun MyProgressScreen(
                         onDismissRequest = { categoryExpanded = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("All Categories") },
+                            text = { Text("All Categories", fontWeight = FontWeight.Bold) },
                             onClick = {
                                 selectedCategory = "All Categories"
                                 categoryExpanded = false
@@ -126,14 +128,15 @@ fun MyProgressScreen(
                 }
             }
 
-            // Total Allocated Time Banner
+            // Total Allocated Time Banner in Ace Red
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
+                        containerColor = AceRed
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
                 ) {
                     Row(
                         modifier = Modifier
@@ -144,7 +147,7 @@ fun MyProgressScreen(
                         Icon(
                             imageVector = Icons.Default.Schedule,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            tint = Color.White,
                             modifier = Modifier.size(36.dp)
                         )
                         Spacer(modifier = Modifier.width(16.dp))
@@ -152,13 +155,13 @@ fun MyProgressScreen(
                             Text(
                                 text = "Total Allocated Time",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                color = Color.White.copy(alpha = 0.85f)
                             )
                             Text(
                                 text = TimeUtils.formatDuration(totalMillis),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                color = Color.White
                             )
                         }
                     }
@@ -204,8 +207,8 @@ fun MyProgressScreen(
                                     )
                                     val dataSet = BarDataSet(entries, "Hours").apply {
                                         colors = listOf(
-                                            AndroidColor.parseColor("#D32F2F"),
-                                            AndroidColor.parseColor("#2E7D32")
+                                            AndroidColor.parseColor("#D32F2F"), // Ace Red
+                                            AndroidColor.parseColor("#388E3C")  // Dark Green
                                         )
                                         valueTextColor = AndroidColor.BLACK
                                         valueTextSize = 12f
@@ -243,7 +246,7 @@ fun TimesheetEntryCard(entry: TimesheetEntry) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -255,7 +258,7 @@ fun TimesheetEntryCard(entry: TimesheetEntry) {
                     text = entry.category,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = AceRed
                 )
                 Text(
                     text = TimeUtils.formatDuration(entry.timeSpent),

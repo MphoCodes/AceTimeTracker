@@ -16,11 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.acetimetracker.data.model.UserProfile
+import com.example.acetimetracker.ui.theme.AceRed
 import com.example.acetimetracker.util.Resource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,16 +37,16 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Profile", fontWeight = FontWeight.Bold) },
+                title = { Text("My Profile", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = AceRed,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }
@@ -57,7 +59,7 @@ fun ProfileScreen(
         ) {
             when (profileState) {
                 is Resource.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = AceRed)
                 }
                 else -> {
                     Column(
@@ -82,15 +84,15 @@ fun ProfileScreen(
                         } else {
                             Surface(
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.primaryContainer,
+                                color = AceRed,
                                 modifier = Modifier.size(110.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         imageVector = Icons.Default.Person,
                                         contentDescription = "Avatar",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(60.dp)
+                                        tint = Color.White,
+                                        modifier = Modifier.size(64.dp)
                                     )
                                 }
                             }
@@ -124,7 +126,7 @@ fun ProfileScreen(
                                     Icon(
                                         imageVector = Icons.Default.Person,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
+                                        tint = AceRed
                                     )
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column {
@@ -143,7 +145,7 @@ fun ProfileScreen(
                                     Icon(
                                         imageVector = Icons.Default.Email,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary
+                                        tint = AceRed
                                     )
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column {
@@ -165,7 +167,8 @@ fun ProfileScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(50.dp),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White)
                         ) {
                             Icon(Icons.Default.Edit, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))

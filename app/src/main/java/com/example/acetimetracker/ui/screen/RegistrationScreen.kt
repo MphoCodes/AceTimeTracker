@@ -1,5 +1,7 @@
 package com.example.acetimetracker.ui.screen
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,9 +11,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -19,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -26,6 +28,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.acetimetracker.R
+import com.example.acetimetracker.ui.theme.AceRed
+import com.example.acetimetracker.ui.theme.AceRedLight
 import com.example.acetimetracker.util.Resource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,33 +59,22 @@ fun RegistrationScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 32.dp),
+                .padding(horizontal = 24.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier.size(72.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.PersonAdd,
-                        contentDescription = "Register Logo",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Image(
+                painter = painterResource(id = R.drawable.acelogo),
+                contentDescription = "AceTimeTracker Logo",
+                modifier = Modifier
+                    .size(130.dp)
+                    .padding(bottom = 4.dp)
+            )
 
             Text(
                 text = "Create Account",
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
+                color = AceRed,
                 fontWeight = FontWeight.Bold
             )
 
@@ -91,7 +85,7 @@ fun RegistrationScreen(
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -99,7 +93,7 @@ fun RegistrationScreen(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -111,7 +105,7 @@ fun RegistrationScreen(
                         onValueChange = { email = it },
                         label = { Text("Email Address") },
                         leadingIcon = {
-                            Icon(Icons.Default.Email, contentDescription = "Email Icon")
+                            Icon(Icons.Default.Email, contentDescription = "Email Icon", tint = AceRed)
                         },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
@@ -122,14 +116,14 @@ fun RegistrationScreen(
                         shape = RoundedCornerShape(12.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("Password") },
                         leadingIcon = {
-                            Icon(Icons.Default.Lock, contentDescription = "Password Icon")
+                            Icon(Icons.Default.Lock, contentDescription = "Password Icon", tint = AceRed)
                         },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -149,14 +143,14 @@ fun RegistrationScreen(
                         shape = RoundedCornerShape(12.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     OutlinedTextField(
                         value = confirmPassword,
                         onValueChange = { confirmPassword = it },
                         label = { Text("Confirm Password") },
                         leadingIcon = {
-                            Icon(Icons.Default.Lock, contentDescription = "Confirm Password Icon")
+                            Icon(Icons.Default.Lock, contentDescription = "Confirm Password Icon", tint = AceRed)
                         },
                         trailingIcon = {
                             IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
@@ -182,7 +176,7 @@ fun RegistrationScreen(
                         shape = RoundedCornerShape(12.dp)
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     Button(
                         onClick = {
@@ -193,7 +187,11 @@ fun RegistrationScreen(
                             .fillMaxWidth()
                             .height(50.dp),
                         enabled = !isLoading,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AceRed,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     ) {
                         if (isLoading) {
                             CircularProgressIndicator(
@@ -212,13 +210,14 @@ fun RegistrationScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedCard(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.5.dp, AceRed),
                 colors = CardDefaults.outlinedCardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    containerColor = AceRedLight.copy(alpha = 0.35f)
                 ),
                 onClick = onTestLoginClick
             ) {
@@ -230,29 +229,29 @@ fun RegistrationScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.PlayArrow,
+                        imageVector = Icons.Default.FlashOn,
                         contentDescription = "Test Login",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
+                        tint = AceRed,
+                        modifier = Modifier.size(28.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
                     Column {
                         Text(
                             text = "Quick Test Login (Bypass Server)",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = AceRed
                         )
                         Text(
-                            text = "Instant offline session for grading and testing",
+                            text = "Instant offline session for testing & grading",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -268,7 +267,7 @@ fun RegistrationScreen(
                         text = "Sign In",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = AceRed
                     )
                 }
             }

@@ -1,6 +1,5 @@
 package com.example.acetimetracker.ui.screen
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -14,14 +13,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.acetimetracker.data.model.Category
-import com.example.acetimetracker.ui.theme.SuccessGreenContainer
-import com.example.acetimetracker.ui.theme.WarningYellowContainer
+import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
 import com.example.acetimetracker.util.TimeUtils
 
@@ -49,41 +48,46 @@ fun TimerScreen(
     val currentHours = elapsedTime / (1000f * 60f * 60f)
 
     val feedbackMessage: String
-    val isSuccessFeedback: Boolean
+    val feedbackBgColor: Color
+    val feedbackTextColor: Color
 
     if (minGoal != null && maxGoal != null && elapsedTime > 0L) {
         when {
             currentHours >= maxGoal -> {
                 feedbackMessage = "🎉 You've reached your maximum goal! Great work!"
-                isSuccessFeedback = true
+                feedbackBgColor = AceLightGreen
+                feedbackTextColor = AceDarkGreen
             }
             currentHours >= minGoal -> {
                 feedbackMessage = "✅ You're on track! Keep going!"
-                isSuccessFeedback = true
+                feedbackBgColor = AceLightGreen
+                feedbackTextColor = AceDarkGreen
             }
             else -> {
                 feedbackMessage = "⏳ Behind minimum goal. Keep pushing!"
-                isSuccessFeedback = false
+                feedbackBgColor = AceLightYellow
+                feedbackTextColor = Color(0xFF7A5800)
             }
         }
     } else {
         feedbackMessage = "Set your goals and start tracking to receive live progress feedback."
-        isSuccessFeedback = true
+        feedbackBgColor = AceLightBlue
+        feedbackTextColor = AceDarkBlue
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Productivity Timer", fontWeight = FontWeight.Bold) },
+                title = { Text("Productivity Timer", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = AceRed,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 )
             )
         }
@@ -109,6 +113,7 @@ fun TimerScreen(
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Category") },
+                    leadingIcon = { Icon(Icons.Default.Folder, contentDescription = null, tint = AceOrange) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -122,7 +127,7 @@ fun TimerScreen(
                 ) {
                     categories.forEach { cat ->
                         DropdownMenuItem(
-                            text = { Text(cat.name) },
+                            text = { Text(cat.name, fontWeight = FontWeight.Medium) },
                             onClick = {
                                 selectedCategory = cat.name
                                 categoryExpanded = false
@@ -136,21 +141,21 @@ fun TimerScreen(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = if (isRunning) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                        AceRedLight.copy(alpha = 0.5f)
                     } else {
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        MaterialTheme.colorScheme.surface
                     }
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(32.dp),
+                        .padding(28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -159,9 +164,9 @@ fun TimerScreen(
                         style = MaterialTheme.typography.displayLarge.copy(
                             fontFamily = FontFamily.Monospace,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 48.sp
+                            fontSize = 46.sp
                         ),
-                        color = MaterialTheme.colorScheme.primary
+                        color = AceRed
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -170,7 +175,7 @@ fun TimerScreen(
                         text = if (isRunning) "● ACTIVE SESSION" else "PAUSED",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
-                        color = if (isRunning) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (isRunning) AceRed else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -195,20 +200,21 @@ fun TimerScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(24.dp))
+                Spacer(modifier = Modifier.width(28.dp))
 
-                // Play / Pause FAB
+                // Play / Pause Hero Button
                 FloatingActionButton(
                     onClick = onToggleStartStop,
-                    modifier = Modifier.size(72.dp),
+                    modifier = Modifier.size(74.dp),
                     shape = CircleShape,
-                    containerColor = if (isRunning) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = if (isRunning) Color(0xFFC62828) else AceRed,
+                    contentColor = Color.White,
+                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 8.dp)
                 ) {
                     Icon(
                         imageVector = if (isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = if (isRunning) "Pause" else "Start",
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(38.dp)
                     )
                 }
             }
@@ -220,7 +226,7 @@ fun TimerScreen(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surface
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -258,17 +264,18 @@ fun TimerScreen(
                         )
                     }
 
-                    // Live Goal Feedback Card
+                    // Live Goal Feedback Card with authentic vibrant colors
                     Surface(
                         shape = RoundedCornerShape(10.dp),
-                        color = if (isSuccessFeedback) SuccessGreenContainer else WarningYellowContainer,
+                        color = feedbackBgColor,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
                             text = feedbackMessage,
-                            modifier = Modifier.padding(12.dp),
+                            modifier = Modifier.padding(14.dp),
                             style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.SemiBold,
+                            color = feedbackTextColor
                         )
                     }
                 }
@@ -284,8 +291,12 @@ fun TimerScreen(
                 enabled = minGoal != null && maxGoal != null && minGoal <= maxGoal,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
-                shape = RoundedCornerShape(12.dp)
+                    .height(52.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AceRed,
+                    contentColor = Color.White
+                )
             ) {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
