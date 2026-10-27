@@ -1,0 +1,204 @@
+package com.example.acetimetracker.ui.screen
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.composables.icons.lucide.ArrowLeft
+import com.composables.icons.lucide.Camera
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Mail
+import com.composables.icons.lucide.Save
+import com.composables.icons.lucide.User
+import com.example.acetimetracker.data.model.UserProfile
+import com.example.acetimetracker.ui.theme.AceRed
+import com.example.acetimetracker.util.Resource
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditProfileScreen(
+    profileState: Resource<UserProfile>?,
+    uploadState: Resource<String>?,
+    updateState: Resource<Unit>?,
+    onBackClick: () -> Unit,
+    onUploadPhotoClick: () -> Unit,
+    onSaveClick: (displayName: String, email: String) -> Unit
+) {
+    val initialProfile = (profileState as? Resource.Success)?.data
+
+    var displayName by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var isInitialized by remember { mutableStateOf(false) }
+
+    LaunchedEffect(initialProfile) {
+        if (initialProfile != null && !isInitialized) {
+            displayName = initialProfile.displayName
+            email = initialProfile.email
+            isInitialized = true
+        }
+    }
+
+    val isUploading = uploadState is Resource.Loading
+    val isSaving = updateState is Resource.Loading
+
+    val currentPhotoUrl = when {
+        uploadState is Resource.Success -> uploadState.data
+        else -> initialProfile?.profilePictureUrl.orEmpty()
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Edit Profile", fontWeight = FontWeight.Bold, color = Color.White) },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Color.White, modifier = Modifier.size(22.dp))
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = AceRed,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(rememberScrollState())
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            // Profile Photo Box
+            Box(contentAlignment = Alignment.BottomEnd) {
+                if (currentPhotoUrl.isNotEmpty()) {
+                    AsyncImage(
+                        model = currentPhotoUrl,
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .size(110.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Surface(
+                        shape = CircleShape,
+                        color = AceRed,
+                        modifier = Modifier.size(110.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Lucide.User,
+                                contentDescription = "Avatar",
+                                tint = Color.White,
+                                modifier = Modifier.size(54.dp)
+                            )
+                        }
+                    }
+                }
+
+                FilledIconButton(
+                    onClick = onUploadPhotoClick,
+                    modifier = Modifier.size(38.dp),
+                    shape = CircleShape,
+                    colors = IconButtonDefaults.filledIconButtonColors(containerColor = AceRed, contentColor = Color.White)
+                ) {
+                    if (isUploading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = Color.White,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Lucide.Camera,
+                            contentDescription = "Change Photo",
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+
+            TextButton(onClick = onUploadPhotoClick, enabled = !isUploading) {
+                Text(if (isUploading) "Uploading Photo..." else "Change Profile Photo", color = AceRed, fontWeight = FontWeight.SemiBold)
+            }
+
+            // Input Fields Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    OutlinedTextField(
+                        value = displayName,
+                        onValueChange = { displayName = it },
+                        label = { Text("Display Name") },
+                        leadingIcon = { Icon(Lucide.User, contentDescription = null, tint = AceRed, modifier = Modifier.size(18.dp)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+
+                    OutlinedTextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = { Text("Email Address") },
+                        leadingIcon = { Icon(Lucide.Mail, contentDescription = null, tint = AceRed, modifier = Modifier.size(18.dp)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                }
+            }
+
+            // Save Button
+            Button(
+                onClick = { onSaveClick(displayName, email) },
+                enabled = displayName.isNotBlank() && email.isNotBlank() && !isSaving,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White)
+            ) {
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White,
+                        strokeWidth = 2.5.dp
+                    )
+                } else {
+                    Icon(Lucide.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Save Changes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
