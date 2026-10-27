@@ -3,6 +3,7 @@ package com.example.acetimetracker.ui.screen
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,8 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.acetimetracker.data.model.Category
-import com.example.acetimetracker.ui.theme.AceRed
-import com.example.acetimetracker.ui.theme.AceBlue
+import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
 import java.util.Calendar
 import java.util.Locale
@@ -84,20 +84,29 @@ fun TimesheetScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Log Timesheet Entry", fontWeight = FontWeight.Bold, color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = AceRed,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    actionIconContentColor = Color.White
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(0.5.dp, Slate200)
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Log Timesheet Entry",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Slate900
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Slate800)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
-            )
+            }
         }
     ) { paddingValues ->
         Column(

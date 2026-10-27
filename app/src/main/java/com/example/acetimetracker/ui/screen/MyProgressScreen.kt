@@ -1,6 +1,7 @@
 package com.example.acetimetracker.ui.screen
 
 import android.graphics.Color as AndroidColor
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,7 +23,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.example.acetimetracker.data.model.Category
 import com.example.acetimetracker.data.model.TimesheetEntry
-import com.example.acetimetracker.ui.theme.AceRed
+import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
 import com.example.acetimetracker.util.TimeUtils
 import com.github.mikephil.charting.charts.BarChart
@@ -63,19 +64,29 @@ fun MyProgressScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("My Progress", fontWeight = FontWeight.Bold, color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = AceRed,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(0.5.dp, Slate200)
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Goal Progress",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Slate900
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Slate800)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
-            )
+            }
         }
     ) { paddingValues ->
         LazyColumn(

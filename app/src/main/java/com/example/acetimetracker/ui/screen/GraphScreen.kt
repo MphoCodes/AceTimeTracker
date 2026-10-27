@@ -1,6 +1,7 @@
 package com.example.acetimetracker.ui.screen
 
 import android.graphics.Color as AndroidColor
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,8 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.example.acetimetracker.ui.theme.AceRed
-import com.example.acetimetracker.ui.theme.AceRedLight
+import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
@@ -38,19 +38,29 @@ fun GraphScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Visual Analytics", fontWeight = FontWeight.Bold, color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = AceRed,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(0.5.dp, Slate200)
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Visual Analytics",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Slate900
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Slate800)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
-            )
+            }
         }
     ) { paddingValues ->
         Box(

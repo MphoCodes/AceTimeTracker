@@ -1,11 +1,10 @@
 package com.example.acetimetracker.ui.screen
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,15 +16,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.acetimetracker.R
 import com.example.acetimetracker.data.model.UserProfile
 import com.example.acetimetracker.ui.theme.*
 import kotlinx.coroutines.launch
@@ -47,108 +47,68 @@ fun MainScreen(
         SimpleDateFormat("EEEE, MMM d", Locale.getDefault()).format(Date())
     }
 
-    // Curated Navigation Drawer Categories
-    val navSections = remember {
-        listOf(
-            NavSection(
-                title = "Productivity Hub",
-                items = listOf(
-                    NavMenuItem("Timesheet", "Log Timesheet", Icons.Default.DateRange, Destination.Timesheet, badge = "Add"),
-                    NavMenuItem("Timer", "Productivity Stopwatch", Icons.Default.PlayArrow, Destination.Timer, badge = "Live"),
-                    NavMenuItem("Categories", "Task Categories", Icons.Default.Folder, Destination.Categories)
-                )
-            ),
-            NavSection(
-                title = "Reports & Analytics",
-                items = listOf(
-                    NavMenuItem("Progress", "Goals & Milestones", Icons.Default.TrendingUp, Destination.MyProgress),
-                    NavMenuItem("Analytics", "Visual Distribution", Icons.Default.BarChart, Destination.Graph)
-                )
-            ),
-            NavSection(
-                title = "Account & System",
-                items = listOf(
-                    NavMenuItem("Profile", "My Profile", Icons.Default.Person, Destination.Profile),
-                    NavMenuItem("Settings", "App Preferences", Icons.Default.Settings, Destination.Settings),
-                    NavMenuItem("About", "About AceTimeTracker", Icons.Default.Info, Destination.About)
-                )
-            )
-        )
-    }
-
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier
-                    .width(320.dp)
+                    .width(310.dp)
                     .fillMaxHeight(),
                 drawerContainerColor = MaterialTheme.colorScheme.surface,
-                drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
+                drawerShape = RoundedCornerShape(topEnd = 20.dp, bottomEnd = 20.dp)
             ) {
-                // Sleek Executive Profile Header with Gradient Backdrop
-                Box(
+                // Authentic AceTimeTracker Drawer Header
+                Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(Slate900, Slate800)
-                            )
-                        )
-                        .statusBarsPadding()
                         .clickable {
                             scope.launch { drawerState.close() }
                             onNavigate(Destination.Profile)
-                        }
-                        .padding(horizontal = 20.dp, vertical = 20.dp)
+                        },
+                    color = Slate900
                 ) {
-                    Column {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .statusBarsPadding()
+                            .padding(20.dp)
+                    ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Box(contentAlignment = Alignment.BottomEnd) {
-                                Surface(
-                                    shape = CircleShape,
-                                    color = Slate700,
-                                    border = BorderStroke(2.dp, AceRed),
-                                    modifier = Modifier.size(52.dp)
-                                ) {
-                                    if (userProfile?.profilePictureUrl?.isNotEmpty() == true) {
-                                        AsyncImage(
-                                            model = userProfile.profilePictureUrl,
-                                            contentDescription = "Avatar",
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .clip(CircleShape),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                    } else {
-                                        Box(contentAlignment = Alignment.Center) {
-                                            Icon(
-                                                imageVector = Icons.Default.Person,
-                                                contentDescription = null,
-                                                tint = Color.White,
-                                                modifier = Modifier.size(28.dp)
-                                            )
-                                        }
-                                    }
+                            // User Avatar or App Logo
+                            Surface(
+                                shape = CircleShape,
+                                color = Color.White,
+                                border = BorderStroke(2.dp, AceRed),
+                                modifier = Modifier.size(54.dp)
+                            ) {
+                                if (userProfile?.profilePictureUrl?.isNotEmpty() == true) {
+                                    AsyncImage(
+                                        model = userProfile.profilePictureUrl,
+                                        contentDescription = "Avatar",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clip(CircleShape),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                } else {
+                                    Image(
+                                        painter = painterResource(id = R.drawable.acelogo),
+                                        contentDescription = "AceTimeTracker Logo",
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(4.dp)
+                                    )
                                 }
-
-                                // Online Status Dot
-                                Box(
-                                    modifier = Modifier
-                                        .size(13.dp)
-                                        .background(AccentEmerald, CircleShape)
-                                        .clip(CircleShape)
-                                )
                             }
 
                             Spacer(modifier = Modifier.width(14.dp))
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = userProfile?.displayName?.ifEmpty { "Ace Tracker" } ?: "Ace Tracker",
+                                    text = userProfile?.displayName?.ifEmpty { "Ace Tracker User" } ?: "Ace Tracker User",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
@@ -157,126 +117,133 @@ fun MainScreen(
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = userProfile?.email?.ifEmpty { "user@acetimetracker.com" } ?: "user@acetimetracker.com",
+                                    text = userProfile?.email?.ifEmpty { "st10203065@vcconnect.edu.za" } ?: "st10203065@vcconnect.edu.za",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = Slate400,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
                             }
-
-                            Icon(
-                                imageVector = Icons.Default.ChevronRight,
-                                contentDescription = null,
-                                tint = Slate400,
-                                modifier = Modifier.size(20.dp)
-                            )
                         }
 
                         Spacer(modifier = Modifier.height(14.dp))
 
-                        // Executive Status Pill
                         Surface(
-                            shape = RoundedCornerShape(100.dp),
-                            color = Slate800,
-                            border = BorderStroke(1.dp, Slate700)
+                            shape = RoundedCornerShape(6.dp),
+                            color = Slate800
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(6.dp)
-                                        .background(AceRed, CircleShape)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "PRO WORKSPACE • ACTIVE",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        letterSpacing = 0.8.sp,
-                                        fontSize = 10.sp
-                                    ),
-                                    fontWeight = FontWeight.Bold,
-                                    color = Slate300
-                                )
-                            }
+                            Text(
+                                text = "Ace It! • Student & Task Productivity",
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Slate300,
+                                fontSize = 11.sp
+                            )
                         }
                     }
                 }
 
-                // Sectioned Drawer List
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(vertical = 8.dp)
+                // Drawer Navigation Items (Authentic to app functionality)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(vertical = 8.dp)
                 ) {
-                    navSections.forEach { section ->
-                        item {
-                            Text(
-                                text = section.title.uppercase(),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    letterSpacing = 1.sp,
-                                    fontSize = 11.sp
-                                ),
-                                fontWeight = FontWeight.Bold,
-                                color = Slate400,
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                            )
-                        }
+                    Text(
+                        text = "CORE FEATURES",
+                        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = Slate400,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                    )
 
-                        items(section.items) { item ->
-                            NavigationDrawerItem(
-                                icon = {
-                                    Icon(
-                                        imageVector = item.icon,
-                                        contentDescription = item.title,
-                                        tint = Slate600,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                },
-                                label = {
-                                    Text(
-                                        text = item.title,
-                                        fontWeight = FontWeight.Medium,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = Slate800
-                                    )
-                                },
-                                badge = {
-                                    if (item.badge != null) {
-                                        Surface(
-                                            shape = RoundedCornerShape(6.dp),
-                                            color = AceRedLight
-                                        ) {
-                                            Text(
-                                                text = item.badge,
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.Bold,
-                                                color = AceRed
-                                            )
-                                        }
-                                    }
-                                },
-                                selected = false,
-                                onClick = {
-                                    scope.launch { drawerState.close() }
-                                    onNavigate(item.destination)
-                                },
-                                modifier = Modifier
-                                    .padding(horizontal = 12.dp, vertical = 2.dp)
-                                    .height(44.dp),
-                                shape = RoundedCornerShape(10.dp)
-                            )
+                    DrawerNavRow(
+                        title = "Timesheet Log",
+                        icon = Icons.Default.DateRange,
+                        badge = "Log",
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigate(Destination.Timesheet)
                         }
+                    )
 
-                        item {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
-                                color = Slate100
-                            )
+                    DrawerNavRow(
+                        title = "Stopwatch Timer",
+                        icon = Icons.Default.Timer,
+                        badge = "Live",
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigate(Destination.Timer)
                         }
-                    }
+                    )
+
+                    DrawerNavRow(
+                        title = "Task Categories",
+                        icon = Icons.Default.Folder,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigate(Destination.Categories)
+                        }
+                    )
+
+                    DrawerNavRow(
+                        title = "My Goal Progress",
+                        icon = Icons.Default.TrendingUp,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigate(Destination.MyProgress)
+                        }
+                    )
+
+                    DrawerNavRow(
+                        title = "Analytics Graph",
+                        icon = Icons.Default.PieChart,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigate(Destination.Graph)
+                        }
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                        color = Slate100
+                    )
+
+                    Text(
+                        text = "ACCOUNT & APP",
+                        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
+                        fontWeight = FontWeight.Bold,
+                        color = Slate400,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                    )
+
+                    DrawerNavRow(
+                        title = "User Profile",
+                        icon = Icons.Default.Person,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigate(Destination.Profile)
+                        }
+                    )
+
+                    DrawerNavRow(
+                        title = "Settings",
+                        icon = Icons.Default.Settings,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigate(Destination.Settings)
+                        }
+                    )
+
+                    DrawerNavRow(
+                        title = "About AceTimeTracker",
+                        icon = Icons.Default.Info,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigate(Destination.About)
+                        }
+                    )
                 }
 
                 // Log Out Action
@@ -293,8 +260,7 @@ fun MainScreen(
                         Text(
                             "Log Out",
                             color = AceRed,
-                            fontWeight = FontWeight.SemiBold,
-                            style = MaterialTheme.typography.bodyMedium
+                            fontWeight = FontWeight.SemiBold
                         )
                     },
                     selected = false,
@@ -308,9 +274,9 @@ fun MainScreen(
                     shape = RoundedCornerShape(10.dp)
                 )
 
-                // Version Branding
+                // Author Stamp
                 Text(
-                    text = "AceTimeTracker • Executive v2.0",
+                    text = "AceTimeTracker • Developed by Mpho Ndlela",
                     style = MaterialTheme.typography.labelSmall,
                     color = Slate400,
                     modifier = Modifier
@@ -322,7 +288,7 @@ fun MainScreen(
     ) {
         Scaffold(
             topBar = {
-                // High-End Surface TopAppBar
+                // TopAppBar featuring authentic R.drawable.acelogo
                 Surface(
                     color = MaterialTheme.colorScheme.surface,
                     border = BorderStroke(0.5.dp, Slate200)
@@ -330,20 +296,11 @@ fun MainScreen(
                     TopAppBar(
                         title = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Surface(
-                                    shape = RoundedCornerShape(8.dp),
-                                    color = AceRed,
-                                    modifier = Modifier.size(30.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(
-                                            text = "A",
-                                            fontWeight = FontWeight.Black,
-                                            color = Color.White,
-                                            fontSize = 16.sp
-                                        )
-                                    }
-                                }
+                                Image(
+                                    painter = painterResource(id = R.drawable.acelogo),
+                                    contentDescription = "AceTimeTracker Logo",
+                                    modifier = Modifier.size(34.dp)
+                                )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -399,7 +356,7 @@ fun MainScreen(
                 }
             },
             bottomBar = {
-                // Minimalist, Clean Bottom Navigation Bar with Proper Insets
+                // Native Clean Bottom Navigation Bar
                 Surface(
                     color = MaterialTheme.colorScheme.surface,
                     border = BorderStroke(0.5.dp, Slate200)
@@ -412,7 +369,7 @@ fun MainScreen(
                         NavigationBarItem(
                             selected = selectedBottomTab == BottomNavTab.Home,
                             onClick = { selectedBottomTab = BottomNavTab.Home },
-                            icon = { Icon(Icons.Default.Dashboard, contentDescription = "Dashboard") },
+                            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
                             label = { Text("Home", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = AceRed,
@@ -421,7 +378,7 @@ fun MainScreen(
                             )
                         )
                         NavigationBarItem(
-                            selected = selectedBottomTab == BottomNavTab.Timesheet,
+                            selected = false,
                             onClick = { onNavigate(Destination.Timesheet) },
                             icon = { Icon(Icons.Default.DateRange, contentDescription = "Timesheet") },
                             label = { Text("Timesheet", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
@@ -432,9 +389,9 @@ fun MainScreen(
                             )
                         )
                         NavigationBarItem(
-                            selected = selectedBottomTab == BottomNavTab.Timer,
+                            selected = false,
                             onClick = { onNavigate(Destination.Timer) },
-                            icon = { Icon(Icons.Default.PlayArrow, contentDescription = "Timer") },
+                            icon = { Icon(Icons.Default.Timer, contentDescription = "Stopwatch") },
                             label = { Text("Stopwatch", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = AceRed,
@@ -443,10 +400,10 @@ fun MainScreen(
                             )
                         )
                         NavigationBarItem(
-                            selected = selectedBottomTab == BottomNavTab.Categories,
-                            onClick = { onNavigate(Destination.Graph) },
-                            icon = { Icon(Icons.Default.BarChart, contentDescription = "Analytics") },
-                            label = { Text("Analytics", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
+                            selected = false,
+                            onClick = { onNavigate(Destination.MyProgress) },
+                            icon = { Icon(Icons.Default.TrendingUp, contentDescription = "Progress") },
+                            label = { Text("Progress", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = AceRed,
                                 selectedTextColor = AceRed,
@@ -462,11 +419,11 @@ fun MainScreen(
                     containerColor = AceRed,
                     contentColor = Color.White,
                     shape = RoundedCornerShape(16.dp),
-                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
+                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp)
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Log Time", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text("Log Entry", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
             }
         ) { paddingValues ->
@@ -479,33 +436,32 @@ fun MainScreen(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Executive Performance & Productivity Hero Card
+                // Authentic AceTimeTracker Welcome Hero Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(containerColor = Slate900),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(20.dp)
                     ) {
-                        // Card Header
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .background(AccentEmerald, CircleShape)
+                                Image(
+                                    painter = painterResource(id = R.drawable.acelogo),
+                                    contentDescription = "Ace Logo",
+                                    modifier = Modifier.size(28.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "TODAY'S PRODUCTIVITY",
+                                    text = "ACETIMETRACKER",
                                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.2.sp),
                                     fontWeight = FontWeight.Bold,
                                     color = Slate300
@@ -514,103 +470,43 @@ fun MainScreen(
 
                             Surface(
                                 shape = RoundedCornerShape(100.dp),
-                                color = AccentEmerald.copy(alpha = 0.18f),
-                                border = BorderStroke(1.dp, AccentEmerald.copy(alpha = 0.3f))
+                                color = AceRed.copy(alpha = 0.25f),
+                                border = BorderStroke(1.dp, AceRed.copy(alpha = 0.5f))
                             ) {
                                 Text(
-                                    text = "On Track • 68%",
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    text = "Study & ACE IT!",
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = AccentEmerald
+                                    color = Color(0xFFFCA5A5)
                                 )
                             }
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Large Metric Display
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column {
-                                Row(verticalAlignment = Alignment.Bottom) {
-                                    Text(
-                                        text = "04",
-                                        style = MaterialTheme.typography.displaySmall,
-                                        fontWeight = FontWeight.Black,
-                                        color = Color.White
-                                    )
-                                    Text(
-                                        text = "h ",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Slate400
-                                    )
-                                    Text(
-                                        text = "30",
-                                        style = MaterialTheme.typography.displaySmall,
-                                        fontWeight = FontWeight.Black,
-                                        color = Color.White
-                                    )
-                                    Text(
-                                        text = "m",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Slate400
-                                    )
-                                }
-                                Text(
-                                    text = "Daily Target: 8h 00m • 3h 30m remaining",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = Slate400
-                                )
-                            }
-
-                            // Circular or Pill Mini Badge
-                            Surface(
-                                shape = RoundedCornerShape(10.dp),
-                                color = Slate800,
-                                border = BorderStroke(1.dp, Slate700)
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = "28.5 hrs",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
-                                    )
-                                    Text(
-                                        text = "This Week",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = Slate400,
-                                        fontSize = 10.sp
-                                    )
-                                }
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        // Progress Bar
-                        LinearProgressIndicator(
-                            progress = { 0.68f },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp)),
-                            color = AccentEmerald,
-                            trackColor = Slate800,
+                        Text(
+                            text = "Welcome back,",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Slate400
+                        )
+                        Text(
+                            text = userProfile?.displayName?.ifEmpty { "Ace Learner" } ?: "Ace Learner",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Track your study hours, stay on top of category goals, and balance your daily tasks with ease.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Slate300,
+                            lineHeight = 18.sp
                         )
 
-                        Spacer(modifier = Modifier.height(18.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                        // Quick Control Buttons
+                        // Real Functional Action Buttons
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -626,7 +522,7 @@ fun MainScreen(
                                     contentColor = Color.White
                                 )
                             ) {
-                                Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.Timer, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text("Start Timer", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                             }
@@ -644,189 +540,179 @@ fun MainScreen(
                             ) {
                                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Log Entry", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                                Text("Add Hours", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
                             }
                         }
                     }
                 }
 
-                // Section: Productivity Workspace Hub
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "WORKSPACE HUBS",
-                        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-                        fontWeight = FontWeight.Bold,
-                        color = Slate500
-                    )
-                    Text(
-                        text = "All Tools",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = AceRed,
-                        modifier = Modifier.clickable { scope.launch { drawerState.open() } }
-                    )
-                }
-
-                // 2x2 Grid of Elegant Executive Action Cards
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ExecutiveActionCard(
-                        title = "Timesheet Log",
-                        description = "Review entries & photos",
-                        icon = Icons.Default.DateRange,
-                        accentColor = AccentBlue,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onNavigate(Destination.Timesheet) }
-                    )
-                    ExecutiveActionCard(
-                        title = "Task Categories",
-                        description = "Organize goals & limits",
-                        icon = Icons.Default.Folder,
-                        accentColor = AccentAmber,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onNavigate(Destination.Categories) }
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    ExecutiveActionCard(
-                        title = "Goal Milestones",
-                        description = "Min vs max target limits",
-                        icon = Icons.Default.TrendingUp,
-                        accentColor = AccentEmerald,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onNavigate(Destination.MyProgress) }
-                    )
-                    ExecutiveActionCard(
-                        title = "Visual Analytics",
-                        description = "Time distribution charts",
-                        icon = Icons.Default.PieChart,
-                        accentColor = AccentIndigo,
-                        modifier = Modifier.weight(1f),
-                        onClick = { onNavigate(Destination.Graph) }
-                    )
-                }
-
-                // Section: Recent Activity / Sessions (Gives high-end real feel)
+                // Section: App Features
                 Text(
-                    text = "RECENT TRACKING SESSIONS",
+                    text = "APP FEATURES",
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
                     fontWeight = FontWeight.Bold,
                     color = Slate500
                 )
 
+                // 2x2 Grid of Real Feature Cards
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    FeatureCard(
+                        title = "Timesheet Log",
+                        description = "Log hours & photo proofs",
+                        icon = Icons.Default.DateRange,
+                        accentColor = AccentBlue,
+                        modifier = Modifier.weight(1f),
+                        onClick = { onNavigate(Destination.Timesheet) }
+                    )
+                    FeatureCard(
+                        title = "Stopwatch Timer",
+                        description = "Real-time task tracking",
+                        icon = Icons.Default.Timer,
+                        accentColor = AceRed,
+                        modifier = Modifier.weight(1f),
+                        onClick = { onNavigate(Destination.Timer) }
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    FeatureCard(
+                        title = "Task Categories",
+                        description = "Set min/max hour goals",
+                        icon = Icons.Default.Folder,
+                        accentColor = AccentAmber,
+                        modifier = Modifier.weight(1f),
+                        onClick = { onNavigate(Destination.Categories) }
+                    )
+                    FeatureCard(
+                        title = "Goal Progress",
+                        description = "Min vs max target status",
+                        icon = Icons.Default.TrendingUp,
+                        accentColor = AccentEmerald,
+                        modifier = Modifier.weight(1f),
+                        onClick = { onNavigate(Destination.MyProgress) }
+                    )
+                }
+
+                FeatureCard(
+                    title = "Visual Analytics & Distribution",
+                    description = "Interactive pie chart breakdown of your task time distribution",
+                    icon = Icons.Default.PieChart,
+                    accentColor = AccentIndigo,
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onNavigate(Destination.Graph) }
+                )
+
+                // Helpful Study Tips Card
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     color = Color.White,
                     border = BorderStroke(1.dp, Slate200)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        RecentSessionRow(
-                            title = "Client App Architecture",
-                            category = "Engineering",
-                            duration = "2h 15m",
-                            badgeColor = AccentBlue,
-                            onClick = { onNavigate(Destination.Timesheet) }
-                        )
-                        Divider(color = Slate100)
-                        RecentSessionRow(
-                            title = "Sprint Planning & Sync",
-                            category = "Management",
-                            duration = "45m",
-                            badgeColor = AccentAmber,
-                            onClick = { onNavigate(Destination.Timesheet) }
-                        )
-                        Divider(color = Slate100)
-                        RecentSessionRow(
-                            title = "UX Navigation Redesign",
-                            category = "Design",
-                            duration = "1h 30m",
-                            badgeColor = AccentEmerald,
-                            onClick = { onNavigate(Destination.Timesheet) }
-                        )
+                        Surface(
+                            shape = CircleShape,
+                            color = AceRedLight,
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.Lightbulb,
+                                    contentDescription = null,
+                                    tint = AceRed,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(14.dp))
+
+                        Column {
+                            Text(
+                                text = "Pro Tip: Set Goal Boundaries",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Slate900
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "Configure minimum and maximum target hours under Task Categories to keep your work-life balance on track.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Slate500,
+                                lineHeight = 16.sp
+                            )
+                        }
                     }
                 }
 
-                // Generous bottom spacer so FAB never obscures any content
-                Spacer(modifier = Modifier.height(72.dp))
+                Spacer(modifier = Modifier.height(60.dp))
             }
         }
     }
 }
 
 @Composable
-fun RecentSessionRow(
+fun DrawerNavRow(
     title: String,
-    category: String,
-    duration: String,
-    badgeColor: Color,
+    icon: ImageVector,
+    badge: String? = null,
     onClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(8.dp)
-                    .background(badgeColor, CircleShape)
+    NavigationDrawerItem(
+        icon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = Slate600,
+                modifier = Modifier.size(20.dp)
             )
-            Spacer(modifier = Modifier.width(10.dp))
-            Column {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Slate900,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = category,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Slate500
-                )
-            }
-        }
-
-        Surface(
-            shape = RoundedCornerShape(6.dp),
-            color = Slate100
-        ) {
+        },
+        label = {
             Text(
-                text = duration,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = Slate700
+                text = title,
+                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Slate800
             )
-        }
-    }
+        },
+        badge = {
+            if (badge != null) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = AceRedLight
+                ) {
+                    Text(
+                        text = badge,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = AceRed
+                    )
+                }
+            }
+        },
+        selected = false,
+        onClick = onClick,
+        modifier = Modifier
+            .padding(horizontal = 12.dp, vertical = 2.dp)
+            .height(44.dp),
+        shape = RoundedCornerShape(10.dp)
+    )
 }
 
 @Composable
-fun ExecutiveActionCard(
+fun FeatureCard(
     title: String,
     description: String,
     icon: ImageVector,
@@ -893,31 +779,18 @@ fun ExecutiveActionCard(
                 color = Slate500,
                 fontSize = 11.sp,
                 lineHeight = 15.sp,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
         }
     }
 }
 
-data class NavSection(
-    val title: String,
-    val items: List<NavMenuItem>
-)
-
-data class NavMenuItem(
-    val id: String,
-    val title: String,
-    val icon: ImageVector,
-    val destination: Destination,
-    val badge: String? = null
-)
-
 enum class BottomNavTab {
     Home,
     Timesheet,
     Timer,
-    Categories
+    Progress
 }
 
 enum class Destination {

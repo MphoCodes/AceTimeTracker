@@ -1,5 +1,6 @@
 package com.example.acetimetracker.ui.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -77,19 +78,29 @@ fun TimerScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Productivity Timer", fontWeight = FontWeight.Bold, color = Color.White) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = AceRed,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(0.5.dp, Slate200)
+            ) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "Stopwatch Timer",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Slate900
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Slate800)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
-            )
+            }
         }
     ) { paddingValues ->
         Column(
