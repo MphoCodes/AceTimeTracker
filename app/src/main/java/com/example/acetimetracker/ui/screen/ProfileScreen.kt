@@ -39,7 +39,7 @@ fun ProfileScreen(
         topBar = {
             Surface(
                 color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(0.5.dp, Slate200)
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 TopAppBar(
                     title = {
@@ -47,12 +47,12 @@ fun ProfileScreen(
                             text = "My Profile",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Slate900
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
-                            Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Slate800, modifier = Modifier.size(22.dp))
+                            Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -151,7 +151,7 @@ fun ProfileScreen(
                                     }
                                 }
 
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = Slate100)
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = MaterialTheme.colorScheme.surfaceVariant)
 
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(

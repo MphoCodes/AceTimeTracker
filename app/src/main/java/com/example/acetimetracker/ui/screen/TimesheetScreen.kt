@@ -63,6 +63,7 @@ fun TimesheetScreen(
     saveEntryState: Resource<*>?,
     uploadImageState: Resource<*>?,
     selectedImageUri: Uri?,
+    formResetKey: Int = 0,
     initialTab: Int = 0,
     onBackClick: () -> Unit,
     onSelectImageClick: () -> Unit,
@@ -74,14 +75,14 @@ fun TimesheetScreen(
     val context = LocalContext.current
     var selectedTabIndex by remember { mutableIntStateOf(initialTab) }
 
-    // Form state
-    var selectedCategory by remember { mutableStateOf("") }
+    // Form state, cleared whenever formResetKey changes after a successful save
+    var selectedCategory by remember(formResetKey) { mutableStateOf("") }
     var categoryExpanded by remember { mutableStateOf(false) }
-    var startDate by remember { mutableStateOf("") }
-    var startTime by remember { mutableStateOf("") }
-    var endDate by remember { mutableStateOf("") }
-    var endTime by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    var startDate by remember(formResetKey) { mutableStateOf(TimeUtils.today()) }
+    var startTime by remember(formResetKey) { mutableStateOf("") }
+    var endDate by remember(formResetKey) { mutableStateOf(TimeUtils.today()) }
+    var endTime by remember(formResetKey) { mutableStateOf("") }
+    var description by remember(formResetKey) { mutableStateOf("") }
 
     // History filter state
     var selectedCategoryFilter by remember { mutableStateOf("All Categories") }
@@ -98,19 +99,17 @@ fun TimesheetScreen(
     val allTimesheets = (timesheetsState as? Resource.Success)?.data ?: emptyList()
 
     // Calculated time spent preview in Form
-    val calculatedDuration = remember(startTime, endTime) {
-        if (startTime.isNotBlank() && endTime.isNotBlank()) {
-            TimeUtils.calculateTimeSpentMillis(startTime, endTime)
-        } else 0L
+    val calculatedDuration = remember(startDate, startTime, endDate, endTime) {
+        TimeUtils.calculateTimeSpentMillis(startDate, startTime, endDate, endTime)
     }
+    val hasCompleteRange = startDate.isNotBlank() && startTime.isNotBlank() && endDate.isNotBlank() && endTime.isNotBlank()
+    val canSave = selectedCategory.isNotBlank() && hasCompleteRange && calculatedDuration > 0L && !isSaving && !isUploading
 
     // Filtered timesheets in History
     val filteredTimesheets = remember(allTimesheets, selectedCategoryFilter, selectedDatePeriod, searchQuery) {
-        val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        val cal = Calendar.getInstance()
-        cal.set(Calendar.DAY_OF_WEEK, cal.firstDayOfWeek)
-        val startOfWeekStr = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(cal.time)
-        val currentMonthPrefix = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+        val todayStr = TimeUtils.today()
+        val startOfWeekStr = TimeUtils.startOfWeek()
+        val currentMonthPrefix = todayStr.take(7)
 
         allTimesheets.filter { entry ->
             val matchesCategory = selectedCategoryFilter == "All Categories" || entry.category == selectedCategoryFilter
@@ -136,7 +135,7 @@ fun TimesheetScreen(
         DatePickerDialog(
             context,
             { _, year, month, day ->
-                onDateSelected(String.format(Locale.getDefault(), "%04d-%02d-%02d", year, month + 1, day))
+                onDateSelected(String.format(Locale.US, "%04d-%02d-%02d", year, month + 1, day))
             },
             cal.get(Calendar.YEAR),
             cal.get(Calendar.MONTH),
@@ -149,7 +148,7 @@ fun TimesheetScreen(
         TimePickerDialog(
             context,
             { _, hour, minute ->
-                onTimeSelected(String.format(Locale.getDefault(), "%02d:%02d", hour, minute))
+                onTimeSelected(String.format(Locale.US, "%02d:%02d", hour, minute))
             },
             cal.get(Calendar.HOUR_OF_DAY),
             cal.get(Calendar.MINUTE),
@@ -161,21 +160,21 @@ fun TimesheetScreen(
         topBar = {
             Surface(
                 color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(0.5.dp, Slate200)
+                border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Column {
                     TopAppBar(
                         title = {
                             Text(
-                                text = "Timesheet Management",
+                                text = "Timesheet",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Slate900
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         },
                         navigationIcon = {
                             IconButton(onClick = onBackClick) {
-                                Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Slate800, modifier = Modifier.size(22.dp))
+                                Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp))
                             }
                         },
                         actions = {
@@ -200,14 +199,14 @@ fun TimesheetScreen(
                         selectedTabIndex = selectedTabIndex,
                         containerColor = MaterialTheme.colorScheme.surface,
                         contentColor = AceRed,
-                        divider = { HorizontalDivider(color = Slate200) }
+                        divider = { HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant) }
                     ) {
                         Tab(
                             selected = selectedTabIndex == 0,
                             onClick = { selectedTabIndex = 0 },
                             text = {
                                 Text(
-                                    text = "Log New Entry",
+                                    text = "Log entry",
                                     fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Medium,
                                     fontSize = 14.sp
                                 )
@@ -218,7 +217,7 @@ fun TimesheetScreen(
                             onClick = { selectedTabIndex = 1 },
                             text = {
                                 Text(
-                                    text = "Entries & History (${allTimesheets.size})",
+                                    text = "History (${allTimesheets.size})",
                                     fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Medium,
                                     fontSize = 14.sp
                                 )
@@ -233,7 +232,7 @@ fun TimesheetScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Slate50)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             if (selectedTabIndex == 0) {
                 // TAB 0: LOG NEW ENTRY FORM
@@ -248,15 +247,15 @@ fun TimesheetScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        border = BorderStroke(1.dp, Slate200)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                     ) {
                         Column(modifier = Modifier.padding(18.dp)) {
                             Text(
-                                text = "Task Category *",
+                                text = "Category *",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Slate700
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             ExposedDropdownMenuBox(
@@ -303,18 +302,18 @@ fun TimesheetScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        border = BorderStroke(1.dp, Slate200)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                     ) {
                         Column(
                             modifier = Modifier.padding(18.dp),
                             verticalArrangement = Arrangement.spacedBy(14.dp)
                         ) {
                             Text(
-                                text = "Date & Time Boundaries *",
+                                text = "When *",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Slate700
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
 
                             // Start Date & Time Row
@@ -322,34 +321,19 @@ fun TimesheetScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                OutlinedTextField(
+                                PickerField(
                                     value = startDate,
-                                    onValueChange = { startDate = it },
-                                    label = { Text("Start Date") },
-                                    placeholder = { Text("YYYY-MM-DD") },
-                                    trailingIcon = {
-                                        IconButton(onClick = { showDatePicker { startDate = it } }) {
-                                            Icon(Lucide.Calendar, contentDescription = "Pick Start Date", tint = AceRed, modifier = Modifier.size(20.dp))
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp),
-                                    readOnly = true
+                                    label = "Start date",
+                                    icon = Lucide.Calendar,
+                                    onClick = { showDatePicker { startDate = it; if (endDate < it) endDate = it } },
+                                    modifier = Modifier.weight(1f)
                                 )
-
-                                OutlinedTextField(
+                                PickerField(
                                     value = startTime,
-                                    onValueChange = { startTime = it },
-                                    label = { Text("Start Time") },
-                                    placeholder = { Text("HH:MM") },
-                                    trailingIcon = {
-                                        IconButton(onClick = { showTimePicker { startTime = it } }) {
-                                            Icon(Lucide.Clock, contentDescription = "Pick Start Time", tint = AceRed, modifier = Modifier.size(20.dp))
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp),
-                                    readOnly = true
+                                    label = "Start time",
+                                    icon = Lucide.Clock,
+                                    onClick = { showTimePicker { startTime = it } },
+                                    modifier = Modifier.weight(1f)
                                 )
                             }
 
@@ -358,42 +342,43 @@ fun TimesheetScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                OutlinedTextField(
+                                PickerField(
                                     value = endDate,
-                                    onValueChange = { endDate = it },
-                                    label = { Text("End Date") },
-                                    placeholder = { Text("YYYY-MM-DD") },
-                                    trailingIcon = {
-                                        IconButton(onClick = { showDatePicker { endDate = it } }) {
-                                            Icon(Lucide.Calendar, contentDescription = "Pick End Date", tint = AceRed, modifier = Modifier.size(20.dp))
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp),
-                                    readOnly = true
+                                    label = "End date",
+                                    icon = Lucide.Calendar,
+                                    onClick = { showDatePicker { endDate = it } },
+                                    modifier = Modifier.weight(1f)
                                 )
-
-                                OutlinedTextField(
+                                PickerField(
                                     value = endTime,
-                                    onValueChange = { endTime = it },
-                                    label = { Text("End Time") },
-                                    placeholder = { Text("HH:MM") },
-                                    trailingIcon = {
-                                        IconButton(onClick = { showTimePicker { endTime = it } }) {
-                                            Icon(Lucide.Clock, contentDescription = "Pick End Time", tint = AceRed, modifier = Modifier.size(20.dp))
-                                        }
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(12.dp),
-                                    readOnly = true
+                                    label = "End time",
+                                    icon = Lucide.Clock,
+                                    onClick = { showTimePicker { endTime = it } },
+                                    modifier = Modifier.weight(1f)
                                 )
                             }
 
                             // Live Calculated Duration Banner
+                            if (hasCompleteRange && calculatedDuration <= 0L) {
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = MaterialTheme.colorScheme.errorContainer
+                                ) {
+                                    Text(
+                                        text = "End must be after start. Check the dates and times.",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                }
+                            }
                             if (calculatedDuration > 0L) {
                                 Surface(
                                     shape = RoundedCornerShape(10.dp),
-                                    color = AccentEmeraldLight
+                                    color = MaterialTheme.colorScheme.tertiaryContainer
                                 ) {
                                     Row(
                                         modifier = Modifier
@@ -403,16 +388,16 @@ fun TimesheetScreen(
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         Text(
-                                            text = "Calculated Study Duration:",
+                                            text = "Duration",
                                             style = MaterialTheme.typography.bodySmall,
                                             fontWeight = FontWeight.Medium,
-                                            color = AceDarkGreen
+                                            color = MaterialTheme.colorScheme.onTertiaryContainer
                                         )
                                         Text(
-                                            text = TimeUtils.formatDuration(calculatedDuration),
+                                            text = TimeUtils.formatDurationShort(calculatedDuration),
                                             style = MaterialTheme.typography.labelLarge,
                                             fontWeight = FontWeight.Bold,
-                                            color = AceDarkGreen
+                                            color = MaterialTheme.colorScheme.onTertiaryContainer
                                         )
                                     }
                                 }
@@ -424,15 +409,15 @@ fun TimesheetScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        border = BorderStroke(1.dp, Slate200)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                     ) {
                         Column(modifier = Modifier.padding(18.dp)) {
                             Text(
-                                text = "Study Notes & Description",
+                                text = "Notes",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Slate700
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             OutlinedTextField(
@@ -452,8 +437,8 @@ fun TimesheetScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        border = BorderStroke(1.dp, Slate200)
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                     ) {
                         Column(modifier = Modifier.padding(18.dp)) {
                             Row(
@@ -462,10 +447,10 @@ fun TimesheetScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Photo Proof / Notes Evidence",
+                                    text = "Photo (optional)",
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = Slate700
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 if (selectedImageUri != null) {
                                     TextButton(onClick = onRemoveImageClick) {
@@ -510,13 +495,13 @@ fun TimesheetScreen(
                                     onClick = onSelectImageClick,
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp),
-                                    border = BorderStroke(1.dp, Slate300)
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                                 ) {
-                                    Icon(Lucide.Camera, contentDescription = null, tint = Slate700, modifier = Modifier.size(18.dp))
+                                    Icon(Lucide.Camera, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = if (isUploading) "Uploading Photo..." else "Attach Study Proof / Image",
-                                        color = Slate800,
+                                        text = if (isUploading) "Uploading photo…" else "Attach a photo",
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                 }
@@ -540,8 +525,8 @@ fun TimesheetScreen(
                             .fillMaxWidth()
                             .height(50.dp),
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = AceRed),
-                        enabled = !isSaving
+                        colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White),
+                        enabled = canSave
                     ) {
                         if (isSaving) {
                             CircularProgressIndicator(
@@ -552,7 +537,7 @@ fun TimesheetScreen(
                         } else {
                             Icon(Lucide.Save, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Save Timesheet Entry", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                            Text(if (isUploading) "Waiting for photo…" else "Save entry", fontWeight = FontWeight.Bold, fontSize = 15.sp)
                         }
                     }
 
@@ -570,8 +555,8 @@ fun TimesheetScreen(
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
-                        color = Color.White,
-                        border = BorderStroke(1.dp, Slate200)
+                        color = MaterialTheme.colorScheme.surface,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                     ) {
                         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             // Search bar
@@ -579,7 +564,7 @@ fun TimesheetScreen(
                                 value = searchQuery,
                                 onValueChange = { searchQuery = it },
                                 placeholder = { Text("Search by category or notes...") },
-                                leadingIcon = { Icon(Lucide.Search, contentDescription = null, tint = Slate500, modifier = Modifier.size(18.dp)) },
+                                leadingIcon = { Icon(Lucide.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp)) },
                                 trailingIcon = {
                                     if (searchQuery.isNotEmpty()) {
                                         IconButton(onClick = { searchQuery = "" }) {
@@ -599,22 +584,25 @@ fun TimesheetScreen(
                             ) {
                                 DateFilterPeriod.entries.forEach { period ->
                                     val isSelected = selectedDatePeriod == period
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = if (isSelected) AceRed else Slate100,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .clickable { selectedDatePeriod = period }
-                                    ) {
-                                        Text(
-                                            text = period.label,
-                                            modifier = Modifier.padding(vertical = 6.dp),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                            color = if (isSelected) Color.White else Slate700,
-                                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    FilterChip(
+                                        selected = isSelected,
+                                        onClick = { selectedDatePeriod = period },
+                                        label = {
+                                            Text(
+                                                text = period.label,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                                maxLines = 1,
+                                                modifier = Modifier.fillMaxWidth(),
+                                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                            )
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        colors = FilterChipDefaults.filterChipColors(
+                                            selectedContainerColor = AceRed,
+                                            selectedLabelColor = Color.White
                                         )
-                                    }
+                                    )
                                 }
                             }
 
@@ -663,7 +651,7 @@ fun TimesheetScreen(
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
-                        color = Slate900
+                        color = MaterialTheme.colorScheme.primaryContainer
                     ) {
                         Row(
                             modifier = Modifier
@@ -674,30 +662,29 @@ fun TimesheetScreen(
                         ) {
                             Column {
                                 Text(
-                                    text = "FILTERED TOTAL",
+                                    text = "TOTAL",
                                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-                                    color = Slate400,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f),
                                     fontSize = 10.sp
                                 )
                                 Text(
-                                    text = TimeUtils.formatDuration(totalFilteredMillis),
-                                    style = MaterialTheme.typography.titleMedium,
+                                    text = TimeUtils.formatDurationShort(totalFilteredMillis),
+                                    style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
 
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = Slate800,
-                                border = BorderStroke(1.dp, Slate700)
+                                color = MaterialTheme.colorScheme.surface
                             ) {
                                 Text(
-                                    text = "${filteredTimesheets.size} Entries",
+                                    text = if (filteredTimesheets.size == 1) "1 entry" else "${filteredTimesheets.size} entries",
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = Slate200
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
@@ -708,8 +695,8 @@ fun TimesheetScreen(
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(14.dp),
-                            color = Color.White,
-                            border = BorderStroke(1.dp, Slate200)
+                            color = MaterialTheme.colorScheme.surface,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
                         ) {
                             Column(
                                 modifier = Modifier
@@ -718,19 +705,19 @@ fun TimesheetScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Icon(Lucide.Calendar, contentDescription = null, tint = Slate400, modifier = Modifier.size(36.dp))
+                                Icon(Lucide.Calendar, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(36.dp))
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(
                                     text = "No timesheet entries found",
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = Slate700
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
-                                    text = "Try adjusting your filters or log a new study session in the first tab.",
+                                    text = "Try adjusting your filters, or log a new session from the first tab.",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Slate500,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                 )
                             }
@@ -812,6 +799,37 @@ fun TimesheetScreen(
     }
 }
 
+/** Read-only field that opens a picker when tapped anywhere, not just on its icon. */
+@Composable
+private fun PickerField(
+    value: String,
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = {},
+            label = { Text(label) },
+            placeholder = { Text("Tap to pick") },
+            trailingIcon = { Icon(icon, contentDescription = null, tint = AceRed, modifier = Modifier.size(20.dp)) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            singleLine = true,
+            readOnly = true
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .padding(top = 8.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(onClickLabel = "Pick $label", onClick = onClick)
+        )
+    }
+}
+
 @Composable
 fun TimesheetHistoryCard(
     entry: TimesheetEntry,
@@ -821,8 +839,8 @@ fun TimesheetHistoryCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        color = Color.White,
-        border = BorderStroke(1.dp, Slate200)
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             // Header Row: Category Badge, Duration, Delete
@@ -833,14 +851,14 @@ fun TimesheetHistoryCard(
             ) {
                 Surface(
                     shape = RoundedCornerShape(6.dp),
-                    color = AceRedLight
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Text(
                         text = entry.category,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
-                        color = AceRed
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
 
@@ -849,11 +867,11 @@ fun TimesheetHistoryCard(
                         text = TimeUtils.formatDuration(entry.timeSpent),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Slate900
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    IconButton(onClick = onDeleteClick, modifier = Modifier.size(28.dp)) {
-                        Icon(Lucide.Trash2, contentDescription = "Delete", tint = Slate400, modifier = Modifier.size(16.dp))
+                    IconButton(onClick = onDeleteClick) {
+                        Icon(Lucide.Trash2, contentDescription = "Delete entry", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -862,12 +880,16 @@ fun TimesheetHistoryCard(
 
             // Date & Time Row
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Lucide.Clock, contentDescription = null, tint = Slate400, modifier = Modifier.size(14.dp))
+                Icon(Lucide.Clock, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "${entry.startDate} • ${entry.startTime} - ${entry.endTime}",
+                    text = if (entry.endDate.isNotBlank() && entry.endDate != entry.startDate) {
+                        "${entry.startDate} ${entry.startTime} → ${entry.endDate} ${entry.endTime}"
+                    } else {
+                        "${entry.startDate} • ${entry.startTime} – ${entry.endTime}"
+                    },
                     style = MaterialTheme.typography.bodySmall,
-                    color = Slate600
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -877,7 +899,7 @@ fun TimesheetHistoryCard(
                 Text(
                     text = entry.description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Slate700,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 18.sp
                 )
             }
@@ -889,17 +911,17 @@ fun TimesheetHistoryCard(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .clickable(onClick = onImageClick)
-                        .background(Slate100)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Lucide.Image, contentDescription = null, tint = Slate700, modifier = Modifier.size(15.dp))
+                    Icon(Lucide.Image, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(15.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "View Photo Evidence",
+                        text = "View photo",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = Slate800
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }

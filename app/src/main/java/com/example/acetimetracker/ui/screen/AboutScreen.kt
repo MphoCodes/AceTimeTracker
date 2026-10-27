@@ -5,92 +5,69 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import com.composables.icons.lucide.ArrowLeft
-import com.composables.icons.lucide.FileText
-import com.composables.icons.lucide.Folder
-import com.composables.icons.lucide.GraduationCap
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Timer
-import com.composables.icons.lucide.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.composables.icons.lucide.ChartPie
+import com.composables.icons.lucide.FileText
+import com.composables.icons.lucide.Folder
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Target
+import com.composables.icons.lucide.Timer
 import com.example.acetimetracker.R
+import com.example.acetimetracker.ui.components.AceCard
+import com.example.acetimetracker.ui.components.AceTopBar
+import com.example.acetimetracker.ui.components.IconBadge
+import com.example.acetimetracker.ui.components.SectionLabel
 import com.example.acetimetracker.ui.theme.*
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(
     onBackClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val versionName = remember(context) {
+        runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: "1.0"
+    }
+
     Scaffold(
-        topBar = {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(0.5.dp, Slate200)
-            ) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "About AceTimeTracker",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Slate900
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(
-                                imageVector = Lucide.ArrowLeft,
-                                contentDescription = "Back",
-                                tint = Slate800,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
-                )
-            }
-        }
+        topBar = { AceTopBar(title = "About", onBackClick = onBackClick) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Slate50)
+                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 20.dp),
+                .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Authentic AceTimeTracker Logo Display
             Surface(
-                shape = RoundedCornerShape(24.dp),
+                shape = RoundedCornerShape(28.dp),
                 color = Color.White,
-                border = BorderStroke(1.dp, Slate200),
-                shadowElevation = 1.dp,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.acelogo),
-                    contentDescription = "AceTimeTracker Logo",
+                    contentDescription = "AceTimeTracker logo",
                     modifier = Modifier
-                        .size(130.dp)
-                        .padding(16.dp)
+                        .size(112.dp)
+                        .padding(14.dp)
                 )
             }
 
@@ -106,116 +83,83 @@ fun AboutScreen(
                         text = "TimeTracker",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Slate900
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Surface(
                     shape = RoundedCornerShape(100.dp),
-                    color = AceRedLight,
-                    border = BorderStroke(1.dp, AceRed.copy(alpha = 0.2f))
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Text(
-                        text = "Version 1.0 • Study & Task Management",
-                        style = MaterialTheme.typography.labelSmall,
+                        text = "Version $versionName",
+                        style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                        color = AceRed,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            // Authentic Application Purpose & Creator Card
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = Color.White,
-                border = BorderStroke(1.dp, Slate200)
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            shape = CircleShape,
-                            color = AceRedLight,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Lucide.GraduationCap,
-                                    contentDescription = null,
-                                    tint = AceRed,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = "Built for Students & Learners",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Slate900
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
+            AceCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(20.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconBadge(icon = Lucide.Target, tint = AceRed, size = 36.dp)
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "This application was developed with students in mind. It aims to provide a clean, intuitive, and distraction-free interface for tracking study time and managing academic goals efficiently.\n\nDeveloped by Mpho Ndlela.\nWe hope it helps you study better and ACE IT!!",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Slate600,
-                        lineHeight = 22.sp
+                        text = "Small sessions, real progress",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
                     )
                 }
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "AceTimeTracker helps you turn personal goals into steady, repeatable effort. " +
+                        "Whether it's studying, reading, training or a side project, start a timer or log a session, " +
+                        "then watch your hours add up against the goals you set.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 22.sp
+                )
             }
 
-            // Core Capabilities
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text(
-                    text = "CORE CAPABILITIES",
-                    style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-                    fontWeight = FontWeight.Bold,
-                    color = Slate500,
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-
-                AboutFeatureRow(
-                    icon = Lucide.FileText,
-                    title = "Timesheet Hours & Proofs",
-                    description = "Log your daily task hours with photo evidence attachments.",
-                    accentColor = AccentBlue
-                )
+                SectionLabel("What you can do")
 
                 AboutFeatureRow(
                     icon = Lucide.Timer,
-                    title = "Live Stopwatch Timer",
-                    description = "Track task sessions with real-time feedback on goal thresholds.",
+                    title = "Stopwatch & focus timer",
+                    description = "Track live, or use Pomodoro rounds with built-in breaks.",
                     accentColor = AceRed
                 )
-
+                AboutFeatureRow(
+                    icon = Lucide.FileText,
+                    title = "Timesheet",
+                    description = "Log past sessions with notes and an optional photo, then export them.",
+                    accentColor = AccentBlue
+                )
                 AboutFeatureRow(
                     icon = Lucide.Folder,
-                    title = "Category Goals & Limits",
-                    description = "Establish minimum and maximum study target hours per category.",
+                    title = "Categories & goals",
+                    description = "Group your time and set target, minimum and maximum hours.",
                     accentColor = AccentAmber
                 )
-
                 AboutFeatureRow(
-                    icon = Lucide.TrendingUp,
-                    title = "Goal Progress & Distribution",
-                    description = "Monitor actual performance against targets with interactive charts.",
+                    icon = Lucide.ChartPie,
+                    title = "Progress insights",
+                    description = "See weekly goal progress, streaks and where your time goes.",
                     accentColor = AccentEmerald
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "© AceTimeTracker • Developed by Mpho Ndlela",
-                style = MaterialTheme.typography.labelSmall,
-                color = Slate400,
+                text = "Made by Mpho Ndlela",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }
@@ -227,53 +171,38 @@ fun AboutFeatureRow(
     icon: ImageVector,
     title: String,
     description: String,
-    accentColor: Color
+    accentColor: Color,
+    modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = Color.White,
-        border = BorderStroke(1.dp, Slate200)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                shape = RoundedCornerShape(10.dp),
-                color = accentColor.copy(alpha = 0.12f),
-                modifier = Modifier.size(38.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = accentColor,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-            }
-
+    AceCard(modifier = modifier.fillMaxWidth(), contentPadding = PaddingValues(14.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconBadge(icon = icon, tint = accentColor, size = 40.dp)
             Spacer(modifier = Modifier.width(14.dp))
-
             Column {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Slate900
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Slate500,
-                    fontSize = 11.sp,
-                    lineHeight = 15.sp
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
     }
+}
+
+@Preview(name = "Light")
+@Composable
+private fun AboutScreenPreview() {
+    AceTimeTrackerTheme(darkTheme = false) { AboutScreen(onBackClick = {}) }
+}
+
+@Preview(name = "Dark")
+@Composable
+private fun AboutScreenDarkPreview() {
+    AceTimeTrackerTheme(darkTheme = true) { AboutScreen(onBackClick = {}) }
 }

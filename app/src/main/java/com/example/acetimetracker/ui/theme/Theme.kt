@@ -10,6 +10,8 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.example.acetimetracker.data.repository.SettingsRepository
+import com.example.acetimetracker.data.repository.ThemeState
 
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryDark,
@@ -30,7 +32,15 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = OnSurfaceDark,
     surfaceVariant = SurfaceVariantDark,
     onSurfaceVariant = OnSurfaceVariantDark,
-    outline = OutlineDark
+    surfaceContainerLowest = BackgroundDark,
+    surfaceContainerLow = SurfaceDark,
+    surfaceContainer = SurfaceDark,
+    surfaceContainerHigh = SurfaceVariantDark,
+    surfaceContainerHighest = SurfaceVariantDark,
+    outline = OutlineDark,
+    outlineVariant = OutlineVariantDark,
+    inverseSurface = OnSurfaceDark,
+    inverseOnSurface = SurfaceDark
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -52,12 +62,24 @@ private val LightColorScheme = lightColorScheme(
     onSurface = OnSurfaceLight,
     surfaceVariant = SurfaceVariantLight,
     onSurfaceVariant = OnSurfaceVariantLight,
-    outline = OutlineLight
+    surfaceContainerLowest = SurfaceLight,
+    surfaceContainerLow = Slate50,
+    surfaceContainer = SurfaceLight,
+    surfaceContainerHigh = Slate100,
+    surfaceContainerHighest = Slate200,
+    outline = OutlineLight,
+    outlineVariant = OutlineVariantLight,
+    inverseSurface = Slate900,
+    inverseOnSurface = Slate50
 )
 
 @Composable
 fun AceTimeTrackerTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = when (ThemeState.theme) {
+        SettingsRepository.THEME_DARK -> true
+        SettingsRepository.THEME_LIGHT -> false
+        else -> isSystemInDarkTheme()
+    },
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
@@ -67,9 +89,12 @@ fun AceTimeTrackerTheme(
         SideEffect {
             val window = (view.context as? Activity)?.window
             if (window != null) {
-                // Sleek edge status bar with appropriate icon theme
                 window.statusBarColor = colorScheme.surface.toArgb()
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+                window.navigationBarColor = colorScheme.surface.toArgb()
+                WindowCompat.getInsetsController(window, view).apply {
+                    isAppearanceLightStatusBars = !darkTheme
+                    isAppearanceLightNavigationBars = !darkTheme
+                }
             }
         }
     }

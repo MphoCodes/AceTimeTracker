@@ -20,14 +20,17 @@ class GraphActivity : ComponentActivity() {
         setContent {
             AceTimeTrackerTheme {
                 val chartDataState by viewModel.chartDataState.observeAsState()
+                val categoriesState by viewModel.categoriesState.observeAsState()
 
                 GraphScreen(
                     chartDataState = chartDataState,
+                    categoriesState = categoriesState,
                     onBackClick = { finish() }
                 )
             }
         }
 
         viewModel.loadChartData()
+        viewModel.loadCategories()
     }
 }

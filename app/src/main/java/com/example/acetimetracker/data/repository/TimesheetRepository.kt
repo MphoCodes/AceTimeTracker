@@ -3,7 +3,6 @@ package com.example.acetimetracker.data.repository
 import android.net.Uri
 import com.example.acetimetracker.data.model.TimesheetEntry
 import com.example.acetimetracker.util.Resource
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
@@ -54,6 +53,9 @@ class TimesheetRepository(
         )
     }
 
+    private fun List<TimesheetEntry>.newestFirst(): List<TimesheetEntry> =
+        sortedWith(compareByDescending<TimesheetEntry> { it.startDate }.thenByDescending { it.startTime })
+
     fun uploadImage(imageUri: Uri, onResult: (Resource<String>) -> Unit) {
         onResult(Resource.Loading)
         try {
@@ -101,20 +103,8 @@ class TimesheetRepository(
         val timesheetDocRef = firestore.collection("timesheetEntries").document()
         val entryWithId = entry.copy(id = timesheetDocRef.id, userId = userId)
 
-        val totalHoursWorked = entry.timeSpent / (1000.0 * 60.0 * 60.0)
-
-        val dailySummary = hashMapOf(
-            "date" to entry.startDate,
-            "totalHours" to totalHoursWorked,
-            "category" to entry.category,
-            "userId" to userId
-        )
-
         timesheetDocRef.set(entryWithId)
             .addOnSuccessListener {
-                firestore.collection("users").document(userId)
-                    .update("dailyTimesheetEntries", FieldValue.arrayUnion(dailySummary))
-
                 onResult(Resource.Success(Unit))
             }
             .addOnFailureListener { exception ->
@@ -130,7 +120,7 @@ class TimesheetRepository(
 
         // Offline test mode bypass
         if (userId == AuthRepository.TEST_USER_ID) {
-            onResult(Resource.Success(mockTimesheets.toList()))
+            onResult(Resource.Success(mockTimesheets.newestFirst()))
             return
         }
 
@@ -140,7 +130,7 @@ class TimesheetRepository(
             .get()
             .addOnSuccessListener { snapshot ->
                 val entries = snapshot.documents.mapNotNull { it.toObject(TimesheetEntry::class.java) }
-                onResult(Resource.Success(entries))
+                onResult(Resource.Success(entries.newestFirst()))
             }
             .addOnFailureListener { exception ->
                 onResult(Resource.Error(exception.localizedMessage ?: "Failed to fetch timesheets", exception))
@@ -164,7 +154,7 @@ class TimesheetRepository(
             } else {
                 mockTimesheets.filter { it.category == category }
             }
-            onResult(Resource.Success(filtered))
+            onResult(Resource.Success(filtered.newestFirst()))
             return
         }
 
@@ -180,7 +170,7 @@ class TimesheetRepository(
         query.get()
             .addOnSuccessListener { snapshot ->
                 val entries = snapshot.documents.mapNotNull { it.toObject(TimesheetEntry::class.java) }
-                onResult(Resource.Success(entries))
+                onResult(Resource.Success(entries.newestFirst()))
             }
             .addOnFailureListener { exception ->
                 onResult(Resource.Error(exception.localizedMessage ?: "Failed to fetch timesheets by category", exception))
@@ -193,35 +183,16 @@ class TimesheetRepository(
             return
         }
 
-        // Offline test mode bypass
-        if (userId == AuthRepository.TEST_USER_ID) {
-            val categoryTimeMap = mutableMapOf<String, Float>()
-            mockTimesheets.forEach { entry ->
-                val hours = (entry.timeSpent / (1000f * 60f * 60f))
-                categoryTimeMap[entry.category] = (categoryTimeMap[entry.category] ?: 0f) + hours
-            }
-            onResult(Resource.Success(categoryTimeMap))
-            return
-        }
-
-        onResult(Resource.Loading)
-        firestore.collection("users").document(userId)
-            .get()
-            .addOnSuccessListener { document ->
-                @Suppress("UNCHECKED_CAST")
-                val dailyTimesheetEntries = document.get("dailyTimesheetEntries") as? List<Map<String, Any>>
-                val categoryTimeMap = mutableMapOf<String, Float>()
-
-                dailyTimesheetEntries?.forEach { entry ->
-                    val cat = entry["category"] as? String ?: return@forEach
-                    val hours = (entry["totalHours"] as? Number)?.toFloat() ?: return@forEach
-                    categoryTimeMap[cat] = (categoryTimeMap[cat] ?: 0f) + hours
+        // Derived from the saved entries themselves so deletions and edits are always reflected.
+        fetchTimesheets(userId) { result ->
+            onResult(
+                when (result) {
+                    is Resource.Success -> Resource.Success(TimesheetStats.hoursByCategory(result.data))
+                    is Resource.Error -> result
+                    Resource.Loading -> Resource.Loading
                 }
-                onResult(Resource.Success(categoryTimeMap))
-            }
-            .addOnFailureListener { exception ->
-                onResult(Resource.Error(exception.localizedMessage ?: "Failed to fetch chart data", exception))
-            }
+            )
+        }
     }
 
     fun deleteTimesheetEntry(userId: String, entryId: String, onResult: (Resource<Unit>) -> Unit) {

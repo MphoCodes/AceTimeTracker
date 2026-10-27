@@ -68,7 +68,8 @@ val SurfaceLight = Color.White
 val OnSurfaceLight = Slate900
 val SurfaceVariantLight = Slate100
 val OnSurfaceVariantLight = Slate600
-val OutlineLight = Slate200
+val OutlineLight = Slate300
+val OutlineVariantLight = Slate200
 
 // Material 3 Color Roles (Dark)
 val PrimaryDark = Color(0xFFF87171)
@@ -92,7 +93,8 @@ val SurfaceDark = Color(0xFF18181B)
 val OnSurfaceDark = Color(0xFFF4F4F5)
 val SurfaceVariantDark = Color(0xFF27272A)
 val OnSurfaceVariantDark = Color(0xFFA1A1AA)
-val OutlineDark = Color(0xFF27272A)
+val OutlineDark = Color(0xFF52525B)
+val OutlineVariantDark = Color(0xFF3F3F46)
 
 // Status & Progress Feedback Colors
 val SuccessGreen = AccentEmerald

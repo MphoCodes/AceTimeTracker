@@ -1,7 +1,6 @@
 package com.example.acetimetracker.ui.activity
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.acetimetracker.data.repository.SettingsRepository
@@ -26,12 +25,8 @@ class SettingsActivity : ComponentActivity() {
                     currentTheme = currentTheme,
                     initialNotificationsEnabled = notificationsEnabled,
                     onBackClick = { finish() },
-                    onSaveSettings = { theme, notifications ->
-                        settingsRepository.saveTheme(theme)
-                        settingsRepository.saveNotificationsEnabled(notifications)
-                        settingsRepository.applyTheme(theme)
-                        Toast.makeText(this, "Settings saved!", Toast.LENGTH_SHORT).show()
-                    }
+                    onThemeChange = { theme -> settingsRepository.saveTheme(theme) },
+                    onNotificationsChange = { enabled -> settingsRepository.saveNotificationsEnabled(enabled) }
                 )
             }
         }

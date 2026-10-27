@@ -1,67 +1,61 @@
 package com.example.acetimetracker.ui.screen
 
-import android.graphics.Color as AndroidColor
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.composables.icons.lucide.ArrowLeft
-import com.composables.icons.lucide.ChartPie
-import com.composables.icons.lucide.Lucide
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
+import com.composables.icons.lucide.ChartPie
+import com.composables.icons.lucide.Lucide
+import com.example.acetimetracker.data.model.Category
+import com.example.acetimetracker.ui.components.AceCard
+import com.example.acetimetracker.ui.components.AceTopBar
+import com.example.acetimetracker.ui.components.EmptyState
+import com.example.acetimetracker.ui.components.SectionLabel
 import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
-import com.github.mikephil.charting.charts.PieChart
-import com.github.mikephil.charting.data.PieData
-import com.github.mikephil.charting.data.PieDataSet
-import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.formatter.PercentFormatter
-import com.github.mikephil.charting.utils.ColorTemplate
+import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+/** Fallback colours for categories that no longer exist or have no stored colour. */
+private val fallbackPalette = listOf(AceRed, AccentBlue, AccentEmerald, AccentAmber, AccentIndigo, Color(0xFFEC4899))
+
 @Composable
 fun GraphScreen(
     chartDataState: Resource<Map<String, Float>>?,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    categoriesState: Resource<List<Category>>? = null
 ) {
     val categoryTimeMap = (chartDataState as? Resource.Success)?.data ?: emptyMap()
+    val categories = (categoriesState as? Resource.Success)?.data ?: emptyList()
     val totalHours = categoryTimeMap.values.sum()
 
-    Scaffold(
-        topBar = {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(0.5.dp, Slate200)
-            ) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "Visual Analytics",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Slate900
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Slate800, modifier = Modifier.size(22.dp))
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
-                )
-            }
+    val slices = remember(categoryTimeMap, categories) {
+        categoryTimeMap.entries.mapIndexed { index, (name, hours) ->
+            val color = categories.find { it.name == name }?.colorHex?.let { parseHexColor(it) }
+                ?: fallbackPalette[index % fallbackPalette.size]
+            Triple(name, hours, color)
         }
+    }
+
+    Scaffold(
+        topBar = { AceTopBar(title = "Time breakdown", subtitle = "All time", onBackClick = onBackClick) }
     ) { paddingValues ->
         Box(
             modifier = Modifier
@@ -70,165 +64,134 @@ fun GraphScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             when {
-                chartDataState is Resource.Loading -> {
+                chartDataState == null || chartDataState is Resource.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = AceRed)
                 }
-                categoryTimeMap.isEmpty() -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = AceRedLight.copy(alpha = 0.5f),
-                            modifier = Modifier.size(72.dp)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Lucide.ChartPie,
-                                    contentDescription = null,
-                                    tint = AceRed,
-                                    modifier = Modifier.size(36.dp)
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "No analytics data yet",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Log timesheet entries to visualize your productivity breakdown.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                chartDataState is Resource.Error -> {
+                    EmptyState(
+                        icon = Lucide.ChartPie,
+                        title = "Couldn't load your data",
+                        message = chartDataState.message,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                categoryTimeMap.isEmpty() || totalHours <= 0f -> {
+                    EmptyState(
+                        icon = Lucide.ChartPie,
+                        title = "No data yet",
+                        message = "Log some time and you'll see how it splits across your categories.",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Pie Chart Card
                         item {
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(16.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Text(
-                                        text = "Time Distribution Across Categories",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-
-                                    Spacer(modifier = Modifier.height(16.dp))
-
-                                    AndroidView(
+                            AceCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(24.dp)) {
+                                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                    DonutChart(
+                                        slices = slices.map { it.second to it.third },
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(260.dp),
-                                        factory = { ctx ->
-                                            PieChart(ctx).apply {
-                                                setUsePercentValues(true)
-                                                description.isEnabled = false
-                                                centerText = "Time Spent"
-                                                setEntryLabelColor(AndroidColor.BLACK)
-                                                setEntryLabelTextSize(11f)
-                                                legend.isEnabled = true
-                                                holeRadius = 42f
-                                                transparentCircleRadius = 48f
+                                            .size(220.dp)
+                                            .semantics {
+                                                contentDescription = slices.joinToString { (name, hours, _) ->
+                                                    "$name ${percentOf(hours, totalHours)} percent"
+                                                }
                                             }
-                                        },
-                                        update = { chart ->
-                                            val entries = categoryTimeMap.map { (cat, hours) ->
-                                                PieEntry(hours, cat)
-                                            }
-                                            val dataSet = PieDataSet(entries, "").apply {
-                                                colors = ColorTemplate.MATERIAL_COLORS.toList()
-                                                valueTextColor = AndroidColor.BLACK
-                                                valueTextSize = 11f
-                                            }
-                                            val pieData = PieData(dataSet).apply {
-                                                setValueFormatter(PercentFormatter(chart))
-                                                setValueTextSize(11f)
-                                                setValueTextColor(AndroidColor.BLACK)
-                                            }
-                                            chart.data = pieData
-                                            chart.invalidate()
-                                        }
                                     )
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = formatHours(totalHours),
+                                            style = MaterialTheme.typography.headlineMedium,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Text(
+                                            text = "total",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         }
 
-                        // Category Breakdown header
-                        item {
-                            Text(
-                                text = "Category Breakdown",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        item { SectionLabel("Categories", modifier = Modifier.padding(top = 4.dp)) }
 
-                        // Breakdown Items
-                        items(categoryTimeMap.toList()) { (category, hours) ->
-                            val percentage = if (totalHours > 0f) (hours / totalHours * 100).toInt() else 0
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-                            ) {
-                                Row(
+                        items(slices, key = { it.first }) { (category, hours, color) ->
+                            val pct = percentOf(hours, totalHours)
+                            AceCard(modifier = Modifier.fillMaxWidth()) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(12.dp)
+                                            .clip(CircleShape)
+                                            .background(color)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = category,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    Text(
+                                        text = formatHours(hours),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = "$pct%",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.widthIn(min = 40.dp)
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                LinearProgressIndicator(
+                                    progress = { hours / totalHours },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(16.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Column {
-                                        Text(
-                                            text = category,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                        Text(
-                                            text = String.format("%.1f hours", hours),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-
-                                    Surface(
-                                        shape = RoundedCornerShape(8.dp),
-                                        color = AceRedLight.copy(alpha = 0.5f)
-                                    ) {
-                                        Text(
-                                            text = "$percentage%",
-                                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                            style = MaterialTheme.typography.labelLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            color = AceRed
-                                        )
-                                    }
-                                }
+                                        .height(6.dp)
+                                        .clip(RoundedCornerShape(3.dp)),
+                                    color = color,
+                                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+private fun percentOf(part: Float, total: Float): Int =
+    if (total > 0f) String.format(Locale.US, "%.0f", part / total * 100).toInt() else 0
+
+@Composable
+private fun DonutChart(slices: List<Pair<Float, Color>>, modifier: Modifier = Modifier) {
+    val sweep = remember { Animatable(0f) }
+    LaunchedEffect(slices) { sweep.animateTo(1f, tween(durationMillis = 700)) }
+    val total = slices.sumOf { it.first.toDouble() }.toFloat()
+    val gapColor = MaterialTheme.colorScheme.surface
+
+    Canvas(modifier = modifier) {
+        val stroke = 28.dp.toPx()
+        val inset = stroke / 2
+        val arcSize = Size(size.width - stroke, size.height - stroke)
+        val topLeft = Offset(inset, inset)
+        var start = -90f
+        slices.forEach { (value, color) ->
+            val angle = if (total > 0f) value / total * 360f * sweep.value else 0f
+            drawArc(color, start, angle, false, topLeft, arcSize, style = Stroke(stroke))
+            if (slices.size > 1) {
+                drawArc(gapColor, start + angle - 0.8f, 1.6f, false, topLeft, arcSize, style = Stroke(stroke))
+            }
+            start += angle
         }
     }
 }

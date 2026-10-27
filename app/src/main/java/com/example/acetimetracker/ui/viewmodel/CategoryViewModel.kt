@@ -47,8 +47,24 @@ class CategoryViewModel(
             return
         }
 
-        if (name.isBlank() || description.isBlank() || goal == null || minGoal == null || maxGoal == null) {
-            _addCategoryState.value = Resource.Error("Please fill in all category fields")
+        if (name.isBlank()) {
+            _addCategoryState.value = Resource.Error("Please enter a category name")
+            return
+        }
+
+        if (listOfNotNull(goal, minGoal, maxGoal).any { it < 0f }) {
+            _addCategoryState.value = Resource.Error("Goals can't be negative")
+            return
+        }
+
+        if (minGoal != null && maxGoal != null && minGoal > maxGoal) {
+            _addCategoryState.value = Resource.Error("Minimum goal can't be more than the maximum")
+            return
+        }
+
+        val existing = (_categoriesState.value as? Resource.Success)?.data.orEmpty()
+        if (existing.any { it.name.equals(name.trim(), ignoreCase = true) }) {
+            _addCategoryState.value = Resource.Error("A category named '${name.trim()}' already exists")
             return
         }
 

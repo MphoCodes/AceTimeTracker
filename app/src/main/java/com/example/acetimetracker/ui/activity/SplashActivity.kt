@@ -27,7 +27,8 @@ import com.example.acetimetracker.ui.theme.AceTimeTrackerTheme
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : ComponentActivity() {
 
-    private val splashDelay: Long = 1800
+    // Brief brand moment only; long forced waits delay people who just want to start tracking.
+    private val splashDelay: Long = 700
     private val handler = Handler(Looper.getMainLooper())
     private val authRepository = AuthRepository()
 

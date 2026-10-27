@@ -1,34 +1,45 @@
 package com.example.acetimetracker.ui.screen
 
-import androidx.compose.foundation.BorderStroke
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import com.composables.icons.lucide.ArrowLeft
-import com.composables.icons.lucide.Folder
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.composables.icons.lucide.Check
+import com.composables.icons.lucide.Coffee
+import com.composables.icons.lucide.Flame
+import com.composables.icons.lucide.FolderPlus
 import com.composables.icons.lucide.Hourglass
 import com.composables.icons.lucide.Lucide
 import com.composables.icons.lucide.Pause
 import com.composables.icons.lucide.Play
 import com.composables.icons.lucide.RotateCcw
-import com.composables.icons.lucide.Save
 import com.composables.icons.lucide.SkipForward
 import com.composables.icons.lucide.Timer
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.acetimetracker.data.model.Category
+import com.example.acetimetracker.ui.components.AceCard
+import com.example.acetimetracker.ui.components.AceTopBar
+import com.example.acetimetracker.ui.components.SectionLabel
 import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
 import com.example.acetimetracker.util.TimeUtils
@@ -50,176 +61,291 @@ fun TimerScreen(
     categoriesState: Resource<List<Category>>?,
     mode: TimerMode,
     onModeChange: (TimerMode) -> Unit,
-    // Stopwatch parameters
+    // Stopwatch
     stopwatchElapsedTime: Long,
     isStopwatchRunning: Boolean,
     onToggleStopwatch: () -> Unit,
     onResetStopwatch: () -> Unit,
-    onSaveGoalsAndTime: (category: String, minGoal: Float, maxGoal: Float) -> Unit,
-    // Pomodoro parameters
+    // Pomodoro
     pomodoroPhase: PomodoroPhase,
     pomodoroRemainingTime: Long,
     pomodoroTotalPhaseDuration: Long,
+    pomodoroFocusMinutes: Int,
     isPomodoroRunning: Boolean,
     pomodoroRoundsCompleted: Int,
+    pomodoroFocusLogged: Long,
     onTogglePomodoro: () -> Unit,
     onResetPomodoro: () -> Unit,
     onSkipPomodoroPhase: () -> Unit,
     onSelectPomodoroPreset: (focusMinutes: Int, breakMinutes: Int) -> Unit,
-    onSavePomodoroSession: (category: String) -> Unit,
     // Common
     selectedCategory: String,
     onSelectCategory: (String) -> Unit,
+    isSaving: Boolean,
+    onSaveSession: () -> Unit,
+    message: String?,
+    onMessageShown: () -> Unit,
+    onCreateCategoryClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
-    var categoryExpanded by remember { mutableStateOf(false) }
-    var minGoalText by remember { mutableStateOf("1.0") }
-    var maxGoalText by remember { mutableStateOf("4.0") }
-
     val categories = (categoriesState as? Resource.Success)?.data ?: emptyList()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val isRunning = isStopwatchRunning || isPomodoroRunning
+    val unsaved = if (mode == TimerMode.STOPWATCH) stopwatchElapsedTime else pomodoroFocusLogged
+    var showLeaveDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(message) {
+        if (message != null) {
+            snackbarHostState.showSnackbar(message)
+            onMessageShown()
+        }
+    }
+
+    // Leaving discards in-progress time, so confirm first.
+    BackHandler(enabled = isRunning || unsaved >= 1000L) { showLeaveDialog = true }
+    val requestBack = { if (isRunning || unsaved >= 1000L) showLeaveDialog = true else onBackClick() }
 
     Scaffold(
-        topBar = {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(0.5.dp, Slate200)
-            ) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = if (mode == TimerMode.STOPWATCH) "Stopwatch Timer" else "Pomodoro Focus",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Slate900
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Slate800, modifier = Modifier.size(22.dp))
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
-                )
-            }
-        }
+        topBar = { AceTopBar(title = "Timer", onBackClick = requestBack) },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Tab Selector
-            TabRow(
-                selectedTabIndex = if (mode == TimerMode.STOPWATCH) 0 else 1,
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = AceRed
-            ) {
-                Tab(
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                SegmentedButton(
                     selected = mode == TimerMode.STOPWATCH,
                     onClick = { onModeChange(TimerMode.STOPWATCH) },
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Lucide.Timer, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Stopwatch", fontWeight = FontWeight.Bold)
-                        }
-                    }
-                )
-                Tab(
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                    icon = { Icon(Lucide.Timer, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                    colors = segmentedColors()
+                ) { Text("Stopwatch") }
+                SegmentedButton(
                     selected = mode == TimerMode.POMODORO,
                     onClick = { onModeChange(TimerMode.POMODORO) },
-                    text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Lucide.Hourglass, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Pomodoro Focus", fontWeight = FontWeight.Bold)
-                        }
-                    }
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                    icon = { Icon(Lucide.Hourglass, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                    colors = segmentedColors()
+                ) { Text("Focus") }
+            }
+
+            CategoryPicker(
+                categories = categories,
+                isLoading = categoriesState is Resource.Loading,
+                selected = selectedCategory,
+                onSelect = onSelectCategory,
+                onCreateCategoryClick = onCreateCategoryClick
+            )
+
+            val selectedGoalHours = categories.find { it.name == selectedCategory }?.goal
+
+            if (mode == TimerMode.STOPWATCH) {
+                StopwatchView(
+                    elapsedTime = stopwatchElapsedTime,
+                    isRunning = isStopwatchRunning,
+                    goalHours = selectedGoalHours,
+                    onToggleStartStop = onToggleStopwatch,
+                    onReset = onResetStopwatch
+                )
+            } else {
+                PomodoroView(
+                    phase = pomodoroPhase,
+                    remainingTime = pomodoroRemainingTime,
+                    totalPhaseDuration = pomodoroTotalPhaseDuration,
+                    focusMinutes = pomodoroFocusMinutes,
+                    isRunning = isPomodoroRunning,
+                    roundsCompleted = pomodoroRoundsCompleted,
+                    focusLogged = pomodoroFocusLogged,
+                    onToggleStartStop = onTogglePomodoro,
+                    onReset = onResetPomodoro,
+                    onSkipPhase = onSkipPomodoroPhase,
+                    onSelectPreset = onSelectPomodoroPreset
                 )
             }
 
-            Column(
+            Button(
+                onClick = onSaveSession,
+                enabled = !isSaving && unsaved >= 1000L && selectedCategory.isNotBlank(),
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(18.dp)
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White)
             ) {
-                // Category Selector (Shared)
-                ExposedDropdownMenuBox(
-                    expanded = categoryExpanded,
-                    onExpandedChange = { categoryExpanded = !categoryExpanded },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    OutlinedTextField(
-                        value = if (selectedCategory.isNotEmpty()) selectedCategory else "Select Category to Track",
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Category") },
-                        leadingIcon = { Icon(Lucide.Folder, contentDescription = null, tint = AceOrange, modifier = Modifier.size(20.dp)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-
-                    ExposedDropdownMenu(
-                        expanded = categoryExpanded,
-                        onDismissRequest = { categoryExpanded = false }
-                    ) {
-                        categories.forEach { cat ->
-                            DropdownMenuItem(
-                                text = { Text(cat.name, fontWeight = FontWeight.Medium) },
-                                onClick = {
-                                    onSelectCategory(cat.name)
-                                    categoryExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-
-                if (mode == TimerMode.STOPWATCH) {
-                    // STOPWATCH CONTENT
-                    StopwatchView(
-                        elapsedTime = stopwatchElapsedTime,
-                        isRunning = isStopwatchRunning,
-                        minGoalText = minGoalText,
-                        maxGoalText = maxGoalText,
-                        onMinGoalChange = { minGoalText = it },
-                        onMaxGoalChange = { maxGoalText = it },
-                        onToggleStartStop = onToggleStopwatch,
-                        onReset = onResetStopwatch,
-                        onSaveSession = {
-                            val min = minGoalText.toFloatOrNull()
-                            val max = maxGoalText.toFloatOrNull()
-                            if (min != null && max != null) {
-                                onSaveGoalsAndTime(selectedCategory, min, max)
-                            }
-                        }
-                    )
+                if (isSaving) {
+                    CircularProgressIndicator(modifier = Modifier.size(22.dp), color = Color.White, strokeWidth = 2.dp)
                 } else {
-                    // POMODORO CONTENT
-                    PomodoroView(
-                        phase = pomodoroPhase,
-                        remainingTime = pomodoroRemainingTime,
-                        totalPhaseDuration = pomodoroTotalPhaseDuration,
-                        isRunning = isPomodoroRunning,
-                        roundsCompleted = pomodoroRoundsCompleted,
-                        onToggleStartStop = onTogglePomodoro,
-                        onReset = onResetPomodoro,
-                        onSkipPhase = onSkipPomodoroPhase,
-                        onSelectPreset = onSelectPomodoroPreset,
-                        onSaveSession = { onSavePomodoroSession(selectedCategory) }
+                    Icon(Lucide.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = when {
+                            selectedCategory.isBlank() -> "Pick a category to save"
+                            unsaved < 1000L -> "Save session"
+                            else -> "Save ${TimeUtils.formatDurationShort(unsaved).let { if (it == "0m") "<1m" else it }} to $selectedCategory"
+                        },
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
                     )
                 }
             }
         }
+    }
+
+    if (showLeaveDialog) {
+        AlertDialog(
+            onDismissRequest = { showLeaveDialog = false },
+            title = { Text("Leave without saving?") },
+            text = { Text("You have ${TimeUtils.formatDurationShort(unsaved).let { if (it == "0m") "less than a minute" else it }} that hasn't been saved. Leaving will discard it.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showLeaveDialog = false
+                    onBackClick()
+                }) { Text("Discard", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLeaveDialog = false }) { Text("Keep timing") }
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun segmentedColors() = SegmentedButtonDefaults.colors(
+    activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+    activeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    activeBorderColor = MaterialTheme.colorScheme.outlineVariant,
+    inactiveBorderColor = MaterialTheme.colorScheme.outlineVariant
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryPicker(
+    categories: List<Category>,
+    isLoading: Boolean,
+    selected: String,
+    onSelect: (String) -> Unit,
+    onCreateCategoryClick: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SectionLabel("What are you working on?")
+        when {
+            isLoading -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = AceRed)
+            categories.isEmpty() -> AceCard(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    "Create a category so your tracked time has somewhere to go.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                FilledTonalButton(onClick = onCreateCategoryClick) {
+                    Icon(Lucide.FolderPlus, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("Create category")
+                }
+            }
+            else -> Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                categories.forEach { cat ->
+                    val color = parseHexColor(cat.colorHex)
+                    val isSelected = cat.name == selected
+                    FilterChip(
+                        selected = isSelected,
+                        onClick = { onSelect(cat.name) },
+                        label = { Text(cat.name, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium) },
+                        leadingIcon = {
+                            Box(
+                                modifier = Modifier
+                                    .size(10.dp)
+                                    .clip(CircleShape)
+                                    .background(color)
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = color.copy(alpha = 0.18f),
+                            selectedLabelColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            enabled = true,
+                            selected = isSelected,
+                            selectedBorderColor = color,
+                            selectedBorderWidth = 1.5.dp
+                        ),
+                        modifier = Modifier.height(40.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Circular progress ring with arbitrary centered content. */
+@Composable
+private fun TimerRing(
+    progress: Float,
+    color: Color,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val animated by animateFloatAsState(targetValue = progress.coerceIn(0f, 1f), label = "ring")
+    val track = MaterialTheme.colorScheme.surfaceVariant
+    Box(modifier = modifier.size(260.dp), contentAlignment = Alignment.Center) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val stroke = 14.dp.toPx()
+            val inset = stroke / 2
+            val arcSize = androidx.compose.ui.geometry.Size(size.width - stroke, size.height - stroke)
+            val topLeft = androidx.compose.ui.geometry.Offset(inset, inset)
+            drawArc(track, 0f, 360f, false, topLeft, arcSize, style = Stroke(stroke))
+            drawArc(color, -90f, 360f * animated, false, topLeft, arcSize, style = Stroke(stroke, cap = StrokeCap.Round))
+        }
+        Column(horizontalAlignment = Alignment.CenterHorizontally, content = content)
+    }
+}
+
+@Composable
+private fun TimerControls(
+    isRunning: Boolean,
+    accent: Color,
+    onToggle: () -> Unit,
+    onReset: () -> Unit,
+    resetLabel: String,
+    trailing: (@Composable () -> Unit)?
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FilledTonalIconButton(onClick = onReset, modifier = Modifier.size(56.dp)) {
+            Icon(Lucide.RotateCcw, contentDescription = resetLabel, modifier = Modifier.size(22.dp))
+        }
+        Spacer(modifier = Modifier.width(28.dp))
+        LargeFloatingActionButton(
+            onClick = onToggle,
+            shape = CircleShape,
+            containerColor = accent,
+            contentColor = Color.White
+        ) {
+            Icon(
+                imageVector = if (isRunning) Lucide.Pause else Lucide.Play,
+                contentDescription = if (isRunning) "Pause" else "Start",
+                modifier = Modifier.size(36.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(28.dp))
+        if (trailing != null) trailing() else Spacer(modifier = Modifier.size(56.dp))
     }
 }
 
@@ -227,400 +353,141 @@ fun TimerScreen(
 fun StopwatchView(
     elapsedTime: Long,
     isRunning: Boolean,
-    minGoalText: String,
-    maxGoalText: String,
-    onMinGoalChange: (String) -> Unit,
-    onMaxGoalChange: (String) -> Unit,
+    goalHours: Float?,
     onToggleStartStop: () -> Unit,
-    onReset: () -> Unit,
-    onSaveSession: () -> Unit
+    onReset: () -> Unit
 ) {
-    val minGoal = minGoalText.toFloatOrNull()
-    val maxGoal = maxGoalText.toFloatOrNull()
-    val currentHours = elapsedTime / (1000f * 60f * 60f)
+    val goalMs = goalHours?.takeIf { it > 0f }?.let { (it * 60 * 60 * 1000).toLong() }
+    val progress = if (goalMs != null) elapsedTime.toFloat() / goalMs else if (elapsedTime > 0) 1f else 0f
+    val ringColor = if (goalMs != null && elapsedTime >= goalMs) AccentEmerald else AceRed
+    val timeText = TimeUtils.formatDuration(elapsedTime)
 
-    val feedbackMessage: String
-    val feedbackBgColor: Color
-    val feedbackTextColor: Color
-
-    if (minGoal != null && maxGoal != null && elapsedTime > 0L) {
-        when {
-            currentHours >= maxGoal -> {
-                feedbackMessage = "🎉 Maximum goal reached! Outstanding work!"
-                feedbackBgColor = AceLightGreen
-                feedbackTextColor = AceDarkGreen
-            }
-            currentHours >= minGoal -> {
-                feedbackMessage = "✅ On track with your goal! Keep going!"
-                feedbackBgColor = AceLightGreen
-                feedbackTextColor = AceDarkGreen
-            }
-            else -> {
-                feedbackMessage = "⏳ Behind minimum goal. Keep pushing!"
-                feedbackBgColor = AceLightYellow
-                feedbackTextColor = Color(0xFF7A5800)
-            }
-        }
-    } else {
-        feedbackMessage = "Set your goals and start tracking to receive live progress feedback."
-        feedbackBgColor = AceLightBlue
-        feedbackTextColor = AceDarkBlue
-    }
-
-    // Hero Stopwatch Display
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isRunning) AceRedLight.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surface
-        ),
-        border = BorderStroke(1.dp, Slate200),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    TimerRing(
+        progress = progress,
+        color = ringColor,
+        modifier = Modifier.semantics { contentDescription = "Elapsed $timeText" }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(28.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = TimeUtils.formatDuration(elapsedTime),
-                style = MaterialTheme.typography.displayLarge.copy(
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 46.sp
-                ),
-                color = AceRed
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = if (isRunning) "● ACTIVE SESSION" else "PAUSED",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = if (isRunning) AceRed else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-
-    // Controls - Centered with symmetric balancing
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(
-            onClick = onReset,
-            modifier = Modifier
-                .size(52.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-        ) {
-            Icon(
-                imageVector = Lucide.RotateCcw,
-                contentDescription = "Reset Timer",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(22.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(28.dp))
-
-        FloatingActionButton(
-            onClick = onToggleStartStop,
-            modifier = Modifier.size(74.dp),
-            shape = CircleShape,
-            containerColor = if (isRunning) Color(0xFFC62828) else AceRed,
-            contentColor = Color.White,
-            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
-        ) {
-            Icon(
-                imageVector = if (isRunning) Lucide.Pause else Lucide.Play,
-                contentDescription = if (isRunning) "Pause" else "Start",
-                modifier = Modifier.size(34.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(28.dp))
-
-        // Balance spacer ensuring the Start/Pause FAB is centered
-        Spacer(modifier = Modifier.size(52.dp))
-    }
-
-    // Goals Card
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        border = BorderStroke(1.dp, Slate200),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Text(
-                text = "Session Goals",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = minGoalText,
-                    onValueChange = onMinGoalChange,
-                    label = { Text("Min Goal (h)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(10.dp)
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                OutlinedTextField(
-                    value = maxGoalText,
-                    onValueChange = onMaxGoalChange,
-                    label = { Text("Max Goal (h)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(10.dp)
-                )
-            }
-
-            Surface(
-                shape = RoundedCornerShape(10.dp),
-                color = feedbackBgColor,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = feedbackMessage,
-                    modifier = Modifier.padding(14.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = feedbackTextColor
-                )
-            }
-        }
-    }
-
-    Button(
-        onClick = onSaveSession,
-        enabled = minGoal != null && maxGoal != null && minGoal <= maxGoal,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = AceRed,
-            contentColor = Color.White
+        Text(
+            text = timeText,
+            style = MaterialTheme.typography.displaySmall.copy(fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 40.sp),
+            color = MaterialTheme.colorScheme.onSurface
         )
-    ) {
-        Icon(Lucide.Save, contentDescription = null, modifier = Modifier.size(18.dp))
-        Spacer(modifier = Modifier.width(8.dp))
-        Text("Save Stopwatch Session", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = when {
+                goalMs == null -> if (isRunning) "Tracking…" else if (elapsedTime > 0) "Paused" else "Ready"
+                elapsedTime >= goalMs -> "Goal reached"
+                else -> "of ${formatHours(goalHours)} goal"
+            },
+            style = MaterialTheme.typography.labelLarge,
+            color = if (goalMs != null && elapsedTime >= goalMs) AccentEmerald else MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.SemiBold
+        )
     }
+
+    TimerControls(
+        isRunning = isRunning,
+        accent = AceRed,
+        onToggle = onToggleStartStop,
+        onReset = onReset,
+        resetLabel = "Reset stopwatch",
+        trailing = null
+    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PomodoroView(
     phase: PomodoroPhase,
     remainingTime: Long,
     totalPhaseDuration: Long,
+    focusMinutes: Int,
     isRunning: Boolean,
     roundsCompleted: Int,
+    focusLogged: Long,
     onToggleStartStop: () -> Unit,
     onReset: () -> Unit,
     onSkipPhase: () -> Unit,
-    onSelectPreset: (focusMinutes: Int, breakMinutes: Int) -> Unit,
-    onSaveSession: () -> Unit
+    onSelectPreset: (focusMinutes: Int, breakMinutes: Int) -> Unit
 ) {
     val isFocus = phase == PomodoroPhase.FOCUS
-    val progress = if (totalPhaseDuration > 0L) {
-        ((totalPhaseDuration - remainingTime).toFloat() / totalPhaseDuration.toFloat()).coerceIn(0f, 1f)
-    } else {
-        0f
-    }
-
+    val accent = if (isFocus) AceRed else AccentEmerald
+    val progress = if (totalPhaseDuration > 0L) 1f - remainingTime.toFloat() / totalPhaseDuration else 0f
     val totalSeconds = (remainingTime / 1000).coerceAtLeast(0)
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    val timeFormatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+    val timeFormatted = String.format(Locale.US, "%02d:%02d", totalSeconds / 60, totalSeconds % 60)
 
-    // Presets Row
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        OutlinedButton(
-            onClick = { onSelectPreset(25, 5) },
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = if (totalPhaseDuration == 25 * 60 * 1000L || totalPhaseDuration == 5 * 60 * 1000L) AceRed else Slate700
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(25 to 5, 50 to 10).forEach { (focus, rest) ->
+            FilterChip(
+                selected = focusMinutes == focus,
+                onClick = { onSelectPreset(focus, rest) },
+                label = {
+                    Text(
+                        "$focus min focus · $rest break",
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(40.dp),
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
-        ) {
-            Text("25 / 5m Standard", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
-        }
-
-        OutlinedButton(
-            onClick = { onSelectPreset(50, 10) },
-            modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = if (totalPhaseDuration == 50 * 60 * 1000L || totalPhaseDuration == 10 * 60 * 1000L) AceRed else Slate700
-            )
-        ) {
-            Text("50 / 10m Deep Work", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
         }
     }
 
-    // Pomodoro Hero Display
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isFocus) {
-                if (isRunning) AceRedLight.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surface
-            } else {
-                AceLightGreen.copy(alpha = 0.5f)
-            }
-        ),
-        border = BorderStroke(1.dp, Slate200),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    TimerRing(
+        progress = progress,
+        color = accent,
+        modifier = Modifier.semantics { contentDescription = "${if (isFocus) "Focus" else "Break"}, $timeFormatted remaining" }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(28.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // Phase indicator badge
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = if (isFocus) AceRed.copy(alpha = 0.15f) else AceDarkGreen.copy(alpha = 0.15f)
-            ) {
-                Text(
-                    text = if (isFocus) "🔥 FOCUS ROUND" else "☕ REST BREAK",
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isFocus) AceRed else AceDarkGreen
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                if (isFocus) Lucide.Flame else Lucide.Coffee,
+                contentDescription = null,
+                tint = accent,
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(
+                text = if (isFocus) "FOCUS" else "BREAK",
+                style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.5.sp),
+                fontWeight = FontWeight.Bold,
+                color = accent
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = timeFormatted,
+            style = MaterialTheme.typography.displayMedium.copy(fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = "Round ${roundsCompleted + 1} · ${TimeUtils.formatDurationShort(focusLogged)} focused",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+
+    TimerControls(
+        isRunning = isRunning,
+        accent = accent,
+        onToggle = onToggleStartStop,
+        onReset = onReset,
+        resetLabel = "Reset phase",
+        trailing = {
+            FilledTonalIconButton(onClick = onSkipPhase, modifier = Modifier.size(56.dp)) {
+                Icon(
+                    Lucide.SkipForward,
+                    contentDescription = if (isFocus) "Skip to break" else "Skip to focus",
+                    modifier = Modifier.size(22.dp)
                 )
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = timeFormatted,
-                style = MaterialTheme.typography.displayLarge.copy(
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 54.sp
-                ),
-                color = if (isFocus) AceRed else AceDarkGreen
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Progress bar
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp),
-                color = if (isFocus) AceRed else AceDarkGreen,
-                trackColor = Slate200
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = "Rounds Completed: $roundsCompleted",
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.SemiBold,
-                color = Slate600
-            )
         }
-    }
-
-    // Controls
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Reset
-        IconButton(
-            onClick = onReset,
-            modifier = Modifier
-                .size(52.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-        ) {
-            Icon(
-                imageVector = Lucide.RotateCcw,
-                contentDescription = "Reset Pomodoro",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(22.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(24.dp))
-
-        // Play / Pause Hero Button
-        FloatingActionButton(
-            onClick = onToggleStartStop,
-            modifier = Modifier.size(74.dp),
-            shape = CircleShape,
-            containerColor = if (isFocus) (if (isRunning) Color(0xFFC62828) else AceRed) else AceDarkGreen,
-            contentColor = Color.White,
-            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
-        ) {
-            Icon(
-                imageVector = if (isRunning) Lucide.Pause else Lucide.Play,
-                contentDescription = if (isRunning) "Pause" else "Start",
-                modifier = Modifier.size(34.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.width(24.dp))
-
-        // Skip Phase Button
-        IconButton(
-            onClick = onSkipPhase,
-            modifier = Modifier
-                .size(52.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-        ) {
-            Icon(
-                imageVector = Lucide.SkipForward,
-                contentDescription = "Skip Phase",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(22.dp)
-            )
-        }
-    }
-
-    Button(
-        onClick = onSaveSession,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(52.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = AceRed,
-            contentColor = Color.White
-        )
-    ) {
-        Icon(Lucide.Save, contentDescription = null, modifier = Modifier.size(18.dp))
-        Spacer(modifier = Modifier.width(8.dp))
-        Text("Save Focus Session to Category", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-    }
+    )
 }

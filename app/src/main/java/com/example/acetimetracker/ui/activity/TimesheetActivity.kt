@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.acetimetracker.data.model.TimesheetEntry
@@ -24,6 +25,7 @@ class TimesheetActivity : ComponentActivity() {
 
     private val viewModel: TimesheetViewModel by viewModels()
     private var selectedImageUri by mutableStateOf<Uri?>(null)
+    private var formResetKey by mutableIntStateOf(0)
 
     private val imagePickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -54,6 +56,7 @@ class TimesheetActivity : ComponentActivity() {
                     saveEntryState = saveEntryState,
                     uploadImageState = uploadImageState,
                     selectedImageUri = selectedImageUri,
+                    formResetKey = formResetKey,
                     onBackClick = { finish() },
                     onSelectImageClick = {
                         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -122,28 +125,34 @@ class TimesheetActivity : ComponentActivity() {
     private fun observeViewModel() {
         viewModel.uploadImageState.observe(this) { resource ->
             when (resource) {
-                is Resource.Loading -> {}
                 is Resource.Success -> {
-                    Toast.makeText(this, "Image uploaded successfully!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Photo attached", Toast.LENGTH_SHORT).show()
+                    viewModel.consumeUploadState()
                 }
                 is Resource.Error -> {
                     Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show()
+                    selectedImageUri = null
+                    viewModel.consumeUploadState()
                 }
+                else -> {}
             }
         }
 
         viewModel.saveEntryState.observe(this) { resource ->
             when (resource) {
-                is Resource.Loading -> {}
                 is Resource.Success -> {
-                    Toast.makeText(this, "Timesheet entry saved successfully!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Entry saved", Toast.LENGTH_SHORT).show()
                     selectedImageUri = null
                     viewModel.selectedImageUrl = ""
+                    formResetKey++
+                    viewModel.consumeSaveState()
                     viewModel.loadTimesheets()
                 }
                 is Resource.Error -> {
                     Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show()
+                    viewModel.consumeSaveState()
                 }
+                else -> {}
             }
         }
     }

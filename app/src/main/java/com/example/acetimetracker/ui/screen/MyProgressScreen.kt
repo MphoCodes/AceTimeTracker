@@ -1,93 +1,78 @@
 package com.example.acetimetracker.ui.screen
 
-import android.graphics.Color as AndroidColor
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.composables.icons.lucide.ArrowLeft
-import com.composables.icons.lucide.Clock
-import com.composables.icons.lucide.Lucide
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
+import com.composables.icons.lucide.CalendarDays
+import com.composables.icons.lucide.Clock
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Target
+import com.composables.icons.lucide.TrendingUp
 import com.example.acetimetracker.data.model.Category
 import com.example.acetimetracker.data.model.TimesheetEntry
+import com.example.acetimetracker.data.repository.TimesheetStats
+import com.example.acetimetracker.ui.components.AceCard
+import com.example.acetimetracker.ui.components.AceTopBar
+import com.example.acetimetracker.ui.components.EmptyState
+import com.example.acetimetracker.ui.components.SectionLabel
+import com.example.acetimetracker.ui.components.StatTile
 import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
 import com.example.acetimetracker.util.TimeUtils
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
+enum class ProgressPeriod(val label: String) {
+    WEEK("This week"),
+    MONTH("This month"),
+    ALL("All time")
+}
+
 @Composable
 fun MyProgressScreen(
     categoriesState: Resource<List<Category>>?,
     timesheetsState: Resource<List<TimesheetEntry>>?,
     onBackClick: () -> Unit
 ) {
-    var selectedCategory by remember { mutableStateOf("All Categories") }
-    var categoryExpanded by remember { mutableStateOf(false) }
+    var period by rememberSaveable { mutableStateOf(ProgressPeriod.WEEK) }
+    var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
 
     val categories = (categoriesState as? Resource.Success)?.data ?: emptyList()
     val allTimesheets = (timesheetsState as? Resource.Success)?.data ?: emptyList()
+    val isLoading = timesheetsState is Resource.Loading || categoriesState is Resource.Loading
 
-    val filteredTimesheets = remember(selectedCategory, allTimesheets) {
-        if (selectedCategory == "All Categories") {
-            allTimesheets
-        } else {
-            allTimesheets.filter { it.category == selectedCategory }
+    val inPeriod = remember(allTimesheets, period) {
+        val from = when (period) {
+            ProgressPeriod.WEEK -> TimeUtils.startOfWeek()
+            ProgressPeriod.MONTH -> TimeUtils.today().take(7) + "-01"
+            ProgressPeriod.ALL -> ""
         }
+        allTimesheets.filter { it.startDate >= from }
     }
-
-    val totalMillis = remember(filteredTimesheets) {
-        filteredTimesheets.sumOf { it.timeSpent }
+    val hoursByCategory = remember(inPeriod) { TimesheetStats.hoursByCategory(inPeriod) }
+    val totalMillis = remember(inPeriod) { inPeriod.sumOf { it.timeSpent.coerceAtLeast(0L) } }
+    val goalsMet = categories.count { cat ->
+        val goal = cat.goal?.takeIf { it > 0f } ?: return@count false
+        (hoursByCategory[cat.name] ?: 0f) >= goal
     }
-
-    val targetCategory = categories.find { it.name == selectedCategory }
-    val goalHours = targetCategory?.goal ?: 0f
-    val currentSpentHours = totalMillis / (1000f * 60f * 60f)
+    val goalsSet = categories.count { (it.goal ?: 0f) > 0f }
+    val listed = remember(inPeriod, selectedCategory) {
+        if (selectedCategory == null) inPeriod else inPeriod.filter { it.category == selectedCategory }
+    }
 
     Scaffold(
-        topBar = {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                border = BorderStroke(0.5.dp, Slate200)
-            ) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "Goal Progress",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = Slate900
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBackClick) {
-                            Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Slate800, modifier = Modifier.size(22.dp))
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
-                )
-            }
-        }
+        topBar = { AceTopBar(title = "Goal progress", onBackClick = onBackClick) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -95,218 +80,159 @@ fun MyProgressScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Category Filter Dropdown
             item {
-                ExposedDropdownMenuBox(
-                    expanded = categoryExpanded,
-                    onExpandedChange = { categoryExpanded = !categoryExpanded }
-                ) {
-                    OutlinedTextField(
-                        value = selectedCategory,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Filter Category") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(),
-                        shape = RoundedCornerShape(12.dp)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ProgressPeriod.entries.forEach { p ->
+                        FilterChip(
+                            selected = period == p,
+                            onClick = { period = p },
+                            label = { Text(p.label, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(40.dp),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        )
+                    }
+                }
+            }
+
+            if (isLoading) {
+                item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = AceRed) }
+            }
+
+            item {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StatTile(
+                        label = "Time tracked",
+                        value = TimeUtils.formatDurationShort(totalMillis),
+                        icon = Lucide.Clock,
+                        accent = AceRed,
+                        modifier = Modifier.weight(1f)
                     )
-
-                    ExposedDropdownMenu(
-                        expanded = categoryExpanded,
-                        onDismissRequest = { categoryExpanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("All Categories", fontWeight = FontWeight.Bold) },
-                            onClick = {
-                                selectedCategory = "All Categories"
-                                categoryExpanded = false
-                            }
-                        )
-                        categories.forEach { cat ->
-                            DropdownMenuItem(
-                                text = { Text(cat.name) },
-                                onClick = {
-                                    selectedCategory = cat.name
-                                    categoryExpanded = false
-                                }
-                            )
-                        }
-                    }
+                    StatTile(
+                        label = "Goals met",
+                        value = if (goalsSet > 0) "$goalsMet / $goalsSet" else "—",
+                        icon = Lucide.Target,
+                        accent = AccentEmerald,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
 
-            // Total Allocated Time Banner in Ace Red
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = AceRed
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Lucide.Clock,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(34.dp)
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                text = "Total Allocated Time",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.85f)
-                            )
-                            Text(
-                                text = TimeUtils.formatDuration(totalMillis),
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Comparison Chart (when a specific category is selected)
-            if (selectedCategory != "All Categories") {
+            if (categories.isEmpty() && !isLoading) {
                 item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = "Progress vs Target Goal",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-
-                            AndroidView(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(200.dp),
-                                factory = { ctx ->
-                                    BarChart(ctx).apply {
-                                        description.isEnabled = false
-                                        legend.isEnabled = false
-                                        axisRight.isEnabled = false
-                                        xAxis.position = XAxis.XAxisPosition.BOTTOM
-                                        xAxis.setDrawGridLines(false)
-                                        xAxis.granularity = 1f
-                                        setFitBars(true)
-                                    }
-                                },
-                                update = { chart ->
-                                    val entries = listOf(
-                                        BarEntry(0f, currentSpentHours),
-                                        BarEntry(1f, goalHours)
+                    EmptyState(
+                        icon = Lucide.TrendingUp,
+                        title = "No goals to track yet",
+                        message = "Create a category with a target number of hours, then log time against it."
+                    )
+                }
+            } else if (categories.isNotEmpty()) {
+                item { SectionLabel("By category · tap to filter", modifier = Modifier.padding(top = 4.dp)) }
+                item {
+                    AceCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(vertical = 4.dp)) {
+                        categories
+                            .sortedByDescending { hoursByCategory[it.name] ?: 0f }
+                            .forEach { category ->
+                                val isSelected = selectedCategory == category.name
+                                Surface(
+                                    onClick = { selectedCategory = if (isSelected) null else category.name },
+                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else MaterialTheme.colorScheme.surface
+                                ) {
+                                    CategoryProgressRow(
+                                        category = category,
+                                        hours = hoursByCategory[category.name] ?: 0f,
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
                                     )
-                                    val dataSet = BarDataSet(entries, "Hours").apply {
-                                        colors = listOf(
-                                            AndroidColor.parseColor("#D32F2F"), // Ace Red
-                                            AndroidColor.parseColor("#388E3C")  // Dark Green
-                                        )
-                                        valueTextColor = AndroidColor.BLACK
-                                        valueTextSize = 12f
-                                    }
-                                    chart.xAxis.valueFormatter = IndexAxisValueFormatter(listOf("Current", "Goal"))
-                                    chart.data = BarData(dataSet)
-                                    chart.invalidate()
                                 }
-                            )
-                        }
+                            }
                     }
                 }
             }
 
-            // Timesheet entries header
             item {
-                Text(
-                    text = "Timesheet Log (${filteredTimesheets.size} entries)",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                SectionLabel(
+                    text = (selectedCategory ?: "All sessions") + " · ${listed.size}",
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
 
-            // Timesheet List
-            items(filteredTimesheets) { entry ->
-                TimesheetEntryCard(entry = entry)
+            if (listed.isEmpty() && !isLoading) {
+                item {
+                    EmptyState(
+                        icon = Lucide.CalendarDays,
+                        title = "No sessions in this period",
+                        message = "Try a longer period or log some time."
+                    )
+                }
+            }
+
+            items(listed, key = { it.id.ifEmpty { "${it.startDate}${it.startTime}${it.category}" } }) { entry ->
+                TimesheetEntryCard(entry = entry, color = categories.find { it.name == entry.category }?.colorHex)
             }
         }
     }
 }
 
 @Composable
-fun TimesheetEntryCard(entry: TimesheetEntry) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = entry.category,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = AceRed
-                )
-                Text(
-                    text = TimeUtils.formatDuration(entry.timeSpent),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "${entry.startDate} ${entry.startTime} → ${entry.endDate} ${entry.endTime}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+fun TimesheetEntryCard(entry: TimesheetEntry, color: String? = null) {
+    AceCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(color?.let { parseHexColor(it) } ?: AceRed)
             )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = entry.category,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = TimeUtils.formatDurationShort(entry.timeSpent),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold
+            )
+        }
 
-            if (entry.description.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = entry.description,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = if (entry.endDate.isNotBlank() && entry.endDate != entry.startDate) {
+                "${entry.startDate} ${entry.startTime} → ${entry.endDate} ${entry.endTime}"
+            } else {
+                "${entry.startDate} · ${entry.startTime} – ${entry.endTime}"
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
-            if (entry.imageUrl.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(10.dp))
-                AsyncImage(
-                    model = entry.imageUrl,
-                    contentDescription = "Entry Proof",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-            }
+        if (entry.description.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(text = entry.description, style = MaterialTheme.typography.bodyMedium)
+        }
+
+        if (entry.imageUrl.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(10.dp))
+            AsyncImage(
+                model = entry.imageUrl,
+                contentDescription = "Photo attached to ${entry.category} session",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
+            )
         }
     }
 }

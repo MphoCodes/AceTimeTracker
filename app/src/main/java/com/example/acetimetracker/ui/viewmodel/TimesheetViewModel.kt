@@ -24,11 +24,11 @@ class TimesheetViewModel(
     private val _timesheetsState = MutableLiveData<Resource<List<TimesheetEntry>>>()
     val timesheetsState: LiveData<Resource<List<TimesheetEntry>>> = _timesheetsState
 
-    private val _uploadImageState = MutableLiveData<Resource<String>>()
-    val uploadImageState: LiveData<Resource<String>> = _uploadImageState
+    private val _uploadImageState = MutableLiveData<Resource<String>?>()
+    val uploadImageState: LiveData<Resource<String>?> = _uploadImageState
 
-    private val _saveEntryState = MutableLiveData<Resource<Unit>>()
-    val saveEntryState: LiveData<Resource<Unit>> = _saveEntryState
+    private val _saveEntryState = MutableLiveData<Resource<Unit>?>()
+    val saveEntryState: LiveData<Resource<Unit>?> = _saveEntryState
 
     var selectedImageUrl: String = ""
 
@@ -88,6 +88,13 @@ class TimesheetViewModel(
             return
         }
 
+        if (_saveEntryState.value is Resource.Loading) return
+
+        if (_uploadImageState.value is Resource.Loading) {
+            _saveEntryState.value = Resource.Error("Please wait for the photo to finish uploading")
+            return
+        }
+
         if (category.isBlank() || category == "Select Category") {
             _saveEntryState.value = Resource.Error("Please select a category")
             return
@@ -103,7 +110,12 @@ class TimesheetViewModel(
             return
         }
 
-        val timeSpentMillis = TimeUtils.calculateTimeSpentMillis(startTime, endTime)
+        val timeSpentMillis = TimeUtils.calculateTimeSpentMillis(startDate, startTime, endDate, endTime)
+        if (timeSpentMillis <= 0L) {
+            _saveEntryState.value = Resource.Error("End time must be after the start time")
+            return
+        }
+
         val entry = TimesheetEntry(
             userId = userId,
             category = category,
@@ -119,5 +131,14 @@ class TimesheetViewModel(
         timesheetRepository.saveTimesheetEntry(userId, entry) { result ->
             _saveEntryState.value = result
         }
+    }
+
+    /** Clears one-shot save/upload results after the UI has reacted, so they are not replayed on recreation. */
+    fun consumeSaveState() {
+        _saveEntryState.value = null
+    }
+
+    fun consumeUploadState() {
+        _uploadImageState.value = null
     }
 }
