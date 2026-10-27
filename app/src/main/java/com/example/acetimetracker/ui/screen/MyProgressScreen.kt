@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Schedule
+import com.composables.icons.lucide.ArrowLeft
+import com.composables.icons.lucide.Clock
+import com.composables.icons.lucide.Lucide
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -79,7 +79,7 @@ fun MyProgressScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Slate800)
+                            Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Slate800, modifier = Modifier.size(22.dp))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -156,10 +156,10 @@ fun MyProgressScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Schedule,
+                            imageVector = Lucide.Clock,
                             contentDescription = null,
                             tint = Color.White,
-                            modifier = Modifier.size(36.dp)
+                            modifier = Modifier.size(34.dp)
                         )
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {

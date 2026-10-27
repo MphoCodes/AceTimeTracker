@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.composables.icons.lucide.ArrowLeft
+import com.composables.icons.lucide.Bell
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Moon
+import com.composables.icons.lucide.Save
+import com.composables.icons.lucide.Sun
 import com.example.acetimetracker.data.repository.SettingsRepository
 import com.example.acetimetracker.ui.theme.*
 
@@ -47,7 +51,7 @@ fun SettingsScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Slate800)
+                            Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Slate800, modifier = Modifier.size(22.dp))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -93,7 +97,7 @@ fun SettingsScreen(
                             colors = RadioButtonDefaults.colors(selectedColor = AceRed)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(Icons.Default.LightMode, contentDescription = null, tint = AceRed)
+                        Icon(Lucide.Sun, contentDescription = null, tint = AceRed, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("Light Theme", style = MaterialTheme.typography.bodyLarge)
                     }
@@ -112,7 +116,7 @@ fun SettingsScreen(
                             colors = RadioButtonDefaults.colors(selectedColor = AceRed)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(Icons.Default.DarkMode, contentDescription = null, tint = AceRed)
+                        Icon(Lucide.Moon, contentDescription = null, tint = AceRed, modifier = Modifier.size(20.dp))
                         Spacer(modifier = Modifier.width(12.dp))
                         Text("Dark Theme", style = MaterialTheme.typography.bodyLarge)
                     }
@@ -137,7 +141,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Icon(Icons.Default.Notifications, contentDescription = null, tint = AceRed)
+                        Icon(Lucide.Bell, contentDescription = null, tint = AceRed, modifier = Modifier.size(22.dp))
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text(
@@ -173,7 +177,7 @@ fun SettingsScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White)
             ) {
-                Icon(Icons.Default.Save, contentDescription = null)
+                Icon(Lucide.Save, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Save Preferences", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }

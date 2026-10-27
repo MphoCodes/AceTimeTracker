@@ -8,9 +8,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import com.composables.icons.lucide.ArrowLeft
+import com.composables.icons.lucide.FileText
+import com.composables.icons.lucide.Folder
+import com.composables.icons.lucide.GraduationCap
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Timer
+import com.composables.icons.lucide.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,9 +53,10 @@ fun AboutScreen(
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                imageVector = Lucide.ArrowLeft,
                                 contentDescription = "Back",
-                                tint = Slate800
+                                tint = Slate800,
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                     },
@@ -136,7 +141,7 @@ fun AboutScreen(
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
-                                    imageVector = Icons.Default.School,
+                                    imageVector = Lucide.GraduationCap,
                                     contentDescription = null,
                                     tint = AceRed,
                                     modifier = Modifier.size(20.dp)
@@ -177,28 +182,28 @@ fun AboutScreen(
                 )
 
                 AboutFeatureRow(
-                    icon = Icons.Default.DateRange,
+                    icon = Lucide.FileText,
                     title = "Timesheet Hours & Proofs",
                     description = "Log your daily task hours with photo evidence attachments.",
                     accentColor = AccentBlue
                 )
 
                 AboutFeatureRow(
-                    icon = Icons.Default.Timer,
+                    icon = Lucide.Timer,
                     title = "Live Stopwatch Timer",
                     description = "Track task sessions with real-time feedback on goal thresholds.",
                     accentColor = AceRed
                 )
 
                 AboutFeatureRow(
-                    icon = Icons.Default.Folder,
+                    icon = Lucide.Folder,
                     title = "Category Goals & Limits",
                     description = "Establish minimum and maximum study target hours per category.",
                     accentColor = AccentAmber
                 )
 
                 AboutFeatureRow(
-                    icon = Icons.Default.TrendingUp,
+                    icon = Lucide.TrendingUp,
                     title = "Goal Progress & Distribution",
                     description = "Monitor actual performance against targets with interactive charts.",
                     accentColor = AccentEmerald

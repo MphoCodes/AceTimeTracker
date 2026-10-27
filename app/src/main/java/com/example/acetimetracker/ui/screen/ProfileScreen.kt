@@ -7,11 +7,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,6 +17,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.composables.icons.lucide.ArrowLeft
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Mail
+import com.composables.icons.lucide.Pencil
+import com.composables.icons.lucide.User
 import com.example.acetimetracker.data.model.UserProfile
 import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
@@ -52,7 +52,7 @@ fun ProfileScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Slate800)
+                            Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Slate800, modifier = Modifier.size(22.dp))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -100,10 +100,10 @@ fun ProfileScreen(
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        imageVector = Icons.Default.Person,
+                                        imageVector = Lucide.User,
                                         contentDescription = "Avatar",
                                         tint = Color.White,
-                                        modifier = Modifier.size(64.dp)
+                                        modifier = Modifier.size(54.dp)
                                     )
                                 }
                             }
@@ -135,9 +135,10 @@ fun ProfileScreen(
                             Column(modifier = Modifier.padding(20.dp)) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
-                                        imageVector = Icons.Default.Person,
+                                        imageVector = Lucide.User,
                                         contentDescription = null,
-                                        tint = AceRed
+                                        tint = AceRed,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column {
@@ -150,13 +151,14 @@ fun ProfileScreen(
                                     }
                                 }
 
-                                Divider(modifier = Modifier.padding(vertical = 14.dp))
+                                HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp), color = Slate100)
 
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
-                                        imageVector = Icons.Default.Email,
+                                        imageVector = Lucide.Mail,
                                         contentDescription = null,
-                                        tint = AceRed
+                                        tint = AceRed,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                     Spacer(modifier = Modifier.width(16.dp))
                                     Column {
@@ -181,7 +183,7 @@ fun ProfileScreen(
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White)
                         ) {
-                            Icon(Icons.Default.Edit, contentDescription = null)
+                            Icon(Lucide.Pencil, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Edit Profile Details", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         }

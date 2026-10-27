@@ -7,8 +7,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +18,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.composables.icons.lucide.ArrowLeft
+import com.composables.icons.lucide.Camera
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Mail
+import com.composables.icons.lucide.Save
+import com.composables.icons.lucide.User
 import com.example.acetimetracker.data.model.UserProfile
 import com.example.acetimetracker.ui.theme.AceRed
 import com.example.acetimetracker.util.Resource
@@ -62,7 +66,7 @@ fun EditProfileScreen(
                 title = { Text("Edit Profile", fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Color.White, modifier = Modifier.size(22.dp))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -102,10 +106,10 @@ fun EditProfileScreen(
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                imageVector = Icons.Default.Person,
+                                imageVector = Lucide.User,
                                 contentDescription = "Avatar",
                                 tint = Color.White,
-                                modifier = Modifier.size(64.dp)
+                                modifier = Modifier.size(54.dp)
                             )
                         }
                     }
@@ -125,9 +129,9 @@ fun EditProfileScreen(
                         )
                     } else {
                         Icon(
-                            imageVector = Icons.Default.CameraAlt,
+                            imageVector = Lucide.Camera,
                             contentDescription = "Change Photo",
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -154,7 +158,7 @@ fun EditProfileScreen(
                         value = displayName,
                         onValueChange = { displayName = it },
                         label = { Text("Display Name") },
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = AceRed) },
+                        leadingIcon = { Icon(Lucide.User, contentDescription = null, tint = AceRed, modifier = Modifier.size(18.dp)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
@@ -164,7 +168,7 @@ fun EditProfileScreen(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Email Address") },
-                        leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = AceRed) },
+                        leadingIcon = { Icon(Lucide.Mail, contentDescription = null, tint = AceRed, modifier = Modifier.size(18.dp)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -190,7 +194,7 @@ fun EditProfileScreen(
                         strokeWidth = 2.5.dp
                     )
                 } else {
-                    Icon(Icons.Default.Save, contentDescription = null)
+                    Icon(Lucide.Save, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Save Changes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }

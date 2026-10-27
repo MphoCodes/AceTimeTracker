@@ -9,8 +9,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +23,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.composables.icons.lucide.ChartPie
+import com.composables.icons.lucide.ChevronRight
+import com.composables.icons.lucide.FileText
+import com.composables.icons.lucide.Folder
+import com.composables.icons.lucide.House
+import com.composables.icons.lucide.Info
+import com.composables.icons.lucide.Lightbulb
+import com.composables.icons.lucide.LogOut
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Menu
+import com.composables.icons.lucide.Play
+import com.composables.icons.lucide.Plus
+import com.composables.icons.lucide.Settings
+import com.composables.icons.lucide.Timer
+import com.composables.icons.lucide.TrendingUp
+import com.composables.icons.lucide.User
 import com.example.acetimetracker.R
 import com.example.acetimetracker.data.model.UserProfile
 import com.example.acetimetracker.ui.theme.*
@@ -143,7 +157,7 @@ fun MainScreen(
                     }
                 }
 
-                // Drawer Navigation Items (Authentic to app functionality)
+                // Drawer Navigation Items with Lucide Icons
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -160,7 +174,7 @@ fun MainScreen(
 
                     DrawerNavRow(
                         title = "Timesheet Log",
-                        icon = Icons.Default.DateRange,
+                        icon = Lucide.FileText,
                         badge = "Log",
                         onClick = {
                             scope.launch { drawerState.close() }
@@ -170,7 +184,7 @@ fun MainScreen(
 
                     DrawerNavRow(
                         title = "Stopwatch Timer",
-                        icon = Icons.Default.Timer,
+                        icon = Lucide.Timer,
                         badge = "Live",
                         onClick = {
                             scope.launch { drawerState.close() }
@@ -180,7 +194,7 @@ fun MainScreen(
 
                     DrawerNavRow(
                         title = "Task Categories",
-                        icon = Icons.Default.Folder,
+                        icon = Lucide.Folder,
                         onClick = {
                             scope.launch { drawerState.close() }
                             onNavigate(Destination.Categories)
@@ -189,7 +203,7 @@ fun MainScreen(
 
                     DrawerNavRow(
                         title = "My Goal Progress",
-                        icon = Icons.Default.TrendingUp,
+                        icon = Lucide.TrendingUp,
                         onClick = {
                             scope.launch { drawerState.close() }
                             onNavigate(Destination.MyProgress)
@@ -198,7 +212,7 @@ fun MainScreen(
 
                     DrawerNavRow(
                         title = "Analytics Graph",
-                        icon = Icons.Default.PieChart,
+                        icon = Lucide.ChartPie,
                         onClick = {
                             scope.launch { drawerState.close() }
                             onNavigate(Destination.Graph)
@@ -220,7 +234,7 @@ fun MainScreen(
 
                     DrawerNavRow(
                         title = "User Profile",
-                        icon = Icons.Default.Person,
+                        icon = Lucide.User,
                         onClick = {
                             scope.launch { drawerState.close() }
                             onNavigate(Destination.Profile)
@@ -229,7 +243,7 @@ fun MainScreen(
 
                     DrawerNavRow(
                         title = "Settings",
-                        icon = Icons.Default.Settings,
+                        icon = Lucide.Settings,
                         onClick = {
                             scope.launch { drawerState.close() }
                             onNavigate(Destination.Settings)
@@ -238,7 +252,7 @@ fun MainScreen(
 
                     DrawerNavRow(
                         title = "About AceTimeTracker",
-                        icon = Icons.Default.Info,
+                        icon = Lucide.Info,
                         onClick = {
                             scope.launch { drawerState.close() }
                             onNavigate(Destination.About)
@@ -250,7 +264,7 @@ fun MainScreen(
                 NavigationDrawerItem(
                     icon = {
                         Icon(
-                            Icons.Default.ExitToApp,
+                            Lucide.LogOut,
                             contentDescription = "Log Out",
                             tint = AceRed,
                             modifier = Modifier.size(20.dp)
@@ -327,7 +341,7 @@ fun MainScreen(
                         },
                         navigationIcon = {
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Slate800)
+                                Icon(Lucide.Menu, contentDescription = "Menu", tint = Slate800, modifier = Modifier.size(22.dp))
                             }
                         },
                         actions = {
@@ -340,10 +354,10 @@ fun MainScreen(
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
-                                            Icons.Default.Person,
+                                            Lucide.User,
                                             contentDescription = "Profile",
                                             tint = Slate700,
-                                            modifier = Modifier.size(20.dp)
+                                            modifier = Modifier.size(18.dp)
                                         )
                                     }
                                 }
@@ -356,7 +370,7 @@ fun MainScreen(
                 }
             },
             bottomBar = {
-                // Native Clean Bottom Navigation Bar
+                // Native Clean Bottom Navigation Bar with Lucide Icons
                 Surface(
                     color = MaterialTheme.colorScheme.surface,
                     border = BorderStroke(0.5.dp, Slate200)
@@ -369,7 +383,7 @@ fun MainScreen(
                         NavigationBarItem(
                             selected = selectedBottomTab == BottomNavTab.Home,
                             onClick = { selectedBottomTab = BottomNavTab.Home },
-                            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                            icon = { Icon(Lucide.House, contentDescription = "Home", modifier = Modifier.size(22.dp)) },
                             label = { Text("Home", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = AceRed,
@@ -380,7 +394,7 @@ fun MainScreen(
                         NavigationBarItem(
                             selected = false,
                             onClick = { onNavigate(Destination.Timesheet) },
-                            icon = { Icon(Icons.Default.DateRange, contentDescription = "Timesheet") },
+                            icon = { Icon(Lucide.FileText, contentDescription = "Timesheet", modifier = Modifier.size(22.dp)) },
                             label = { Text("Timesheet", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = AceRed,
@@ -391,7 +405,7 @@ fun MainScreen(
                         NavigationBarItem(
                             selected = false,
                             onClick = { onNavigate(Destination.Timer) },
-                            icon = { Icon(Icons.Default.Timer, contentDescription = "Stopwatch") },
+                            icon = { Icon(Lucide.Timer, contentDescription = "Stopwatch", modifier = Modifier.size(22.dp)) },
                             label = { Text("Stopwatch", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = AceRed,
@@ -402,7 +416,7 @@ fun MainScreen(
                         NavigationBarItem(
                             selected = false,
                             onClick = { onNavigate(Destination.MyProgress) },
-                            icon = { Icon(Icons.Default.TrendingUp, contentDescription = "Progress") },
+                            icon = { Icon(Lucide.TrendingUp, contentDescription = "Progress", modifier = Modifier.size(22.dp)) },
                             label = { Text("Progress", fontSize = 11.sp, fontWeight = FontWeight.Medium) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = AceRed,
@@ -421,7 +435,7 @@ fun MainScreen(
                     shape = RoundedCornerShape(16.dp),
                     elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Icon(Lucide.Plus, contentDescription = null, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Log Entry", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
@@ -522,7 +536,7 @@ fun MainScreen(
                                     contentColor = Color.White
                                 )
                             ) {
-                                Icon(Icons.Default.Timer, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Lucide.Play, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text("Start Timer", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                             }
@@ -538,7 +552,7 @@ fun MainScreen(
                                     contentColor = Color.White
                                 )
                             ) {
-                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Icon(Lucide.Plus, contentDescription = null, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text("Add Hours", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
                             }
@@ -554,7 +568,7 @@ fun MainScreen(
                     color = Slate500
                 )
 
-                // 2x2 Grid of Real Feature Cards
+                // 2x2 Grid of Real Feature Cards with Lucide Icons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -562,7 +576,7 @@ fun MainScreen(
                     FeatureCard(
                         title = "Timesheet Log",
                         description = "Log hours & photo proofs",
-                        icon = Icons.Default.DateRange,
+                        icon = Lucide.FileText,
                         accentColor = AccentBlue,
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigate(Destination.Timesheet) }
@@ -570,7 +584,7 @@ fun MainScreen(
                     FeatureCard(
                         title = "Stopwatch Timer",
                         description = "Real-time task tracking",
-                        icon = Icons.Default.Timer,
+                        icon = Lucide.Timer,
                         accentColor = AceRed,
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigate(Destination.Timer) }
@@ -584,7 +598,7 @@ fun MainScreen(
                     FeatureCard(
                         title = "Task Categories",
                         description = "Set min/max hour goals",
-                        icon = Icons.Default.Folder,
+                        icon = Lucide.Folder,
                         accentColor = AccentAmber,
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigate(Destination.Categories) }
@@ -592,7 +606,7 @@ fun MainScreen(
                     FeatureCard(
                         title = "Goal Progress",
                         description = "Min vs max target status",
-                        icon = Icons.Default.TrendingUp,
+                        icon = Lucide.TrendingUp,
                         accentColor = AccentEmerald,
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigate(Destination.MyProgress) }
@@ -602,13 +616,13 @@ fun MainScreen(
                 FeatureCard(
                     title = "Visual Analytics & Distribution",
                     description = "Interactive pie chart breakdown of your task time distribution",
-                    icon = Icons.Default.PieChart,
+                    icon = Lucide.ChartPie,
                     accentColor = AccentIndigo,
                     modifier = Modifier.fillMaxWidth(),
                     onClick = { onNavigate(Destination.Graph) }
                 )
 
-                // Helpful Study Tips Card
+                // Helpful Study Tips Card with Lucide.Lightbulb
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
@@ -628,10 +642,10 @@ fun MainScreen(
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
-                                    imageVector = Icons.Default.Lightbulb,
+                                    imageVector = Lucide.Lightbulb,
                                     contentDescription = null,
                                     tint = AceRed,
-                                    modifier = Modifier.size(22.dp)
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         }
@@ -755,7 +769,7 @@ fun FeatureCard(
                 }
 
                 Icon(
-                    imageVector = Icons.Default.ChevronRight,
+                    imageVector = Lucide.ChevronRight,
                     contentDescription = null,
                     tint = Slate400,
                     modifier = Modifier.size(16.dp)
@@ -766,9 +780,11 @@ fun FeatureCard(
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = Slate900
+                color = Slate900,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(2.dp))
@@ -777,8 +793,7 @@ fun FeatureCard(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
                 color = Slate500,
-                fontSize = 11.sp,
-                lineHeight = 15.sp,
+                lineHeight = 16.sp,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )

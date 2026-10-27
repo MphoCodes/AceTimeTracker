@@ -13,8 +13,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import com.composables.icons.lucide.ArrowLeft
+import com.composables.icons.lucide.Calendar
+import com.composables.icons.lucide.Camera
+import com.composables.icons.lucide.Clock
+import com.composables.icons.lucide.Image
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Save
+import com.composables.icons.lucide.Search
+import com.composables.icons.lucide.Share2
+import com.composables.icons.lucide.Trash2
+import com.composables.icons.lucide.X
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -166,16 +175,17 @@ fun TimesheetScreen(
                         },
                         navigationIcon = {
                             IconButton(onClick = onBackClick) {
-                                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Slate800)
+                                Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Slate800, modifier = Modifier.size(22.dp))
                             }
                         },
                         actions = {
                             if (selectedTabIndex == 1 && filteredTimesheets.isNotEmpty()) {
                                 IconButton(onClick = { onExportCsvClick(filteredTimesheets) }) {
                                     Icon(
-                                        Icons.Default.Share,
+                                        Lucide.Share2,
                                         contentDescription = "Export & Share Report",
-                                        tint = AceRed
+                                        tint = AceRed,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
@@ -319,7 +329,7 @@ fun TimesheetScreen(
                                     placeholder = { Text("YYYY-MM-DD") },
                                     trailingIcon = {
                                         IconButton(onClick = { showDatePicker { startDate = it } }) {
-                                            Icon(Icons.Default.DateRange, contentDescription = "Pick Start Date", tint = AceRed)
+                                            Icon(Lucide.Calendar, contentDescription = "Pick Start Date", tint = AceRed, modifier = Modifier.size(20.dp))
                                         }
                                     },
                                     modifier = Modifier.weight(1f),
@@ -334,7 +344,7 @@ fun TimesheetScreen(
                                     placeholder = { Text("HH:MM") },
                                     trailingIcon = {
                                         IconButton(onClick = { showTimePicker { startTime = it } }) {
-                                            Icon(Icons.Default.Schedule, contentDescription = "Pick Start Time", tint = AceRed)
+                                            Icon(Lucide.Clock, contentDescription = "Pick Start Time", tint = AceRed, modifier = Modifier.size(20.dp))
                                         }
                                     },
                                     modifier = Modifier.weight(1f),
@@ -355,7 +365,7 @@ fun TimesheetScreen(
                                     placeholder = { Text("YYYY-MM-DD") },
                                     trailingIcon = {
                                         IconButton(onClick = { showDatePicker { endDate = it } }) {
-                                            Icon(Icons.Default.DateRange, contentDescription = "Pick End Date", tint = AceRed)
+                                            Icon(Lucide.Calendar, contentDescription = "Pick End Date", tint = AceRed, modifier = Modifier.size(20.dp))
                                         }
                                     },
                                     modifier = Modifier.weight(1f),
@@ -370,7 +380,7 @@ fun TimesheetScreen(
                                     placeholder = { Text("HH:MM") },
                                     trailingIcon = {
                                         IconButton(onClick = { showTimePicker { endTime = it } }) {
-                                            Icon(Icons.Default.Schedule, contentDescription = "Pick End Time", tint = AceRed)
+                                            Icon(Lucide.Clock, contentDescription = "Pick End Time", tint = AceRed, modifier = Modifier.size(20.dp))
                                         }
                                     },
                                     modifier = Modifier.weight(1f),
@@ -502,7 +512,7 @@ fun TimesheetScreen(
                                     shape = RoundedCornerShape(12.dp),
                                     border = BorderStroke(1.dp, Slate300)
                                 ) {
-                                    Icon(Icons.Default.PhotoCamera, contentDescription = null, tint = Slate700)
+                                    Icon(Lucide.Camera, contentDescription = null, tint = Slate700, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = if (isUploading) "Uploading Photo..." else "Attach Study Proof / Image",
@@ -540,7 +550,7 @@ fun TimesheetScreen(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Icon(Icons.Default.Save, contentDescription = null)
+                            Icon(Lucide.Save, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Save Timesheet Entry", fontWeight = FontWeight.Bold, fontSize = 15.sp)
                         }
@@ -569,11 +579,11 @@ fun TimesheetScreen(
                                 value = searchQuery,
                                 onValueChange = { searchQuery = it },
                                 placeholder = { Text("Search by category or notes...") },
-                                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Slate500) },
+                                leadingIcon = { Icon(Lucide.Search, contentDescription = null, tint = Slate500, modifier = Modifier.size(18.dp)) },
                                 trailingIcon = {
                                     if (searchQuery.isNotEmpty()) {
                                         IconButton(onClick = { searchQuery = "" }) {
-                                            Icon(Icons.Default.Close, contentDescription = "Clear")
+                                            Icon(Lucide.X, contentDescription = "Clear", modifier = Modifier.size(16.dp))
                                         }
                                     }
                                 },
@@ -708,7 +718,7 @@ fun TimesheetScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.Center
                             ) {
-                                Icon(Icons.Default.DateRange, contentDescription = null, tint = Slate400, modifier = Modifier.size(40.dp))
+                                Icon(Lucide.Calendar, contentDescription = null, tint = Slate400, modifier = Modifier.size(36.dp))
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Text(
                                     text = "No timesheet entries found",
@@ -766,7 +776,7 @@ fun TimesheetScreen(
                                 .align(Alignment.TopEnd)
                                 .padding(8.dp)
                         ) {
-                            Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                            Icon(Lucide.X, contentDescription = "Close", tint = Color.White, modifier = Modifier.size(20.dp))
                         }
                     }
                 }
@@ -843,7 +853,7 @@ fun TimesheetHistoryCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     IconButton(onClick = onDeleteClick, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = Slate400, modifier = Modifier.size(18.dp))
+                        Icon(Lucide.Trash2, contentDescription = "Delete", tint = Slate400, modifier = Modifier.size(16.dp))
                     }
                 }
             }
@@ -852,7 +862,7 @@ fun TimesheetHistoryCard(
 
             // Date & Time Row
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Schedule, contentDescription = null, tint = Slate400, modifier = Modifier.size(14.dp))
+                Icon(Lucide.Clock, contentDescription = null, tint = Slate400, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = "${entry.startDate} • ${entry.startTime} - ${entry.endTime}",
@@ -883,7 +893,7 @@ fun TimesheetHistoryCard(
                         .padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.Photo, contentDescription = null, tint = Slate700, modifier = Modifier.size(16.dp))
+                    Icon(Lucide.Image, contentDescription = null, tint = Slate700, modifier = Modifier.size(15.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = "View Photo Evidence",

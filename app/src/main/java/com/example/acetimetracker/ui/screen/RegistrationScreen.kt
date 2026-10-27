@@ -9,12 +9,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import com.composables.icons.lucide.Eye
+import com.composables.icons.lucide.EyeOff
+import com.composables.icons.lucide.Lock
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Mail
+import com.composables.icons.lucide.Zap
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -105,7 +105,7 @@ fun RegistrationScreen(
                         onValueChange = { email = it },
                         label = { Text("Email Address") },
                         leadingIcon = {
-                            Icon(Icons.Default.Email, contentDescription = "Email Icon", tint = AceRed)
+                            Icon(Lucide.Mail, contentDescription = "Email Icon", tint = AceRed, modifier = Modifier.size(20.dp))
                         },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
@@ -123,13 +123,14 @@ fun RegistrationScreen(
                         onValueChange = { password = it },
                         label = { Text("Password") },
                         leadingIcon = {
-                            Icon(Icons.Default.Lock, contentDescription = "Password Icon", tint = AceRed)
+                            Icon(Lucide.Lock, contentDescription = "Password Icon", tint = AceRed, modifier = Modifier.size(20.dp))
                         },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
-                                    imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                                    imageVector = if (passwordVisible) Lucide.Eye else Lucide.EyeOff,
+                                    contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         },
@@ -150,13 +151,14 @@ fun RegistrationScreen(
                         onValueChange = { confirmPassword = it },
                         label = { Text("Confirm Password") },
                         leadingIcon = {
-                            Icon(Icons.Default.Lock, contentDescription = "Confirm Password Icon", tint = AceRed)
+                            Icon(Lucide.Lock, contentDescription = "Confirm Password Icon", tint = AceRed, modifier = Modifier.size(20.dp))
                         },
                         trailingIcon = {
                             IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                                 Icon(
-                                    imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password"
+                                    imageVector = if (confirmPasswordVisible) Lucide.Eye else Lucide.EyeOff,
+                                    contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password",
+                                    modifier = Modifier.size(20.dp)
                                 )
                             }
                         },
@@ -229,7 +231,7 @@ fun RegistrationScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.FlashOn,
+                        imageVector = Lucide.Zap,
                         contentDescription = "Test Login",
                         tint = AceRed,
                         modifier = Modifier.size(28.dp)

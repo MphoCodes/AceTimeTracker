@@ -8,9 +8,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import com.composables.icons.lucide.ArrowLeft
+import com.composables.icons.lucide.Folder
+import com.composables.icons.lucide.Hourglass
+import com.composables.icons.lucide.Lucide
+import com.composables.icons.lucide.Pause
+import com.composables.icons.lucide.Play
+import com.composables.icons.lucide.RotateCcw
+import com.composables.icons.lucide.Save
+import com.composables.icons.lucide.SkipForward
+import com.composables.icons.lucide.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -88,7 +95,7 @@ fun TimerScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Slate800)
+                            Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = Slate800, modifier = Modifier.size(22.dp))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -115,7 +122,7 @@ fun TimerScreen(
                     onClick = { onModeChange(TimerMode.STOPWATCH) },
                     text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Timer, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Lucide.Timer, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text("Stopwatch", fontWeight = FontWeight.Bold)
                         }
@@ -126,7 +133,7 @@ fun TimerScreen(
                     onClick = { onModeChange(TimerMode.POMODORO) },
                     text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.HourglassBottom, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Lucide.Hourglass, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text("Pomodoro Focus", fontWeight = FontWeight.Bold)
                         }
@@ -153,7 +160,7 @@ fun TimerScreen(
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Category") },
-                        leadingIcon = { Icon(Icons.Default.Folder, contentDescription = null, tint = AceOrange) },
+                        leadingIcon = { Icon(Lucide.Folder, contentDescription = null, tint = AceOrange, modifier = Modifier.size(20.dp)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -311,9 +318,10 @@ fun StopwatchView(
                 .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
         ) {
             Icon(
-                imageVector = Icons.Default.Refresh,
+                imageVector = Lucide.RotateCcw,
                 contentDescription = "Reset Timer",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(22.dp)
             )
         }
 
@@ -328,9 +336,9 @@ fun StopwatchView(
             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
         ) {
             Icon(
-                imageVector = if (isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
+                imageVector = if (isRunning) Lucide.Pause else Lucide.Play,
                 contentDescription = if (isRunning) "Pause" else "Start",
-                modifier = Modifier.size(38.dp)
+                modifier = Modifier.size(34.dp)
             )
         }
     }
@@ -409,7 +417,7 @@ fun StopwatchView(
             contentColor = Color.White
         )
     ) {
-        Icon(Icons.Default.Save, contentDescription = null)
+        Icon(Lucide.Save, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(modifier = Modifier.width(8.dp))
         Text("Save Stopwatch Session", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     }
@@ -552,9 +560,10 @@ fun PomodoroView(
                 .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
         ) {
             Icon(
-                imageVector = Icons.Default.Refresh,
+                imageVector = Lucide.RotateCcw,
                 contentDescription = "Reset Pomodoro",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(22.dp)
             )
         }
 
@@ -570,9 +579,9 @@ fun PomodoroView(
             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 6.dp)
         ) {
             Icon(
-                imageVector = if (isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
+                imageVector = if (isRunning) Lucide.Pause else Lucide.Play,
                 contentDescription = if (isRunning) "Pause" else "Start",
-                modifier = Modifier.size(38.dp)
+                modifier = Modifier.size(34.dp)
             )
         }
 
@@ -586,9 +595,10 @@ fun PomodoroView(
                 .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
         ) {
             Icon(
-                imageVector = Icons.Default.SkipNext,
+                imageVector = Lucide.SkipForward,
                 contentDescription = "Skip Phase",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(22.dp)
             )
         }
     }
@@ -604,7 +614,7 @@ fun PomodoroView(
             contentColor = Color.White
         )
     ) {
-        Icon(Icons.Default.Save, contentDescription = null)
+        Icon(Lucide.Save, contentDescription = null, modifier = Modifier.size(18.dp))
         Spacer(modifier = Modifier.width(8.dp))
         Text("Save Focus Session to Category", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     }
