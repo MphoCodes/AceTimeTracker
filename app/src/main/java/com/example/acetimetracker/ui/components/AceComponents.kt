@@ -173,18 +173,23 @@ fun StatTile(
     modifier: Modifier = Modifier
 ) {
     AceCard(modifier = modifier, contentPadding = PaddingValues(14.dp)) {
-        IconBadge(icon = icon, tint = accent, size = 32.dp)
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            IconBadge(icon = icon, tint = accent, size = 32.dp)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
