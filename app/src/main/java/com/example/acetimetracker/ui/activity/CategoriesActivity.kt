@@ -30,8 +30,8 @@ class CategoriesActivity : ComponentActivity() {
                     categoriesState = categoriesState,
                     addCategoryState = addCategoryState,
                     onBackClick = { finish() },
-                    onAddCategory = { name, desc, goal, minGoal, maxGoal ->
-                        viewModel.addCategory(name, desc, goal, minGoal, maxGoal)
+                    onAddCategory = { name, desc, goal, minGoal, maxGoal, colorHex ->
+                        viewModel.addCategory(name, desc, goal, minGoal, maxGoal, colorHex)
                     },
                     onDeleteCategory = { category ->
                         viewModel.deleteCategory(category)

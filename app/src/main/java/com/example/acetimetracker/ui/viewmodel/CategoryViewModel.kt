@@ -38,7 +38,8 @@ class CategoryViewModel(
         description: String,
         goal: Float?,
         minGoal: Float?,
-        maxGoal: Float?
+        maxGoal: Float?,
+        colorHex: String = "#DC2626"
     ) {
         val userId = authRepository.currentUserId
         if (userId.isEmpty()) {
@@ -56,7 +57,8 @@ class CategoryViewModel(
             description = description.trim(),
             goal = goal,
             minGoal = minGoal,
-            maxGoal = maxGoal
+            maxGoal = maxGoal,
+            colorHex = colorHex
         )
 
         categoryRepository.addCategory(userId, category) { result ->

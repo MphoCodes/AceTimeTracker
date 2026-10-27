@@ -22,8 +22,27 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.acetimetracker.data.model.Category
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
 import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
+
+val CATEGORY_PALETTES = listOf(
+    "#DC2626" to "Ruby",
+    "#2563EB" to "Cobalt",
+    "#10B981" to "Emerald",
+    "#F59E0B" to "Amber",
+    "#8B5CF6" to "Purple",
+    "#EC4899" to "Pink"
+)
+
+fun parseHexColor(hex: String, fallback: Color = AceRed): Color {
+    return try {
+        Color(android.graphics.Color.parseColor(hex))
+    } catch (_: Exception) {
+        fallback
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +50,7 @@ fun CategoriesScreen(
     categoriesState: Resource<List<Category>>?,
     addCategoryState: Resource<*>?,
     onBackClick: () -> Unit,
-    onAddCategory: (String, String, Float?, Float?, Float?) -> Unit,
+    onAddCategory: (String, String, Float?, Float?, Float?, String) -> Unit,
     onDeleteCategory: (Category) -> Unit
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
@@ -181,8 +200,8 @@ fun CategoriesScreen(
         AddCategoryDialog(
             isLoading = addCategoryState is Resource.Loading,
             onDismiss = { showAddDialog = false },
-            onConfirm = { name, desc, goal, minGoal, maxGoal ->
-                onAddCategory(name, desc, goal, minGoal, maxGoal)
+            onConfirm = { name, desc, goal, minGoal, maxGoal, colorHex ->
+                onAddCategory(name, desc, goal, minGoal, maxGoal, colorHex)
                 showAddDialog = false
             }
         )
@@ -260,6 +279,7 @@ fun CategoryCard(
     onClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+    val catColor = parseHexColor(category.colorHex)
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -268,7 +288,8 @@ fun CategoryCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        border = BorderStroke(1.dp, Slate200),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
@@ -278,14 +299,14 @@ fun CategoryCard(
         ) {
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = AceOrange.copy(alpha = 0.15f),
+                color = catColor.copy(alpha = 0.15f),
                 modifier = Modifier.size(46.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.Folder,
                         contentDescription = "Folder",
-                        tint = AceOrange,
+                        tint = catColor,
                         modifier = Modifier.size(26.dp)
                     )
                 }
@@ -356,13 +377,14 @@ fun GoalChip(label: String, bg: Color, textCol: Color) {
 fun AddCategoryDialog(
     isLoading: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, desc: String, goal: Float?, minGoal: Float?, maxGoal: Float?) -> Unit
+    onConfirm: (name: String, desc: String, goal: Float?, minGoal: Float?, maxGoal: Float?, colorHex: String) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var desc by remember { mutableStateOf("") }
     var goalText by remember { mutableStateOf("") }
     var minGoalText by remember { mutableStateOf("") }
     var maxGoalText by remember { mutableStateOf("") }
+    var selectedColorHex by remember { mutableStateOf(CATEGORY_PALETTES.first().first) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -388,6 +410,43 @@ fun AddCategoryDialog(
                     label = { Text("Description") },
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                Text(
+                    text = "Category Color Theme",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Slate700
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CATEGORY_PALETTES.forEach { (hex, _) ->
+                        val color = parseHexColor(hex)
+                        val isSelected = hex.equals(selectedColorHex, ignoreCase = true)
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(color = color, shape = CircleShape)
+                                .clickable { selectedColorHex = hex }
+                                .then(
+                                    if (isSelected) Modifier.border(3.dp, Slate900, CircleShape)
+                                    else Modifier
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Selected",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                }
 
                 OutlinedTextField(
                     value = goalText,
@@ -425,7 +484,7 @@ fun AddCategoryDialog(
                     val goal = goalText.toFloatOrNull()
                     val min = minGoalText.toFloatOrNull()
                     val max = maxGoalText.toFloatOrNull()
-                    onConfirm(name.trim(), desc.trim(), goal, min, max)
+                    onConfirm(name.trim(), desc.trim(), goal, min, max, selectedColorHex)
                 },
                 enabled = name.isNotBlank() && !isLoading,
                 colors = ButtonDefaults.buttonColors(containerColor = AceRed)

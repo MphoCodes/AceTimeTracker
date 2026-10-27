@@ -11,10 +11,10 @@ class CategoryRepository(
 
     companion object {
         private val mockCategories = mutableListOf(
-            Category("mock_cat_1", "Development", "Android App development and refactoring", 2f, 6f, 4f),
-            Category("mock_cat_2", "Design", "UI/UX wireframing and prototyping", 1f, 4f, 2f),
-            Category("mock_cat_3", "Testing", "Unit testing and QA verification", 1f, 3f, 2f),
-            Category("mock_cat_4", "Documentation", "Architecture and user documentation", 1f, 2f, 1.5f)
+            Category("mock_cat_1", "Development", "Android App development and refactoring", 2f, 6f, 4f, "#2563EB"),
+            Category("mock_cat_2", "Design", "UI/UX wireframing and prototyping", 1f, 4f, 2f, "#F59E0B"),
+            Category("mock_cat_3", "Testing", "Unit testing and QA verification", 1f, 3f, 2f, "#10B981"),
+            Category("mock_cat_4", "Documentation", "Architecture and user documentation", 1f, 2f, 1.5f, "#8B5CF6")
         )
     }
 
@@ -43,7 +43,8 @@ class CategoryRepository(
                         description = doc.getString("description").orEmpty(),
                         minGoal = doc.getDouble("minGoal")?.toFloat(),
                         maxGoal = doc.getDouble("maxGoal")?.toFloat(),
-                        goal = doc.getDouble("goal")?.toFloat()
+                        goal = doc.getDouble("goal")?.toFloat(),
+                        colorHex = doc.getString("colorHex") ?: "#DC2626"
                     )
                 }
                 onResult(Resource.Success(categories))
@@ -75,6 +76,7 @@ class CategoryRepository(
             "goal" to category.goal,
             "minGoal" to category.minGoal,
             "maxGoal" to category.maxGoal,
+            "colorHex" to category.colorHex,
             "timeSpent" to 0L
         )
 

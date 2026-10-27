@@ -21,6 +21,9 @@ class TimesheetViewModel(
     private val _categoriesState = MutableLiveData<Resource<List<Category>>>()
     val categoriesState: LiveData<Resource<List<Category>>> = _categoriesState
 
+    private val _timesheetsState = MutableLiveData<Resource<List<TimesheetEntry>>>()
+    val timesheetsState: LiveData<Resource<List<TimesheetEntry>>> = _timesheetsState
+
     private val _uploadImageState = MutableLiveData<Resource<String>>()
     val uploadImageState: LiveData<Resource<String>> = _uploadImageState
 
@@ -37,6 +40,28 @@ class TimesheetViewModel(
         }
         categoryRepository.fetchCategories(userId) { result ->
             _categoriesState.value = result
+        }
+    }
+
+    fun loadTimesheets() {
+        val userId = authRepository.currentUserId
+        if (userId.isEmpty()) {
+            _timesheetsState.value = Resource.Error("User not authenticated")
+            return
+        }
+        _timesheetsState.value = Resource.Loading
+        timesheetRepository.fetchTimesheets(userId) { result ->
+            _timesheetsState.value = result
+        }
+    }
+
+    fun deleteTimesheet(entryId: String) {
+        val userId = authRepository.currentUserId
+        if (userId.isEmpty() || entryId.isEmpty()) return
+        timesheetRepository.deleteTimesheetEntry(userId, entryId) { result ->
+            if (result is Resource.Success) {
+                loadTimesheets()
+            }
         }
     }
 

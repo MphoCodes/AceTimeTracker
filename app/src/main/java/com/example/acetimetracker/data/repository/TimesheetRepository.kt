@@ -223,4 +223,27 @@ class TimesheetRepository(
                 onResult(Resource.Error(exception.localizedMessage ?: "Failed to fetch chart data", exception))
             }
     }
+
+    fun deleteTimesheetEntry(userId: String, entryId: String, onResult: (Resource<Unit>) -> Unit) {
+        if (userId.isEmpty()) {
+            onResult(Resource.Error("User not authenticated"))
+            return
+        }
+
+        if (userId == AuthRepository.TEST_USER_ID) {
+            mockTimesheets.removeAll { it.id == entryId }
+            onResult(Resource.Success(Unit))
+            return
+        }
+
+        onResult(Resource.Loading)
+        firestore.collection("timesheetEntries").document(entryId)
+            .delete()
+            .addOnSuccessListener {
+                onResult(Resource.Success(Unit))
+            }
+            .addOnFailureListener { exception ->
+                onResult(Resource.Error(exception.localizedMessage ?: "Failed to delete timesheet entry", exception))
+            }
+    }
 }

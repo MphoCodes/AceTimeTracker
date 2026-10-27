@@ -10,5 +10,6 @@ data class Category(
     val description: String = "",
     val minGoal: Float? = null,
     val maxGoal: Float? = null,
-    val goal: Float? = null
+    val goal: Float? = null,
+    val colorHex: String = "#DC2626"
 ) : Parcelable
