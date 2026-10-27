@@ -305,7 +305,7 @@ fun StopwatchView(
         }
     }
 
-    // Controls
+    // Controls - Centered with symmetric balancing
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
@@ -341,6 +341,11 @@ fun StopwatchView(
                 modifier = Modifier.size(34.dp)
             )
         }
+
+        Spacer(modifier = Modifier.width(28.dp))
+
+        // Balance spacer ensuring the Start/Pause FAB is centered
+        Spacer(modifier = Modifier.size(52.dp))
     }
 
     // Goals Card

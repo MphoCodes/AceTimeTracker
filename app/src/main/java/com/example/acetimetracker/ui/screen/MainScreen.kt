@@ -439,7 +439,8 @@ fun MainScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Log Entry", fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
-            }
+            },
+            floatingActionButtonPosition = FabPosition.Center
         ) { paddingValues ->
             Column(
                 modifier = Modifier

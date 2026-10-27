@@ -103,7 +103,8 @@ fun CategoriesScreen(
             ) {
                 Icon(Lucide.Plus, contentDescription = "Add Category", modifier = Modifier.size(24.dp))
             }
-        }
+        },
+        floatingActionButtonPosition = FabPosition.Center
     ) { paddingValues ->
         Box(
             modifier = Modifier
