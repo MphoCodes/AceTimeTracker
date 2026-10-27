@@ -58,7 +58,6 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun AceTimeTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Keep false to preserve AceTimeTracker's authentic red identity
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
@@ -68,9 +67,9 @@ fun AceTimeTrackerTheme(
         SideEffect {
             val window = (view.context as? Activity)?.window
             if (window != null) {
-                // Keep the signature AceRed status bar
-                window.statusBarColor = AceRed.toArgb()
-                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+                // Sleek edge status bar with appropriate icon theme
+                window.statusBarColor = colorScheme.surface.toArgb()
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             }
         }
     }
