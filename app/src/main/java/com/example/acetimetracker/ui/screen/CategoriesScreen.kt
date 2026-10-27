@@ -30,6 +30,7 @@ import com.example.acetimetracker.data.model.Category
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.border
 import androidx.compose.ui.draw.clip
+import com.example.acetimetracker.ui.components.AceAlertDialog
 import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
 
@@ -156,7 +157,7 @@ fun CategoriesScreen(
                             Button(
                                 onClick = { showAddDialog = true },
                                 colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White),
-                                modifier = Modifier.height(48.dp)
+                                modifier = Modifier.heightIn(min = 48.dp)
                             ) {
                                 Icon(Lucide.Plus, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -214,7 +215,7 @@ fun CategoriesScreen(
     // Details Dialog
     if (selectedCategoryForDetails != null) {
         val cat = selectedCategoryForDetails!!
-        AlertDialog(
+        AceAlertDialog(
             onDismissRequest = { selectedCategoryForDetails = null },
             icon = { Icon(Lucide.Folder, contentDescription = null, tint = parseHexColor(cat.colorHex), modifier = Modifier.size(24.dp)) },
             title = { Text(cat.name, fontWeight = FontWeight.Bold) },
@@ -252,7 +253,7 @@ fun CategoriesScreen(
     // Delete Confirmation Dialog
     if (categoryToDelete != null) {
         val cat = categoryToDelete!!
-        AlertDialog(
+        AceAlertDialog(
             onDismissRequest = { categoryToDelete = null },
             icon = { Icon(Lucide.Trash2, contentDescription = null, tint = AceRed, modifier = Modifier.size(24.dp)) },
             title = { Text("Delete Category?") },
@@ -396,7 +397,7 @@ fun AddCategoryDialog(
     var maxGoalText by remember { mutableStateOf("") }
     var selectedColorHex by remember { mutableStateOf(CATEGORY_PALETTES.first().first) }
 
-    AlertDialog(
+    AceAlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("New category", fontWeight = FontWeight.Bold) },
         text = {

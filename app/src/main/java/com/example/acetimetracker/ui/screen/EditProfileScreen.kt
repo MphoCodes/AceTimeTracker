@@ -183,7 +183,7 @@ fun EditProfileScreen(
                 enabled = displayName.isNotBlank() && email.isNotBlank() && !isSaving,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
+                    .heightIn(min = 50.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White)
             ) {

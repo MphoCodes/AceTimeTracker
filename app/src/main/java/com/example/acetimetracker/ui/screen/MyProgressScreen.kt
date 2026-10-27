@@ -91,7 +91,7 @@ fun MyProgressScreen(
                             label = { Text(p.label, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(40.dp),
+                                .heightIn(min = 40.dp),
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                                 selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer

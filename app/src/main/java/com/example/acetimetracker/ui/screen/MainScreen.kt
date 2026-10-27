@@ -52,6 +52,7 @@ import com.example.acetimetracker.ui.components.AceCard
 import com.example.acetimetracker.ui.components.IconBadge
 import com.example.acetimetracker.ui.components.SectionLabel
 import com.example.acetimetracker.ui.components.StatTile
+import com.example.acetimetracker.ui.components.AceAlertDialog
 import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.TimeUtils
 import kotlinx.coroutines.launch
@@ -125,7 +126,7 @@ fun MainScreen(
     }
 
     if (showLogoutDialog) {
-        AlertDialog(
+        AceAlertDialog(
             onDismissRequest = { showLogoutDialog = false },
             icon = { Icon(Lucide.LogOut, contentDescription = null) },
             title = { Text("Log out?") },
@@ -367,26 +368,28 @@ private fun TodayHeroCard(
                     onClick = onStartTimer,
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp),
+                        .heightIn(min = 48.dp),
                     shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = AceRedDark)
                 ) {
                     Icon(Lucide.Play, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Start timer", fontWeight = FontWeight.Bold)
+                    Text("Start timer", fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
                 }
                 OutlinedButton(
                     onClick = onLogManually,
                     modifier = Modifier
                         .weight(1f)
-                        .height(48.dp),
+                        .heightIn(min = 48.dp),
                     shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp),
                     border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
                 ) {
                     Icon(Lucide.Plus, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Log time", fontWeight = FontWeight.SemiBold)
+                    Text("Log time", fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false)
                 }
             }
         }

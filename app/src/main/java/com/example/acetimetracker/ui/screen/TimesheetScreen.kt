@@ -1,7 +1,5 @@
 package com.example.acetimetracker.ui.screen
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -40,6 +38,9 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.acetimetracker.data.model.Category
 import com.example.acetimetracker.data.model.TimesheetEntry
+import com.example.acetimetracker.ui.components.AceDatePickerDialog
+import com.example.acetimetracker.ui.components.AceTimePickerDialog
+import com.example.acetimetracker.ui.components.AceAlertDialog
 import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
 import com.example.acetimetracker.util.TimeUtils
@@ -47,6 +48,8 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+
+private enum class PickerTarget { StartDate, StartTime, EndDate, EndTime }
 
 enum class DateFilterPeriod(val label: String) {
     ALL("All Time"),
@@ -130,31 +133,7 @@ fun TimesheetScreen(
         filteredTimesheets.sumOf { it.timeSpent }
     }
 
-    fun showDatePicker(onDateSelected: (String) -> Unit) {
-        val cal = Calendar.getInstance()
-        DatePickerDialog(
-            context,
-            { _, year, month, day ->
-                onDateSelected(String.format(Locale.US, "%04d-%02d-%02d", year, month + 1, day))
-            },
-            cal.get(Calendar.YEAR),
-            cal.get(Calendar.MONTH),
-            cal.get(Calendar.DAY_OF_MONTH)
-        ).show()
-    }
-
-    fun showTimePicker(onTimeSelected: (String) -> Unit) {
-        val cal = Calendar.getInstance()
-        TimePickerDialog(
-            context,
-            { _, hour, minute ->
-                onTimeSelected(String.format(Locale.US, "%02d:%02d", hour, minute))
-            },
-            cal.get(Calendar.HOUR_OF_DAY),
-            cal.get(Calendar.MINUTE),
-            true
-        ).show()
-    }
+    var activePicker by remember { mutableStateOf<PickerTarget?>(null) }
 
     Scaffold(
         topBar = {
@@ -325,14 +304,14 @@ fun TimesheetScreen(
                                     value = startDate,
                                     label = "Start date",
                                     icon = Lucide.Calendar,
-                                    onClick = { showDatePicker { startDate = it; if (endDate < it) endDate = it } },
+                                    onClick = { activePicker = PickerTarget.StartDate },
                                     modifier = Modifier.weight(1f)
                                 )
                                 PickerField(
                                     value = startTime,
                                     label = "Start time",
                                     icon = Lucide.Clock,
-                                    onClick = { showTimePicker { startTime = it } },
+                                    onClick = { activePicker = PickerTarget.StartTime },
                                     modifier = Modifier.weight(1f)
                                 )
                             }
@@ -346,14 +325,14 @@ fun TimesheetScreen(
                                     value = endDate,
                                     label = "End date",
                                     icon = Lucide.Calendar,
-                                    onClick = { showDatePicker { endDate = it } },
+                                    onClick = { activePicker = PickerTarget.EndDate },
                                     modifier = Modifier.weight(1f)
                                 )
                                 PickerField(
                                     value = endTime,
                                     label = "End time",
                                     icon = Lucide.Clock,
-                                    onClick = { showTimePicker { endTime = it } },
+                                    onClick = { activePicker = PickerTarget.EndTime },
                                     modifier = Modifier.weight(1f)
                                 )
                             }
@@ -523,7 +502,7 @@ fun TimesheetScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp),
+                            .heightIn(min = 50.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White),
                         enabled = canSave
@@ -740,6 +719,43 @@ fun TimesheetScreen(
             }
         }
 
+        when (activePicker) {
+            PickerTarget.StartDate -> AceDatePickerDialog(
+                initialDate = startDate,
+                onDismiss = { activePicker = null },
+                onConfirm = {
+                    startDate = it
+                    if (endDate < it) endDate = it
+                    activePicker = null
+                }
+            )
+            PickerTarget.EndDate -> AceDatePickerDialog(
+                initialDate = endDate,
+                onDismiss = { activePicker = null },
+                onConfirm = {
+                    endDate = it
+                    activePicker = null
+                }
+            )
+            PickerTarget.StartTime -> AceTimePickerDialog(
+                initialTime = startTime,
+                onDismiss = { activePicker = null },
+                onConfirm = {
+                    startTime = it
+                    activePicker = null
+                }
+            )
+            PickerTarget.EndTime -> AceTimePickerDialog(
+                initialTime = endTime,
+                onDismiss = { activePicker = null },
+                onConfirm = {
+                    endTime = it
+                    activePicker = null
+                }
+            )
+            null -> Unit
+        }
+
         // Full Screen Image Dialog
         if (fullScreenImageUrl != null) {
             Dialog(onDismissRequest = { fullScreenImageUrl = null }) {
@@ -772,7 +788,7 @@ fun TimesheetScreen(
 
         // Delete Confirmation Dialog
         if (entryToDelete != null) {
-            AlertDialog(
+            AceAlertDialog(
                 onDismissRequest = { entryToDelete = null },
                 title = { Text("Delete Entry?", fontWeight = FontWeight.Bold) },
                 text = {

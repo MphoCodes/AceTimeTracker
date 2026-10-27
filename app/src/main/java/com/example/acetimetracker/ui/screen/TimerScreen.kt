@@ -40,6 +40,7 @@ import com.example.acetimetracker.data.model.Category
 import com.example.acetimetracker.ui.components.AceCard
 import com.example.acetimetracker.ui.components.AceTopBar
 import com.example.acetimetracker.ui.components.SectionLabel
+import com.example.acetimetracker.ui.components.AceAlertDialog
 import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
 import com.example.acetimetracker.util.TimeUtils
@@ -175,7 +176,7 @@ fun TimerScreen(
                 enabled = !isSaving && unsaved >= 1000L && selectedCategory.isNotBlank(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
+                    .heightIn(min = 52.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White)
             ) {
@@ -192,7 +193,7 @@ fun TimerScreen(
                         },
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        maxLines = 1
+                        maxLines = 2
                     )
                 }
             }
@@ -200,7 +201,7 @@ fun TimerScreen(
     }
 
     if (showLeaveDialog) {
-        AlertDialog(
+        AceAlertDialog(
             onDismissRequest = { showLeaveDialog = false },
             title = { Text("Leave without saving?") },
             text = { Text("You have ${TimeUtils.formatDurationShort(unsaved).let { if (it == "0m") "less than a minute" else it }} that hasn't been saved. Leaving will discard it.") },
@@ -283,7 +284,7 @@ private fun CategoryPicker(
                             selectedBorderColor = color,
                             selectedBorderWidth = 1.5.dp
                         ),
-                        modifier = Modifier.height(40.dp)
+                        modifier = Modifier.heightIn(min = 40.dp)
                     )
                 }
             }
@@ -431,7 +432,7 @@ fun PomodoroView(
                 },
                 modifier = Modifier
                     .weight(1f)
-                    .height(40.dp),
+                    .heightIn(min = 40.dp),
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                     selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer

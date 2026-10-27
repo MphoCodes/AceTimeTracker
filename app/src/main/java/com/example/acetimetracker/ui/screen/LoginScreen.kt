@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.acetimetracker.R
+import com.example.acetimetracker.ui.components.AceAlertDialog
 import com.example.acetimetracker.ui.theme.AceRed
 import com.example.acetimetracker.ui.theme.AceRedLight
 import com.example.acetimetracker.util.Resource
@@ -191,7 +192,7 @@ fun LoginScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp),
+                            .heightIn(min = 50.dp),
                         enabled = !isLoading,
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
@@ -283,7 +284,7 @@ fun LoginScreen(
 
         // Forgot Password Dialog
         if (showForgotDialog) {
-            AlertDialog(
+            AceAlertDialog(
                 onDismissRequest = { showForgotDialog = false },
                 title = { Text("Reset Password", fontWeight = FontWeight.Bold) },
                 text = {
