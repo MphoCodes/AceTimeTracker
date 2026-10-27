@@ -27,6 +27,7 @@ class TimerActivity : AppCompatActivity() {
 
     private val categoryViewModel: CategoryViewModel by viewModels()
     private val userRepository = UserRepository()
+    private val authRepository = com.example.acetimetracker.data.repository.AuthRepository()
     private val firestore = FirebaseFirestore.getInstance()
 
     private lateinit var timerTextView: TextView
@@ -165,12 +166,12 @@ class TimerActivity : AppCompatActivity() {
         val selectedCategory = categorySpinner.selectedItem?.toString().orEmpty()
 
         if (minGoal != null && maxGoal != null && minGoal <= maxGoal) {
-            val userId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+            val userId = authRepository.currentUserId
             userRepository.updateUserGoals(userId, minGoal, maxGoal) {
                 // Goals updated
             }
 
-            if (selectedCategory.isNotEmpty()) {
+            if (selectedCategory.isNotEmpty() && !authRepository.isMockSession) {
                 val totalTimeRef = firestore.collection("Category").document(selectedCategory)
                 totalTimeRef.get().addOnSuccessListener { doc ->
                     val currentTotal = doc.getLong("totalTime") ?: 0L

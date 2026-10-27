@@ -3,19 +3,19 @@ package com.example.acetimetracker.ui.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.acetimetracker.data.model.AuthUser
 import com.example.acetimetracker.data.repository.AuthRepository
 import com.example.acetimetracker.util.Resource
-import com.google.firebase.auth.FirebaseUser
 
 class AuthViewModel(
     private val authRepository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
-    private val _loginState = MutableLiveData<Resource<FirebaseUser>>()
-    val loginState: LiveData<Resource<FirebaseUser>> = _loginState
+    private val _loginState = MutableLiveData<Resource<AuthUser>>()
+    val loginState: LiveData<Resource<AuthUser>> = _loginState
 
-    private val _registerState = MutableLiveData<Resource<FirebaseUser>>()
-    val registerState: LiveData<Resource<FirebaseUser>> = _registerState
+    private val _registerState = MutableLiveData<Resource<AuthUser>>()
+    val registerState: LiveData<Resource<AuthUser>> = _registerState
 
     private val _passwordResetState = MutableLiveData<Resource<Unit>>()
     val passwordResetState: LiveData<Resource<Unit>> = _passwordResetState
@@ -25,6 +25,12 @@ class AuthViewModel(
 
     val currentUserId: String
         get() = authRepository.currentUserId
+
+    fun loginTestAccount() {
+        authRepository.loginTestAccount { result ->
+            _loginState.value = result
+        }
+    }
 
     fun login(email: String, password: String) {
         if (email.isBlank() || password.isBlank()) {

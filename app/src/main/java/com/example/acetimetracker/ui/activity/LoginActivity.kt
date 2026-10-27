@@ -25,11 +25,16 @@ class LoginActivity : AppCompatActivity() {
         val etEmail = findViewById<EditText>(R.id.etEmail)
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val btnLogin = findViewById<Button>(R.id.btnLogin)
+        val btnTestLogin = findViewById<Button>(R.id.btnTestLogin)
 
         btnLogin.setOnClickListener {
             val email = etEmail.text.toString()
             val password = etPassword.text.toString()
             viewModel.login(email, password)
+        }
+
+        btnTestLogin.setOnClickListener {
+            viewModel.loginTestAccount()
         }
 
         observeViewModel()

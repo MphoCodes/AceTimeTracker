@@ -20,7 +20,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="455dp"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp"
             tools:ignore="TextSizeCheck">
@@ -89,10 +89,19 @@
 
             <Button
                 android:id="@+id/btnRegister"
-android:backgroundTint="@color/red"
+                android:backgroundTint="@color/red"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/btn_register" />
+
+            <Button
+                android:id="@+id/btnTestLogin"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Quick Test Login (Bypass Server)"
+                android:textColor="@color/red" />
 
             <TextView
                 android:id="@+id/tvLoginLink"

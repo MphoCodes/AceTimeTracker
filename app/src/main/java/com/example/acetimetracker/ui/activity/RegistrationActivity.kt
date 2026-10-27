@@ -28,6 +28,7 @@ class RegistrationActivity : AppCompatActivity() {
         val etPassword = findViewById<EditText>(R.id.etPassword)
         val etConfirmPassword = findViewById<EditText>(R.id.etConfirmPassword)
         val btnRegister = findViewById<Button>(R.id.btnRegister)
+        val btnTestLogin = findViewById<Button>(R.id.btnTestLogin)
         val tvLoginLink = findViewById<TextView>(R.id.tvLoginLink)
 
         val loginLinkText = SpannableString(tvLoginLink.text)
@@ -47,6 +48,10 @@ class RegistrationActivity : AppCompatActivity() {
             viewModel.register(email, password, confirm)
         }
 
+        btnTestLogin.setOnClickListener {
+            viewModel.loginTestAccount()
+        }
+
         observeViewModel()
     }
 
@@ -59,6 +64,20 @@ class RegistrationActivity : AppCompatActivity() {
                 is Resource.Success -> {
                     Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
                     startActivity(Intent(this, LoginActivity::class.java))
+                    finish()
+                }
+                is Resource.Error -> {
+                    Toast.makeText(this, resource.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        viewModel.loginState.observe(this) { resource ->
+            when (resource) {
+                is Resource.Loading -> {}
+                is Resource.Success -> {
+                    Toast.makeText(this, "Logged in with test account!", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, MainActivity::class.java))
                     finish()
                 }
                 is Resource.Error -> {
