@@ -9,6 +9,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,25 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.composables.icons.lucide.CalendarDays
-import com.composables.icons.lucide.ChartPie
-import com.composables.icons.lucide.ChevronRight
-import com.composables.icons.lucide.Clock
-import com.composables.icons.lucide.FileText
-import com.composables.icons.lucide.Flame
-import com.composables.icons.lucide.Folder
-import com.composables.icons.lucide.FolderPlus
-import com.composables.icons.lucide.House
-import com.composables.icons.lucide.Info
-import com.composables.icons.lucide.LogOut
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Menu
-import com.composables.icons.lucide.Play
-import com.composables.icons.lucide.Plus
-import com.composables.icons.lucide.Settings
-import com.composables.icons.lucide.Timer
-import com.composables.icons.lucide.TrendingUp
-import com.composables.icons.lucide.User
 import com.example.acetimetracker.R
 import com.example.acetimetracker.data.model.Category
 import com.example.acetimetracker.data.model.TimesheetEntry
@@ -65,18 +49,18 @@ private data class DrawerItem(val title: String, val icon: ImageVector, val dest
 
 private val drawerSections = listOf(
     "Track" to listOf(
-        DrawerItem("Timer", Lucide.Timer, Destination.Timer),
-        DrawerItem("Timesheet", Lucide.FileText, Destination.Timesheet),
-        DrawerItem("Categories", Lucide.Folder, Destination.Categories)
+        DrawerItem("Timer", PhosphorIcons.Regular.Timer, Destination.Timer),
+        DrawerItem("Timesheet", PhosphorIcons.Regular.FileText, Destination.Timesheet),
+        DrawerItem("Categories", PhosphorIcons.Regular.Folder, Destination.Categories)
     ),
     "Insights" to listOf(
-        DrawerItem("Goal progress", Lucide.TrendingUp, Destination.MyProgress),
-        DrawerItem("Time breakdown", Lucide.ChartPie, Destination.Graph)
+        DrawerItem("Goal progress", PhosphorIcons.Regular.ChartLineUp, Destination.MyProgress),
+        DrawerItem("Time breakdown", PhosphorIcons.Regular.ChartPie, Destination.Graph)
     ),
     "Account" to listOf(
-        DrawerItem("Profile", Lucide.User, Destination.Profile),
-        DrawerItem("Settings", Lucide.Settings, Destination.Settings),
-        DrawerItem("About", Lucide.Info, Destination.About)
+        DrawerItem("Profile", PhosphorIcons.Regular.User, Destination.Profile),
+        DrawerItem("Settings", PhosphorIcons.Regular.Gear, Destination.Settings),
+        DrawerItem("About", PhosphorIcons.Regular.Info, Destination.About)
     )
 )
 
@@ -128,7 +112,7 @@ fun MainScreen(
     if (showLogoutDialog) {
         AceAlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            icon = { Icon(Lucide.LogOut, contentDescription = null) },
+            icon = { Icon(PhosphorIcons.Regular.SignOut, contentDescription = null) },
             title = { Text("Log out?") },
             text = { Text("You'll need to sign in again to see your sessions.") },
             confirmButton = {
@@ -180,7 +164,7 @@ private fun HomeTopBar(
             },
             navigationIcon = {
                 IconButton(onClick = onMenuClick) {
-                    Icon(Lucide.Menu, contentDescription = "Open menu", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp))
+                    Icon(PhosphorIcons.Regular.List, contentDescription = "Open menu", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp))
                 }
             },
             actions = {
@@ -204,28 +188,28 @@ private fun HomeBottomBar(onNavigate: (Destination) -> Unit) {
         NavigationBarItem(
             selected = true,
             onClick = {},
-            icon = { Icon(Lucide.House, contentDescription = null, modifier = Modifier.size(22.dp)) },
+            icon = { Icon(PhosphorIcons.Regular.House, contentDescription = null, modifier = Modifier.size(22.dp)) },
             label = { Text("Today") },
             colors = itemColors
         )
         NavigationBarItem(
             selected = false,
             onClick = { onNavigate(Destination.Timer) },
-            icon = { Icon(Lucide.Timer, contentDescription = null, modifier = Modifier.size(22.dp)) },
+            icon = { Icon(PhosphorIcons.Regular.Timer, contentDescription = null, modifier = Modifier.size(22.dp)) },
             label = { Text("Timer") },
             colors = itemColors
         )
         NavigationBarItem(
             selected = false,
             onClick = { onNavigate(Destination.Timesheet) },
-            icon = { Icon(Lucide.FileText, contentDescription = null, modifier = Modifier.size(22.dp)) },
+            icon = { Icon(PhosphorIcons.Regular.FileText, contentDescription = null, modifier = Modifier.size(22.dp)) },
             label = { Text("Timesheet") },
             colors = itemColors
         )
         NavigationBarItem(
             selected = false,
             onClick = { onNavigate(Destination.MyProgress) },
-            icon = { Icon(Lucide.TrendingUp, contentDescription = null, modifier = Modifier.size(22.dp)) },
+            icon = { Icon(PhosphorIcons.Regular.ChartLineUp, contentDescription = null, modifier = Modifier.size(22.dp)) },
             label = { Text("Progress") },
             colors = itemColors
         )
@@ -274,14 +258,14 @@ private fun HomeContent(
             StatTile(
                 label = "This week",
                 value = TimeUtils.formatDurationShort(weekMillis),
-                icon = Lucide.CalendarDays,
+                icon = PhosphorIcons.Regular.CalendarDots,
                 accent = AccentBlue,
                 modifier = Modifier.weight(1f)
             )
             StatTile(
                 label = if (streak == 1) "Day streak" else "Days in a row",
                 value = streak.toString(),
-                icon = Lucide.Flame,
+                icon = PhosphorIcons.Regular.Flame,
                 accent = AccentAmber,
                 modifier = Modifier.weight(1f)
             )
@@ -373,7 +357,7 @@ private fun TodayHeroCard(
                     contentPadding = PaddingValues(horizontal = 12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = AceRedDark)
                 ) {
-                    Icon(Lucide.Play, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(PhosphorIcons.Regular.Play, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text("Start timer", fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
                 }
@@ -387,7 +371,7 @@ private fun TodayHeroCard(
                     border = BorderStroke(1.dp, Color.White.copy(alpha = 0.6f)),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
                 ) {
-                    Icon(Lucide.Plus, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(PhosphorIcons.Regular.Plus, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text("Log time", fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false)
                 }
@@ -400,7 +384,7 @@ private fun TodayHeroCard(
 private fun GetStartedCard(onCreateCategory: () -> Unit) {
     AceCard(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconBadge(icon = Lucide.FolderPlus, tint = AceRed)
+            IconBadge(icon = PhosphorIcons.Regular.FolderPlus, tint = AceRed)
             Spacer(modifier = Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text("Set up your first category", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
@@ -428,7 +412,7 @@ private fun CardHeader(title: String, onSeeAll: (() -> Unit)?) {
         if (onSeeAll != null) {
             TextButton(onClick = onSeeAll) {
                 Text("See all", color = MaterialTheme.colorScheme.primary)
-                Icon(Lucide.ChevronRight, contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(PhosphorIcons.Regular.CaretRight, contentDescription = null, modifier = Modifier.size(16.dp))
             }
         }
     }
@@ -524,7 +508,7 @@ private fun RecentSessionsCard(
                         .padding(end = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconBadge(icon = Lucide.Clock, tint = color, size = 36.dp)
+                    IconBadge(icon = PhosphorIcons.Regular.Clock, tint = color, size = 36.dp)
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(entry.category, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
@@ -572,7 +556,7 @@ private fun Avatar(url: String?, size: androidx.compose.ui.unit.Dp, contentDescr
         } else {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
-                    Lucide.User,
+                    PhosphorIcons.Regular.User,
                     contentDescription = contentDescription,
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(size / 2)
@@ -620,7 +604,7 @@ private fun AppDrawer(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Icon(Lucide.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+            Icon(PhosphorIcons.Regular.CaretRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
@@ -651,7 +635,7 @@ private fun AppDrawer(
 
         HorizontalDivider(modifier = Modifier.padding(horizontal = 24.dp), color = MaterialTheme.colorScheme.outlineVariant)
         NavigationDrawerItem(
-            icon = { Icon(Lucide.LogOut, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp)) },
+            icon = { Icon(PhosphorIcons.Regular.SignOut, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(20.dp)) },
             label = { Text("Log out", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold) },
             selected = false,
             onClick = { onNavigate(Destination.Logout) },

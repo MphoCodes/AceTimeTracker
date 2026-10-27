@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,8 +34,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.composables.icons.lucide.ArrowLeft
-import com.composables.icons.lucide.Lucide
 
 /** Standard top app bar used by every secondary screen: back affordance, title, hairline divider. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,7 +71,7 @@ fun AceTopBar(
             navigationIcon = {
                 IconButton(onClick = onBackClick) {
                     Icon(
-                        imageVector = Lucide.ArrowLeft,
+                        imageVector = PhosphorIcons.Regular.ArrowLeft,
                         contentDescription = "Back",
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(22.dp)
@@ -120,15 +121,7 @@ fun IconBadge(
     modifier: Modifier = Modifier,
     size: Dp = 40.dp
 ) {
-    Surface(
-        modifier = modifier.size(size),
-        shape = RoundedCornerShape(size / 4),
-        color = tint.copy(alpha = 0.14f)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = Modifier.size(size / 2))
-        }
-    }
+    Icon(imageVector = icon, contentDescription = null, tint = tint, modifier = modifier.size(size * 0.6f))
 }
 
 /** Centered empty or error state with an optional call to action. */

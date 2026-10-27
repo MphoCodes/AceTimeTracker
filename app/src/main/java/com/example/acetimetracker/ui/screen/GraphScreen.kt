@@ -9,6 +9,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,8 +25,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.composables.icons.lucide.ChartPie
-import com.composables.icons.lucide.Lucide
 import com.example.acetimetracker.data.model.Category
 import com.example.acetimetracker.ui.components.AceCard
 import com.example.acetimetracker.ui.components.AceTopBar
@@ -69,7 +70,7 @@ fun GraphScreen(
                 }
                 chartDataState is Resource.Error -> {
                     EmptyState(
-                        icon = Lucide.ChartPie,
+                        icon = PhosphorIcons.Regular.ChartPie,
                         title = "Couldn't load your data",
                         message = chartDataState.message,
                         modifier = Modifier.align(Alignment.Center)
@@ -77,7 +78,7 @@ fun GraphScreen(
                 }
                 categoryTimeMap.isEmpty() || totalHours <= 0f -> {
                     EmptyState(
-                        icon = Lucide.ChartPie,
+                        icon = PhosphorIcons.Regular.ChartPie,
                         title = "No data yet",
                         message = "Log some time and you'll see how it splits across your categories.",
                         modifier = Modifier.align(Alignment.Center)

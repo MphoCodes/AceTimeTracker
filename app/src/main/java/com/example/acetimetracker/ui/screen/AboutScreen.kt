@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -21,12 +24,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.composables.icons.lucide.ChartPie
-import com.composables.icons.lucide.FileText
-import com.composables.icons.lucide.Folder
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Target
-import com.composables.icons.lucide.Timer
 import com.example.acetimetracker.R
 import com.example.acetimetracker.ui.components.AceCard
 import com.example.acetimetracker.ui.components.AceTopBar
@@ -103,7 +100,7 @@ fun AboutScreen(
 
             AceCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(20.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconBadge(icon = Lucide.Target, tint = AceRed, size = 36.dp)
+                    IconBadge(icon = PhosphorIcons.Regular.Target, tint = AceRed, size = 36.dp)
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = "Small sessions, real progress",
@@ -129,25 +126,25 @@ fun AboutScreen(
                 SectionLabel("What you can do")
 
                 AboutFeatureRow(
-                    icon = Lucide.Timer,
+                    icon = PhosphorIcons.Regular.Timer,
                     title = "Stopwatch & focus timer",
                     description = "Track live, or use Pomodoro rounds with built-in breaks.",
                     accentColor = AceRed
                 )
                 AboutFeatureRow(
-                    icon = Lucide.FileText,
+                    icon = PhosphorIcons.Regular.FileText,
                     title = "Timesheet",
                     description = "Log past sessions with notes and an optional photo, then export them.",
                     accentColor = AccentBlue
                 )
                 AboutFeatureRow(
-                    icon = Lucide.Folder,
+                    icon = PhosphorIcons.Regular.Folder,
                     title = "Categories & goals",
                     description = "Group your time and set target, minimum and maximum hours.",
                     accentColor = AccentAmber
                 )
                 AboutFeatureRow(
-                    icon = Lucide.ChartPie,
+                    icon = PhosphorIcons.Regular.ChartPie,
                     title = "Progress insights",
                     description = "See weekly goal progress, streaks and where your time goes.",
                     accentColor = AccentEmerald

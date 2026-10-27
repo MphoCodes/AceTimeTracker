@@ -9,12 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import com.composables.icons.lucide.Eye
-import com.composables.icons.lucide.EyeOff
-import com.composables.icons.lucide.Lock
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Mail
-import com.composables.icons.lucide.Zap
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -118,7 +115,7 @@ fun LoginScreen(
                         onValueChange = { email = it },
                         label = { Text("Email Address") },
                         leadingIcon = {
-                            Icon(Lucide.Mail, contentDescription = "Email Icon", tint = AceRed, modifier = Modifier.size(20.dp))
+                            Icon(PhosphorIcons.Regular.Envelope, contentDescription = "Email Icon", tint = AceRed, modifier = Modifier.size(20.dp))
                         },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
@@ -136,12 +133,12 @@ fun LoginScreen(
                         onValueChange = { password = it },
                         label = { Text("Password") },
                         leadingIcon = {
-                            Icon(Lucide.Lock, contentDescription = "Password Icon", tint = AceRed, modifier = Modifier.size(20.dp))
+                            Icon(PhosphorIcons.Regular.Lock, contentDescription = "Password Icon", tint = AceRed, modifier = Modifier.size(20.dp))
                         },
                         trailingIcon = {
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
                                 Icon(
-                                    imageVector = if (passwordVisible) Lucide.Eye else Lucide.EyeOff,
+                                    imageVector = if (passwordVisible) PhosphorIcons.Regular.Eye else PhosphorIcons.Regular.EyeSlash,
                                     contentDescription = if (passwordVisible) "Hide password" else "Show password",
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -237,7 +234,7 @@ fun LoginScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        imageVector = Lucide.Zap,
+                        imageVector = PhosphorIcons.Regular.Lightning,
                         contentDescription = "Test Login",
                         tint = AceRed,
                         modifier = Modifier.size(28.dp)

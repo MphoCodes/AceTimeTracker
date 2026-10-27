@@ -10,13 +10,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import com.composables.icons.lucide.ArrowLeft
-import com.composables.icons.lucide.Check
-import com.composables.icons.lucide.Folder
-import com.composables.icons.lucide.FolderOpen
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Plus
-import com.composables.icons.lucide.Trash2
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -81,7 +77,7 @@ fun CategoriesScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
-                            Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp))
+                            Icon(PhosphorIcons.Regular.ArrowLeft, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -97,7 +93,7 @@ fun CategoriesScreen(
                     containerColor = AceRed,
                     contentColor = Color.White,
                     shape = RoundedCornerShape(16.dp),
-                    icon = { Icon(Lucide.Plus, contentDescription = null, modifier = Modifier.size(20.dp)) },
+                    icon = { Icon(PhosphorIcons.Regular.Plus, contentDescription = null, modifier = Modifier.size(20.dp)) },
                     text = { Text("New category", fontWeight = FontWeight.Bold) }
                 )
             }
@@ -133,7 +129,7 @@ fun CategoriesScreen(
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        imageVector = Lucide.FolderOpen,
+                                        imageVector = PhosphorIcons.Regular.FolderOpen,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(36.dp)
@@ -159,7 +155,7 @@ fun CategoriesScreen(
                                 colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White),
                                 modifier = Modifier.heightIn(min = 48.dp)
                             ) {
-                                Icon(Lucide.Plus, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Icon(PhosphorIcons.Regular.Plus, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Create your first category", fontWeight = FontWeight.Bold)
                             }
@@ -217,7 +213,7 @@ fun CategoriesScreen(
         val cat = selectedCategoryForDetails!!
         AceAlertDialog(
             onDismissRequest = { selectedCategoryForDetails = null },
-            icon = { Icon(Lucide.Folder, contentDescription = null, tint = parseHexColor(cat.colorHex), modifier = Modifier.size(24.dp)) },
+            icon = { Icon(PhosphorIcons.Regular.Folder, contentDescription = null, tint = parseHexColor(cat.colorHex), modifier = Modifier.size(24.dp)) },
             title = { Text(cat.name, fontWeight = FontWeight.Bold) },
             text = {
                 Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
@@ -255,7 +251,7 @@ fun CategoriesScreen(
         val cat = categoryToDelete!!
         AceAlertDialog(
             onDismissRequest = { categoryToDelete = null },
-            icon = { Icon(Lucide.Trash2, contentDescription = null, tint = AceRed, modifier = Modifier.size(24.dp)) },
+            icon = { Icon(PhosphorIcons.Regular.Trash, contentDescription = null, tint = AceRed, modifier = Modifier.size(24.dp)) },
             title = { Text("Delete Category?") },
             text = { Text("'${cat.name}' will be removed. Sessions you already logged keep their history.") },
             confirmButton = {
@@ -301,19 +297,13 @@ fun CategoryCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = catColor.copy(alpha = 0.15f),
-                modifier = Modifier.size(46.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.size(46.dp), contentAlignment = Alignment.Center) {
                     Icon(
-                        imageVector = Lucide.Folder,
+                        imageVector = PhosphorIcons.Regular.Folder,
                         contentDescription = null,
                         tint = catColor,
                         modifier = Modifier.size(24.dp)
                     )
-                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -351,7 +341,7 @@ fun CategoryCard(
 
             IconButton(onClick = onDeleteClick) {
                 Icon(
-                    imageVector = Lucide.Trash2,
+                    imageVector = PhosphorIcons.Regular.Trash,
                     contentDescription = "Delete ${category.name}",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp)
@@ -451,7 +441,7 @@ fun AddCategoryDialog(
                         ) {
                             if (isSelected) {
                                 Icon(
-                                    imageVector = Lucide.Check,
+                                    imageVector = PhosphorIcons.Regular.Check,
                                     contentDescription = "Selected",
                                     tint = Color.White,
                                     modifier = Modifier.size(18.dp)

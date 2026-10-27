@@ -7,6 +7,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,11 +20,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.composables.icons.lucide.ArrowLeft
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Mail
-import com.composables.icons.lucide.Pencil
-import com.composables.icons.lucide.User
 import com.example.acetimetracker.data.model.UserProfile
 import com.example.acetimetracker.ui.theme.*
 import com.example.acetimetracker.util.Resource
@@ -52,7 +50,7 @@ fun ProfileScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
-                            Icon(Lucide.ArrowLeft, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp))
+                            Icon(PhosphorIcons.Regular.ArrowLeft, contentDescription = "Back", tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp))
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
@@ -100,7 +98,7 @@ fun ProfileScreen(
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
-                                        imageVector = Lucide.User,
+                                        imageVector = PhosphorIcons.Regular.User,
                                         contentDescription = "Avatar",
                                         tint = Color.White,
                                         modifier = Modifier.size(54.dp)
@@ -135,7 +133,7 @@ fun ProfileScreen(
                             Column(modifier = Modifier.padding(20.dp)) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
-                                        imageVector = Lucide.User,
+                                        imageVector = PhosphorIcons.Regular.User,
                                         contentDescription = null,
                                         tint = AceRed,
                                         modifier = Modifier.size(20.dp)
@@ -155,7 +153,7 @@ fun ProfileScreen(
 
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
-                                        imageVector = Lucide.Mail,
+                                        imageVector = PhosphorIcons.Regular.Envelope,
                                         contentDescription = null,
                                         tint = AceRed,
                                         modifier = Modifier.size(20.dp)
@@ -183,7 +181,7 @@ fun ProfileScreen(
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White)
                         ) {
-                            Icon(Lucide.Pencil, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(PhosphorIcons.Regular.PencilSimple, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Edit Profile Details", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                         }

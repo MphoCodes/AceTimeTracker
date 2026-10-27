@@ -84,7 +84,7 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.lucide.icons)
+    implementation(libs.phosphor.icons)
     implementation(libs.coil.compose)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)

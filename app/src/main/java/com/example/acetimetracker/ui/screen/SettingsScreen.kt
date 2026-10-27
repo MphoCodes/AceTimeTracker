@@ -7,6 +7,9 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,11 +19,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.composables.icons.lucide.Bell
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Moon
-import com.composables.icons.lucide.Smartphone
-import com.composables.icons.lucide.Sun
 import com.example.acetimetracker.data.repository.SettingsRepository
 import com.example.acetimetracker.ui.components.AceCard
 import com.example.acetimetracker.ui.components.AceTopBar
@@ -31,9 +29,9 @@ import com.example.acetimetracker.ui.theme.*
 private data class ThemeOption(val value: String, val label: String, val description: String, val icon: ImageVector)
 
 private val themeOptions = listOf(
-    ThemeOption(SettingsRepository.THEME_SYSTEM, "System default", "Match your device setting", Lucide.Smartphone),
-    ThemeOption(SettingsRepository.THEME_LIGHT, "Light", "Bright surfaces, dark text", Lucide.Sun),
-    ThemeOption(SettingsRepository.THEME_DARK, "Dark", "Easier on the eyes at night", Lucide.Moon)
+    ThemeOption(SettingsRepository.THEME_SYSTEM, "System default", "Match your device setting", PhosphorIcons.Regular.DeviceMobile),
+    ThemeOption(SettingsRepository.THEME_LIGHT, "Light", "Bright surfaces, dark text", PhosphorIcons.Regular.Sun),
+    ThemeOption(SettingsRepository.THEME_DARK, "Dark", "Easier on the eyes at night", PhosphorIcons.Regular.Moon)
 )
 
 /** Preferences are applied as soon as they change, so there is no separate save step. */
@@ -124,7 +122,7 @@ fun SettingsScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconBadge(icon = Lucide.Bell, tint = AceRed, size = 36.dp)
+                    IconBadge(icon = PhosphorIcons.Regular.Bell, tint = AceRed, size = 36.dp)
                     Spacer(modifier = Modifier.width(14.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text("Live timer notification", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)

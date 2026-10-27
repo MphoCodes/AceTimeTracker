@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,11 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.composables.icons.lucide.CalendarDays
-import com.composables.icons.lucide.Clock
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Target
-import com.composables.icons.lucide.TrendingUp
 import com.example.acetimetracker.data.model.Category
 import com.example.acetimetracker.data.model.TimesheetEntry
 import com.example.acetimetracker.data.repository.TimesheetStats
@@ -110,14 +108,14 @@ fun MyProgressScreen(
                     StatTile(
                         label = "Time tracked",
                         value = TimeUtils.formatDurationShort(totalMillis),
-                        icon = Lucide.Clock,
+                        icon = PhosphorIcons.Regular.Clock,
                         accent = AceRed,
                         modifier = Modifier.weight(1f)
                     )
                     StatTile(
                         label = "Goals met",
                         value = if (goalsSet > 0) "$goalsMet / $goalsSet" else "—",
-                        icon = Lucide.Target,
+                        icon = PhosphorIcons.Regular.Target,
                         accent = AccentEmerald,
                         modifier = Modifier.weight(1f)
                     )
@@ -127,7 +125,7 @@ fun MyProgressScreen(
             if (categories.isEmpty() && !isLoading) {
                 item {
                     EmptyState(
-                        icon = Lucide.TrendingUp,
+                        icon = PhosphorIcons.Regular.ChartLineUp,
                         title = "No goals to track yet",
                         message = "Create a category with a target number of hours, then log time against it."
                     )
@@ -165,7 +163,7 @@ fun MyProgressScreen(
             if (listed.isEmpty() && !isLoading) {
                 item {
                     EmptyState(
-                        icon = Lucide.CalendarDays,
+                        icon = PhosphorIcons.Regular.CalendarDots,
                         title = "No sessions in this period",
                         message = "Try a longer period or log some time."
                     )

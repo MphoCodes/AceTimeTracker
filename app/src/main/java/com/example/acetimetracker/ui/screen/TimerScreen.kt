@@ -10,6 +10,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import com.adamglin.PhosphorIcons
+import com.adamglin.phosphoricons.Regular
+import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,17 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.composables.icons.lucide.Check
-import com.composables.icons.lucide.Coffee
-import com.composables.icons.lucide.Flame
-import com.composables.icons.lucide.FolderPlus
-import com.composables.icons.lucide.Hourglass
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Pause
-import com.composables.icons.lucide.Play
-import com.composables.icons.lucide.RotateCcw
-import com.composables.icons.lucide.SkipForward
-import com.composables.icons.lucide.Timer
 import com.example.acetimetracker.data.model.Category
 import com.example.acetimetracker.ui.components.AceCard
 import com.example.acetimetracker.ui.components.AceTopBar
@@ -125,14 +117,14 @@ fun TimerScreen(
                     selected = mode == TimerMode.STOPWATCH,
                     onClick = { onModeChange(TimerMode.STOPWATCH) },
                     shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                    icon = { Icon(Lucide.Timer, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                    icon = { Icon(PhosphorIcons.Regular.Timer, contentDescription = null, modifier = Modifier.size(16.dp)) },
                     colors = segmentedColors()
                 ) { Text("Stopwatch") }
                 SegmentedButton(
                     selected = mode == TimerMode.POMODORO,
                     onClick = { onModeChange(TimerMode.POMODORO) },
                     shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                    icon = { Icon(Lucide.Hourglass, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                    icon = { Icon(PhosphorIcons.Regular.Hourglass, contentDescription = null, modifier = Modifier.size(16.dp)) },
                     colors = segmentedColors()
                 ) { Text("Focus") }
             }
@@ -183,7 +175,7 @@ fun TimerScreen(
                 if (isSaving) {
                     CircularProgressIndicator(modifier = Modifier.size(22.dp), color = Color.White, strokeWidth = 2.dp)
                 } else {
-                    Icon(Lucide.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(PhosphorIcons.Regular.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = when {
@@ -248,7 +240,7 @@ private fun CategoryPicker(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 FilledTonalButton(onClick = onCreateCategoryClick) {
-                    Icon(Lucide.FolderPlus, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(PhosphorIcons.Regular.FolderPlus, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text("Create category")
                 }
@@ -330,7 +322,7 @@ private fun TimerControls(
         verticalAlignment = Alignment.CenterVertically
     ) {
         FilledTonalIconButton(onClick = onReset, modifier = Modifier.size(56.dp)) {
-            Icon(Lucide.RotateCcw, contentDescription = resetLabel, modifier = Modifier.size(22.dp))
+            Icon(PhosphorIcons.Regular.ArrowCounterClockwise, contentDescription = resetLabel, modifier = Modifier.size(22.dp))
         }
         Spacer(modifier = Modifier.width(28.dp))
         LargeFloatingActionButton(
@@ -340,7 +332,7 @@ private fun TimerControls(
             contentColor = Color.White
         ) {
             Icon(
-                imageVector = if (isRunning) Lucide.Pause else Lucide.Play,
+                imageVector = if (isRunning) PhosphorIcons.Regular.Pause else PhosphorIcons.Regular.Play,
                 contentDescription = if (isRunning) "Pause" else "Start",
                 modifier = Modifier.size(36.dp)
             )
@@ -448,7 +440,7 @@ fun PomodoroView(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                if (isFocus) Lucide.Flame else Lucide.Coffee,
+                if (isFocus) PhosphorIcons.Regular.Flame else PhosphorIcons.Regular.Coffee,
                 contentDescription = null,
                 tint = accent,
                 modifier = Modifier.size(16.dp)
@@ -484,7 +476,7 @@ fun PomodoroView(
         trailing = {
             FilledTonalIconButton(onClick = onSkipPhase, modifier = Modifier.size(56.dp)) {
                 Icon(
-                    Lucide.SkipForward,
+                    PhosphorIcons.Regular.SkipForward,
                     contentDescription = if (isFocus) "Skip to break" else "Skip to focus",
                     modifier = Modifier.size(22.dp)
                 )
