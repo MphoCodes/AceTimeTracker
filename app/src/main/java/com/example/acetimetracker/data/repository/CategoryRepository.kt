@@ -86,10 +86,6 @@ class CategoryRepository(
 
         userCatRef.add(categoryData)
             .addOnSuccessListener { docRef ->
-                firestore.collection("Category")
-                    .document(category.name)
-                    .set(hashMapOf("name" to category.name, "totalTime" to 0L))
-
                 onResult(Resource.Success(docRef.id))
             }
             .addOnFailureListener { exception ->

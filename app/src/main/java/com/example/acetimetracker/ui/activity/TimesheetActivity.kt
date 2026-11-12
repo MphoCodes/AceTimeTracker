@@ -19,7 +19,7 @@ import com.example.acetimetracker.ui.screen.TimesheetScreen
 import com.example.acetimetracker.ui.theme.AceTimeTrackerTheme
 import com.example.acetimetracker.ui.viewmodel.TimesheetViewModel
 import com.example.acetimetracker.util.Resource
-import com.example.acetimetracker.util.TimeUtils
+import com.example.acetimetracker.util.TimesheetCsv
 
 class TimesheetActivity : ComponentActivity() {
 
@@ -67,7 +67,7 @@ class TimesheetActivity : ComponentActivity() {
                     },
                     onRemoveImageClick = {
                         selectedImageUri = null
-                        viewModel.selectedImageUrl = ""
+                        viewModel.clearSelectedImage()
                     },
                     onSaveClick = { category, startDate, startTime, endDate, endTime, description ->
                         viewModel.saveTimesheetEntry(
@@ -104,25 +104,32 @@ class TimesheetActivity : ComponentActivity() {
             return
         }
 
-        val csvBuilder = StringBuilder()
-        csvBuilder.append("Category,Start Date,Start Time,End Date,End Time,Duration,Description\n")
-
-        for (entry in entries) {
-            val durationStr = TimeUtils.formatDuration(entry.timeSpent)
-            val cleanDesc = entry.description.replace("\"", "\"\"")
-            csvBuilder.append("\"${entry.category}\",\"${entry.startDate}\",\"${entry.startTime}\",\"${entry.endDate}\",\"${entry.endTime}\",\"$durationStr\",\"$cleanDesc\"\n")
-        }
+        val csv = TimesheetCsv.export(entries)
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_SUBJECT, "AceTimeTracker - Timesheet Report")
-            putExtra(Intent.EXTRA_TEXT, csvBuilder.toString())
+            putExtra(Intent.EXTRA_TEXT, csv)
         }
 
         startActivity(Intent.createChooser(shareIntent, "Share Timesheet Report via"))
     }
 
     private fun observeViewModel() {
+        viewModel.deleteEntryState.observe(this) { resource ->
+            when (resource) {
+                is Resource.Success -> {
+                    Toast.makeText(this, "Entry deleted", Toast.LENGTH_SHORT).show()
+                    viewModel.consumeDeleteState()
+                }
+                is Resource.Error -> {
+                    Toast.makeText(this, resource.message, Toast.LENGTH_LONG).show()
+                    viewModel.consumeDeleteState()
+                }
+                else -> Unit
+            }
+        }
+
         viewModel.uploadImageState.observe(this) { resource ->
             when (resource) {
                 is Resource.Success -> {
@@ -143,7 +150,7 @@ class TimesheetActivity : ComponentActivity() {
                 is Resource.Success -> {
                     Toast.makeText(this, "Entry saved", Toast.LENGTH_SHORT).show()
                     selectedImageUri = null
-                    viewModel.selectedImageUrl = ""
+                    viewModel.clearSelectedImage()
                     formResetKey++
                     viewModel.consumeSaveState()
                     viewModel.loadTimesheets()

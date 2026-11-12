@@ -15,7 +15,8 @@ import com.example.acetimetracker.util.TimeUtils
 class TimesheetViewModel(
     private val timesheetRepository: TimesheetRepository = TimesheetRepository(),
     private val categoryRepository: CategoryRepository = CategoryRepository(),
-    private val authRepository: AuthRepository = AuthRepository()
+    private val authRepository: AuthRepository = AuthRepository(),
+    private val imageUploader: (Uri, (Resource<String>) -> Unit) -> Unit = timesheetRepository::uploadImage
 ) : ViewModel() {
 
     private val _categoriesState = MutableLiveData<Resource<List<Category>>>()
@@ -30,7 +31,17 @@ class TimesheetViewModel(
     private val _saveEntryState = MutableLiveData<Resource<Unit>?>()
     val saveEntryState: LiveData<Resource<Unit>?> = _saveEntryState
 
+    private val _deleteEntryState = MutableLiveData<Resource<Unit>?>()
+    val deleteEntryState: LiveData<Resource<Unit>?> = _deleteEntryState
+
+    private var deletingEntryId: String? = null
+
+    fun consumeDeleteState() {
+        _deleteEntryState.value = null
+    }
+
     var selectedImageUrl: String = ""
+    private var imageUploadGeneration = 0L
 
     fun loadCategories() {
         val userId = authRepository.currentUserId
@@ -57,21 +68,42 @@ class TimesheetViewModel(
 
     fun deleteTimesheet(entryId: String) {
         val userId = authRepository.currentUserId
-        if (userId.isEmpty() || entryId.isEmpty()) return
+        if (deletingEntryId != null) return
+        if (userId.isEmpty() || entryId.isEmpty()) {
+            _deleteEntryState.value = Resource.Error("Unable to delete this entry. Sign in and refresh your history.")
+            return
+        }
+        deletingEntryId = entryId
+        _deleteEntryState.value = Resource.Loading
         timesheetRepository.deleteTimesheetEntry(userId, entryId) { result ->
-            if (result is Resource.Success) {
-                loadTimesheets()
-            }
+            if (result !is Resource.Loading) deletingEntryId = null
+            _deleteEntryState.value = result
+            if (result is Resource.Success) loadTimesheets()
         }
     }
 
     fun uploadImage(imageUri: Uri) {
-        timesheetRepository.uploadImage(imageUri) { result ->
-            _uploadImageState.value = result
-            if (result is Resource.Success) {
-                selectedImageUrl = result.data
+        val generation = ++imageUploadGeneration
+        selectedImageUrl = ""
+        if (authRepository.isMockSession) {
+            selectedImageUrl = imageUri.toString()
+            _uploadImageState.value = Resource.Success(selectedImageUrl)
+            return
+        }
+        imageUploader(imageUri) { result ->
+            if (generation == imageUploadGeneration) {
+                if (result is Resource.Success) {
+                    selectedImageUrl = result.data
+                }
+                _uploadImageState.value = result
             }
         }
+    }
+
+    fun clearSelectedImage() {
+        imageUploadGeneration++
+        selectedImageUrl = ""
+        _uploadImageState.value = null
     }
 
     fun saveTimesheetEntry(

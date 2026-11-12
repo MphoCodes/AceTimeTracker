@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.example.acetimetracker.AceTimeTrackerApp
 import com.example.acetimetracker.data.model.AuthUser
 import com.example.acetimetracker.util.Resource
+import com.example.acetimetracker.util.isDebuggableBuild
 import com.google.firebase.auth.FirebaseAuth
 
 class AuthRepository(private val auth: FirebaseAuth = FirebaseAuth.getInstance()) {
@@ -27,6 +28,13 @@ class AuthRepository(private val auth: FirebaseAuth = FirebaseAuth.getInstance()
         )
     }
 
+    private val testSessionsEnabled: Boolean
+        get() = try {
+            AceTimeTrackerApp.context.isDebuggableBuild()
+        } catch (_: UninitializedPropertyAccessException) {
+            false
+        }
+
     private val prefs: SharedPreferences? by lazy {
         try {
             AceTimeTrackerApp.context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -37,31 +45,35 @@ class AuthRepository(private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     val currentUserId: String
         get() {
-            val mockId = prefs?.getString(KEY_MOCK_USER_ID, null)
+            val mockId = if (testSessionsEnabled) prefs?.getString(KEY_MOCK_USER_ID, null) else null
             if (!mockId.isNullOrEmpty()) return mockId
             return auth.currentUser?.uid.orEmpty()
         }
 
     val currentUserEmail: String
         get() {
-            val mockEmail = prefs?.getString(KEY_MOCK_USER_EMAIL, null)
+            val mockEmail = if (testSessionsEnabled) prefs?.getString(KEY_MOCK_USER_EMAIL, null) else null
             if (!mockEmail.isNullOrEmpty()) return mockEmail
             return auth.currentUser?.email.orEmpty()
         }
 
     val isAuthenticated: Boolean
         get() {
-            val mockId = prefs?.getString(KEY_MOCK_USER_ID, null)
+            val mockId = if (testSessionsEnabled) prefs?.getString(KEY_MOCK_USER_ID, null) else null
             return !mockId.isNullOrEmpty() || auth.currentUser != null
         }
 
     val isMockSession: Boolean
-        get() = !prefs?.getString(KEY_MOCK_USER_ID, null).isNullOrEmpty()
+        get() = testSessionsEnabled && !prefs?.getString(KEY_MOCK_USER_ID, null).isNullOrEmpty()
 
     fun loginTestAccount(
         email: String = TEST_USER_EMAIL,
         onResult: (Resource<AuthUser>) -> Unit
     ) {
+        if (!testSessionsEnabled) {
+            onResult(Resource.Error("Test sign-in is unavailable in this build"))
+            return
+        }
         onResult(Resource.Loading)
         prefs?.edit()
             ?.putString(KEY_MOCK_USER_ID, TEST_USER_ID)
@@ -75,7 +87,7 @@ class AuthRepository(private val auth: FirebaseAuth = FirebaseAuth.getInstance()
         val normalizedEmail = email.trim().lowercase()
 
         // Check for local test account to bypass remote server
-        if (TEST_ACCOUNTS.containsKey(normalizedEmail) && TEST_ACCOUNTS[normalizedEmail] == password) {
+        if (testSessionsEnabled && TEST_ACCOUNTS.containsKey(normalizedEmail) && TEST_ACCOUNTS[normalizedEmail] == password) {
             loginTestAccount(normalizedEmail, onResult)
             return
         }
@@ -98,7 +110,7 @@ class AuthRepository(private val auth: FirebaseAuth = FirebaseAuth.getInstance()
         val normalizedEmail = email.trim().lowercase()
 
         // Local test account registration bypass
-        if (TEST_ACCOUNTS.containsKey(normalizedEmail)) {
+        if (testSessionsEnabled && TEST_ACCOUNTS.containsKey(normalizedEmail)) {
             loginTestAccount(normalizedEmail, onResult)
             return
         }
@@ -118,7 +130,7 @@ class AuthRepository(private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     fun sendPasswordReset(email: String, onResult: (Resource<Unit>) -> Unit) {
         val normalizedEmail = email.trim().lowercase()
-        if (TEST_ACCOUNTS.containsKey(normalizedEmail)) {
+        if (testSessionsEnabled && TEST_ACCOUNTS.containsKey(normalizedEmail)) {
             onResult(Resource.Success(Unit))
             return
         }

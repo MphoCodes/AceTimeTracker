@@ -50,7 +50,7 @@ enum class DateFilterPeriod(val label: String) {
     THIS_MONTH("This Month")
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TimesheetScreen(
     categoriesState: Resource<List<Category>>?,
@@ -268,9 +268,10 @@ fun TimesheetScreen(
                             )
 
                             // Date Period Filter Chips
-                            Row(
+                            FlowRow(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                maxItemsInEachRow = 2
                             ) {
                                 DateFilterPeriod.entries.forEach { period ->
                                     val isSelected = selectedDatePeriod == period
@@ -282,7 +283,7 @@ fun TimesheetScreen(
                                                 text = period.label,
                                                 style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                maxLines = 1,
+                                                maxLines = 2,
                                                 modifier = Modifier.fillMaxWidth(),
                                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                             )

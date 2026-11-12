@@ -14,3 +14,15 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Local reports, release credentials, and generated packages
+.scratch/
+*.apk
+*.aab
+*.jks
+*.keystore
+*.p12
+keystore.properties
+.env
+.env.*
+!.env.example

@@ -137,15 +137,15 @@ class UserRepository(
                         .addOnSuccessListener { uri ->
                             onResult(Resource.Success(uri.toString()))
                         }
-                        .addOnFailureListener {
-                            onResult(Resource.Success(imageUri.toString()))
+                        .addOnFailureListener { exception ->
+                            onResult(Resource.Error("Could not retrieve the uploaded profile photo. Please try again.", exception))
                         }
                 }
-                .addOnFailureListener {
-                    onResult(Resource.Success(imageUri.toString()))
+                .addOnFailureListener { exception ->
+                    onResult(Resource.Error("Could not upload the profile photo. Please try again.", exception))
                 }
-        } catch (e: Exception) {
-            onResult(Resource.Success(imageUri.toString()))
+        } catch (exception: Exception) {
+            onResult(Resource.Error("Could not upload the profile photo. Please try again.", exception))
         }
     }
 }

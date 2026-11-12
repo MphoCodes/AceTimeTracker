@@ -45,13 +45,7 @@ class TimerForegroundService : Service() {
         }
 
         fun stop(context: Context) {
-            val intent = Intent(context, TimerForegroundService::class.java).apply {
-                action = ACTION_STOP
-            }
-            try {
-                context.startService(intent)
-            } catch (_: Exception) {
-            }
+            context.stopService(Intent(context, TimerForegroundService::class.java))
         }
     }
 

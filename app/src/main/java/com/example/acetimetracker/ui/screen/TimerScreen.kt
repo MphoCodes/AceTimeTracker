@@ -94,9 +94,11 @@ fun TimerScreen(
         }
     }
 
-    // Leaving discards in-progress time, so confirm first.
-    BackHandler(enabled = isRunning || unsaved >= 1000L) { showLeaveDialog = true }
-    val requestBack = { if (isRunning || unsaved >= 1000L) showLeaveDialog = true else onBackClick() }
+    // Leaving pauses the session and keeps a local draft for this account.
+    BackHandler(enabled = isSaving || isRunning || unsaved >= 1000L) { showLeaveDialog = true }
+    val requestBack = {
+        if (isSaving || isRunning || unsaved >= 1000L) showLeaveDialog = true else onBackClick()
+    }
 
     Scaffold(
         topBar = { AceTopBar(title = "Timer", onBackClick = requestBack) },
@@ -195,16 +197,16 @@ fun TimerScreen(
     if (showLeaveDialog) {
         AceAlertDialog(
             onDismissRequest = { showLeaveDialog = false },
-            title = { Text("Leave without saving?") },
-            text = { Text("You have ${TimeUtils.formatDurationShort(unsaved).let { if (it == "0m") "less than a minute" else it }} that hasn't been saved. Leaving will discard it.") },
+            title = { Text(if (isSaving) "Leave while saving?" else "Pause and leave?") },
+            text = { if (isSaving) Text("Your save is still pending. A local draft is kept so you can return and retry safely.") else Text("You have ${TimeUtils.formatDurationShort(unsaved).let { if (it == "0m") "less than a minute" else it }} that hasn't been saved. Leaving pauses the timer and keeps a draft on this device.") },
             confirmButton = {
                 TextButton(onClick = {
                     showLeaveDialog = false
                     onBackClick()
-                }) { Text("Discard", color = MaterialTheme.colorScheme.error) }
+                }) { Text(if (isSaving) "Leave" else "Pause and leave") }
             },
             dismissButton = {
-                TextButton(onClick = { showLeaveDialog = false }) { Text("Keep timing") }
+                TextButton(onClick = { showLeaveDialog = false }) { Text(if (isSaving) "Stay" else "Keep timing") }
             }
         )
     }

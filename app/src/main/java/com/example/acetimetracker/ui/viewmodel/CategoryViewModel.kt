@@ -52,13 +52,20 @@ class CategoryViewModel(
             return
         }
 
-        if (listOfNotNull(goal, minGoal, maxGoal).any { it < 0f }) {
-            _addCategoryState.value = Resource.Error("Goals can't be negative")
+        if (_addCategoryState.value is Resource.Loading) return
+
+        if (listOfNotNull(goal, minGoal, maxGoal).any { !it.isFinite() || it < 0f }) {
+            _addCategoryState.value = Resource.Error("Goals must be finite, non-negative hours")
             return
         }
 
         if (minGoal != null && maxGoal != null && minGoal > maxGoal) {
             _addCategoryState.value = Resource.Error("Minimum goal can't be more than the maximum")
+            return
+        }
+
+        if (goal != null && ((minGoal != null && goal < minGoal) || (maxGoal != null && goal > maxGoal))) {
+            _addCategoryState.value = Resource.Error("Goal must be within the minimum and maximum")
             return
         }
 

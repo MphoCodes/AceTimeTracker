@@ -5,6 +5,17 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
 }
 
+// Optional release signing. CI and fresh checkouts can still produce unsigned artifacts.
+val releaseSigningKeys = listOf(
+    "ACE_RELEASE_STORE_FILE", "ACE_RELEASE_STORE_PASSWORD",
+    "ACE_RELEASE_KEY_ALIAS", "ACE_RELEASE_KEY_PASSWORD"
+)
+val releaseSigningValues = releaseSigningKeys.associateWith { providers.environmentVariable(it).orNull }
+val hasReleaseSigning = releaseSigningValues.values.all { !it.isNullOrBlank() }
+check(releaseSigningValues.values.all { it.isNullOrBlank() } || hasReleaseSigning) {
+    "Release signing requires all four ACE_RELEASE_* environment variables. See docs/release.md."
+}
+
 android {
     namespace = "com.example.acetimetracker"
     compileSdk = 37
@@ -19,12 +30,24 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(releaseSigningValues.getValue("ACE_RELEASE_STORE_FILE")!!)
+                storePassword = releaseSigningValues.getValue("ACE_RELEASE_STORE_PASSWORD")
+                keyAlias = releaseSigningValues.getValue("ACE_RELEASE_KEY_ALIAS")
+                keyPassword = releaseSigningValues.getValue("ACE_RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
         release {
+            if (hasReleaseSigning) signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

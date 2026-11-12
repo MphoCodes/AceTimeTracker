@@ -66,17 +66,15 @@ class TimesheetRepository(
                         .addOnSuccessListener { uri ->
                             onResult(Resource.Success(uri.toString()))
                         }
-                        .addOnFailureListener {
-                            // Fallback to local URI so testing without server works
-                            onResult(Resource.Success(imageUri.toString()))
+                        .addOnFailureListener { exception ->
+                            onResult(Resource.Error("Could not retrieve the uploaded photo. Please try again.", exception))
                         }
                 }
-                .addOnFailureListener {
-                    // Fallback to local URI so testing without server works
-                    onResult(Resource.Success(imageUri.toString()))
+                .addOnFailureListener { exception ->
+                    onResult(Resource.Error("Could not upload the photo. Please try again.", exception))
                 }
-        } catch (e: Exception) {
-            onResult(Resource.Success(imageUri.toString()))
+        } catch (exception: Exception) {
+            onResult(Resource.Error("Could not upload the photo. Please try again.", exception))
         }
     }
 
@@ -92,15 +90,16 @@ class TimesheetRepository(
 
         // Offline test mode bypass
         if (userId == AuthRepository.TEST_USER_ID) {
-            val generatedId = "mock_ts_${UUID.randomUUID().toString().take(6)}"
+            val generatedId = entry.id.ifBlank { "mock_ts_${UUID.randomUUID()}" }
             val entryWithId = entry.copy(id = generatedId, userId = userId)
+            mockTimesheets.removeAll { it.id == generatedId && it.userId == userId }
             mockTimesheets.add(0, entryWithId)
             onResult(Resource.Success(Unit))
             return
         }
 
         onResult(Resource.Loading)
-        val timesheetDocRef = firestore.collection("timesheetEntries").document()
+        val timesheetDocRef = firestore.collection("timesheetEntries").document(entry.id.ifBlank { UUID.randomUUID().toString() })
         val entryWithId = entry.copy(id = timesheetDocRef.id, userId = userId)
 
         timesheetDocRef.set(entryWithId)

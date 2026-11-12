@@ -2,93 +2,73 @@
 
 ## Prerequisites
 
-- JDK 21 to run Gradle (Android Studio's bundled JBR 21 also works).
-- Android SDK command-line tools, platform **37.0**, build tools **36.0.0**, and
-  platform tools. Minimum supported device API is 27; target API is 36.
-- Network access to Google Maven, Maven Central, the Gradle distribution service,
-  and JitPack for MPAndroidChart.
+- JDK 21 to run Gradle. The Java/Kotlin bytecode target is 17.
+- Android SDK platform **37.0**, build tools **36.0.0**, and platform tools.
+- Android Studio with support for the pinned Android Gradle Plugin.
+- Access to Google Maven, Maven Central, Gradle distributions, and JitPack.
 
-Set `JAVA_HOME` to your JDK installation and `ANDROID_HOME` to your SDK directory.
-Alternatively, select JDK 21 in Android Studio's Gradle settings and set `sdk.dir`
-in an untracked `local.properties`. Never commit machine-specific paths.
+The current checkout pins **Gradle 9.6.0**, **AGP 9.4.1**, and **Kotlin 2.4.21**. The wrapper includes a distribution SHA-256 checksum. Dependencies are in `gradle/libs.versions.toml`; treat that file as the source of truth when versions change.
 
-Install SDK packages with Android Studio's SDK Manager or the command-line tools:
+Set `JAVA_HOME` to your JDK and `ANDROID_HOME` to the SDK, or configure Android Studio's Gradle JDK and an untracked `local.properties` containing `sdk.dir`.
 
 ```sh
 sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0' 'platform-tools'
+./gradlew --version
 ```
 
-The SDK repository names API 37's initial platform `android-37.0`, not
-`android-37`. Resolve and accept the SDK license locally when prompted.
+Minimum device API: **27** (Android 8.1). Compile API: **37**. Target API: **36**.
 
-## Build and verify
-
-From the repository root:
+## Build and test
 
 ```sh
-./gradlew --version
-./gradlew --no-daemon --console=plain \
+./gradlew --console=plain \
   :app:checkDebugAarMetadata \
-  :app:assembleDebug \
-  :app:assembleDebugAndroidTest \
   :app:testDebugUnitTest \
-  :app:lintDebug
+  :app:lintDebug \
+  :app:assembleDebug \
+  :app:assembleDebugAndroidTest
 ```
 
-`./gradlew clean` clears generated project outputs for a clean rebuild. The wrapper
-pins Gradle 9.5.0 with a SHA-256 checksum. `gradle/libs.versions.toml` pins direct
-dependencies and plugins. AGP uses built-in Kotlin, with KGP 2.4.21 explicitly
-aligned; Java/Kotlin bytecode targets 17 independently of the JDK running Gradle.
+- Debug APK: `app/build/outputs/apk/debug/app-debug.apk`
+- Unit test report: `app/build/reports/tests/testDebugUnitTest/index.html`
+- Lint report: `app/build/reports/lint-results-debug.html`
 
-The foundation uses AGP 9.3.3 to include the fixes in that patch. Kotlin 2.4.21's
-published fully tested AGP range ends at 9.3.1, so the metadata, compilation, test,
-and lint checks verify this newer patch combination rather than assuming support.
-See [AGP requirements](https://developer.android.com/build/releases/agp-9-3-0-release-notes),
-[built-in Kotlin](https://developer.android.com/build/migrate-to-built-in-kotlin),
-and [Kotlin compatibility](https://kotlinlang.org/docs/gradle-configure-project.html).
+To run one test class:
 
-Outputs:
+```sh
+./gradlew :app:testDebugUnitTest --tests '*TimerRecoveryTest'
+```
 
-- APK: `app/build/outputs/apk/debug/app-debug.apk`
-- Unit tests: `app/build/reports/tests/testDebugUnitTest/index.html`
-- Lint: `app/build/reports/lint-results-debug.html`
+With a connected emulator or device:
 
-GitHub Actions runs these checks for pull requests and pushes to `main`, and
-uploads reports and the debug APK. It requires no repository secrets. Lint errors
-fail the job; legacy warnings remain visible for later modernization stages.
+```sh
+adb devices
+./gradlew :app:installDebug
+./gradlew :app:connectedDebugAndroidTest
+```
 
-## Firebase boundary
+The instrumentation suite currently contains a package-name smoke test; it is not full user-journey coverage. Check timer/background behavior, notification permissions, image selection, light/dark mode, larger text, and navigation manually before shipping.
 
-Debug builds install as `com.example.acetimetracker.debug` and use the checked-in
-**demo** Firebase configuration in `app/src/debug/google-services.json`. Its
-placeholder key cannot authenticate to the production project. This variant is
-for build/UI validation; live sign-in and cloud writes need a separately configured
-development project or an explicit emulator integration in a later stage.
+## Firebase setup
 
-The existing `app/google-services.json` remains the release client configuration.
-It contains Firebase client identifiers, not administrative credentials. Do not
-add service-account keys, signing keys, access tokens, or production secrets.
-This foundation does not deploy rules, migrate records, upload images, or execute
-Firebase operations during its JVM tests or CI checks.
+### Local demo
 
-## Test scope
+Debug installs as `com.example.acetimetracker.debug` and uses `app/src/debug/google-services.json`. The checked-in placeholder configuration cannot authenticate to production. Tap test sign-in to use local sample data. Sample saved entries, categories, and profile changes reset on process restart; timer drafts and settings persist locally.
 
-The JVM suite exercises existing same-day time formatting with literal fixtures,
-including minute precision and hour boundaries. Robolectric tests run a real
-AndroidX drawer/Back dispatcher on API 36, covering drawer dismissal and default
-Back navigation without initializing Firebase clients. The first run downloads
-Robolectric's Android runtime from Maven Central.
+### Your own backend
 
-The suite does not claim timer, overnight date handling, migration, or account
-isolation correctness; those require behavior changes and tests in their owning
-stages.
+1. Create or select a Firebase project you control.
+2. Register Android clients matching the variant's application ID. Download each client configuration from that project.
+3. Place development configuration in `app/src/debug/google-services.json` and release configuration in `app/google-services.json`. Review changes before committing client identifiers.
+4. Enable email/password Authentication, configure Firestore and Storage, and deploy/test owner-restricted security rules.
+5. Verify registration, login, password reset, profile updates, category creation, timesheet saving/deletion, and photo upload with a dedicated test account.
 
-The obsolete manifest entry for the absent `timetracker` activity was removed,
-the drawer uses `OnBackPressedDispatcher` for API 36 gestures, and the GIF library
-was updated to address lint's native 16 KB alignment warning.
+The existing release client identifies `acetimetracker-a3fb0`. Its ownership and deployed access rules are not established by this repository. Do not assume permission to use it. Never commit service-account keys, passwords, or upload keys.
 
-CI also compiles the instrumentation APK. Running it requires a connected emulator
-or device (`./gradlew :app:connectedDebugAndroidTest`); compilation alone does not
-count as an on-device test run. Target-SDK behavior, edge-to-edge layouts, storage
-permissions, accessibility, and the deferred functional defects need device
-verification before release. iOS remains deferred.
+Current data paths are described in [architecture](architecture.md). Firestore queries filtered by `userId` do not replace server-enforced ownership rules. Storage upload paths must also be protected; this repository does not include verified deployed rules.
+
+## CI and releases
+
+[Android CI](../.github/workflows/android.yml) runs metadata checks, JVM tests, lint, and debug/release compilation. Reports and artifacts are retained for 14 days. It does not deploy Firebase, publish to Play, or test live credentials.
+
+See [release preparation](release.md) for signing, artifact verification, and publication blockers. Lint warnings remain visible rather than being hidden with a baseline.

@@ -11,7 +11,8 @@ import com.example.acetimetracker.util.Resource
 
 class ProfileViewModel(
     private val userRepository: UserRepository = UserRepository(),
-    private val authRepository: AuthRepository = AuthRepository()
+    private val authRepository: AuthRepository = AuthRepository(),
+    private val imageUploader: (Uri, (Resource<String>) -> Unit) -> Unit = userRepository::uploadProfilePicture
 ) : ViewModel() {
 
     private val _userProfileState = MutableLiveData<Resource<UserProfile>>()
@@ -22,6 +23,8 @@ class ProfileViewModel(
 
     private val _uploadImageState = MutableLiveData<Resource<String>>()
     val uploadImageState: LiveData<Resource<String>> = _uploadImageState
+
+    private var imageUploadGeneration = 0L
 
     val currentUserId: String
         get() = authRepository.currentUserId
@@ -38,6 +41,10 @@ class ProfileViewModel(
     }
 
     fun updateUserProfile(displayName: String, email: String, profilePictureUrl: String) {
+        if (_uploadImageState.value is Resource.Loading) {
+            _updateProfileState.value = Resource.Error("Please wait for the photo to finish uploading")
+            return
+        }
         val userId = authRepository.currentUserId
         if (userId.isEmpty()) {
             _updateProfileState.value = Resource.Error("User not authenticated")
@@ -52,8 +59,15 @@ class ProfileViewModel(
     }
 
     fun uploadProfilePicture(imageUri: Uri) {
-        userRepository.uploadProfilePicture(imageUri) { result ->
-            _uploadImageState.value = result
+        val generation = ++imageUploadGeneration
+        if (authRepository.isMockSession) {
+            _uploadImageState.value = Resource.Success(imageUri.toString())
+            return
+        }
+        imageUploader(imageUri) { result ->
+            if (generation == imageUploadGeneration) {
+                _uploadImageState.value = result
+            }
         }
     }
 }

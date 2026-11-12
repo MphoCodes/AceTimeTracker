@@ -1,6 +1,8 @@
 package com.example.acetimetracker.ui.viewmodel
 
 import android.app.Application
+import android.content.Context
+import org.json.JSONObject
 import android.os.SystemClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -18,25 +20,34 @@ import com.example.acetimetracker.ui.screen.PomodoroPhase
 import com.example.acetimetracker.ui.screen.TimerMode
 import com.example.acetimetracker.util.Resource
 import com.example.acetimetracker.util.TimeUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.Locale
+import java.util.UUID
 
 /**
  * Owns stopwatch and Pomodoro state so a running session survives rotation and other configuration
  * changes. Elapsed time is measured with [SystemClock.elapsedRealtime] anchors rather than by
  * counting ticks, so a delayed tick never loses time.
  */
-class TimerViewModel(
-    application: Application
+class TimerViewModel @JvmOverloads constructor(
+    application: Application,
+    private val entrySaver: ((String, TimesheetEntry, (Resource<Unit>) -> Unit) -> Unit)? = null
 ) : AndroidViewModel(application) {
 
     private val timesheetRepository = TimesheetRepository()
     private val authRepository = AuthRepository()
     private val settingsRepository = SettingsRepository(application)
+    private val ownerId = authRepository.currentUserId
+    private val drafts = application.getSharedPreferences("timer_drafts", Context.MODE_PRIVATE)
+    private val draftWriter = UUID.randomUUID().toString()
+    private var stopwatchEntryId = UUID.randomUUID().toString()
+    private var pomodoroEntryId = UUID.randomUUID().toString()
 
     var mode by mutableStateOf(TimerMode.STOPWATCH)
         private set
@@ -88,14 +99,17 @@ class TimerViewModel(
         get() = if (mode == TimerMode.STOPWATCH) stopwatchElapsedMs else pomodoroFocusLoggedMs
 
     fun selectCategory(name: String) {
+        if (isSaving) return
         selectedCategory = name
+        persistDraft()
     }
 
     fun changeMode(newMode: TimerMode) {
-        if (mode == newMode) return
+        if (isSaving || mode == newMode) return
         pauseStopwatch()
         pausePomodoro()
         mode = newMode
+        persistDraft()
     }
 
     fun consumeMessage() {
@@ -104,7 +118,10 @@ class TimerViewModel(
 
     // --- Stopwatch ---
 
-    fun toggleStopwatch() = if (isStopwatchRunning) pauseStopwatch() else startStopwatch()
+    fun toggleStopwatch() {
+        if (isSaving) return
+        if (isStopwatchRunning) pauseStopwatch() else startStopwatch()
+    }
 
     private fun startStopwatch() {
         if (stopwatchSessionStart == null) stopwatchSessionStart = Date()
@@ -122,15 +139,21 @@ class TimerViewModel(
     }
 
     fun resetStopwatch() {
+        if (isSaving) return
         pauseStopwatch()
         stopwatchBaseMs = 0L
         stopwatchElapsedMs = 0L
         stopwatchSessionStart = null
+        stopwatchEntryId = UUID.randomUUID().toString()
+        persistDraft()
     }
 
     // --- Pomodoro ---
 
-    fun togglePomodoro() = if (isPomodoroRunning) pausePomodoro() else startPomodoro()
+    fun togglePomodoro() {
+        if (isSaving) return
+        if (isPomodoroRunning) pausePomodoro() else startPomodoro()
+    }
 
     private fun startPomodoro() {
         if (pomodoroSessionStart == null && pomodoroPhase == PomodoroPhase.FOCUS) pomodoroSessionStart = Date()
@@ -147,11 +170,14 @@ class TimerViewModel(
     }
 
     fun resetPomodoro() {
+        if (isSaving) return
         pausePomodoro()
         pomodoroRemainingMs = pomodoroTotalDurationMs
+        persistDraft()
     }
 
     fun selectPomodoroPreset(focusMinutes: Int, breakMinutes: Int) {
+        if (isSaving || focusMinutes !in 1..180 || breakMinutes !in 1..60) return
         pausePomodoro()
         pomodoroFocusMinutes = focusMinutes
         pomodoroBreakMinutes = breakMinutes
@@ -159,6 +185,7 @@ class TimerViewModel(
     }
 
     fun skipPomodoroPhase() {
+        if (isSaving) return
         pausePomodoro()
         setPhase(if (pomodoroPhase == PomodoroPhase.FOCUS) PomodoroPhase.BREAK else PomodoroPhase.FOCUS)
     }
@@ -167,6 +194,7 @@ class TimerViewModel(
         pomodoroPhase = phase
         pomodoroTotalDurationMs = (if (phase == PomodoroPhase.FOCUS) pomodoroFocusMinutes else pomodoroBreakMinutes) * 60 * 1000L
         pomodoroRemainingMs = pomodoroTotalDurationMs
+        persistDraft()
     }
 
     /** Applies time elapsed since the last anchor to the Pomodoro countdown. */
@@ -221,6 +249,7 @@ class TimerViewModel(
     private fun notifyIfSecondChanged(second: Long, timeText: String, modeText: String) {
         if (second == lastNotifiedSecond) return
         lastNotifiedSecond = second
+        persistDraft()
         if (settingsRepository.isNotificationsEnabled()) {
             TimerForegroundService.startOrUpdate(getApplication(), selectedCategory, timeText, modeText)
         }
@@ -228,7 +257,12 @@ class TimerViewModel(
 
     private fun onTimerStopped() {
         lastNotifiedSecond = -1L
-        if (!isAnyRunning) TimerForegroundService.stop(getApplication())
+        if (!isAnyRunning) {
+            tickerJob?.cancel()
+            tickerJob = null
+            TimerForegroundService.stop(getApplication())
+        }
+        persistDraft()
     }
 
     // --- Saving ---
@@ -239,6 +273,10 @@ class TimerViewModel(
      */
     fun saveSession() {
         if (isSaving) return
+        if (ownerId.isEmpty() || authRepository.currentUserId != ownerId) {
+            message = "Sign in again before saving this session"
+            return
+        }
         if (selectedCategory.isBlank()) {
             message = "Choose a category first"
             return
@@ -258,6 +296,7 @@ class TimerViewModel(
             ?: Date(end.time - durationMs)
         val category = selectedCategory
         val entry = TimesheetEntry(
+            id = if (isStopwatch) stopwatchEntryId else pomodoroEntryId,
             category = category,
             startDate = TimeUtils.formatDate(start),
             startTime = TimeUtils.formatTime(start),
@@ -268,30 +307,101 @@ class TimerViewModel(
         )
 
         isSaving = true
-        timesheetRepository.saveTimesheetEntry(authRepository.currentUserId, entry) { result ->
-            when (result) {
-                is Resource.Loading -> Unit
-                is Resource.Success -> {
-                    isSaving = false
-                    if (isStopwatch) {
-                        resetStopwatch()
-                    } else {
-                        pomodoroFocusLoggedMs = 0L
-                        pomodoroRoundsCompleted = 0
-                        pomodoroSessionStart = null
-                        resetPomodoro()
+        persistDraft()
+        val save = entrySaver ?: timesheetRepository::saveTimesheetEntry
+        viewModelScope.launch {
+            // A background commit waits for preceding apply() writes before a remote save can begin.
+            val durable = withContext(Dispatchers.IO) { drafts.edit().commit() }
+            if (!durable) {
+                isSaving = false
+                message = "Could not preserve this session on the device. Please try again."
+                return@launch
+            }
+            save(ownerId, entry) { result ->
+                when (result) {
+                    is Resource.Loading -> Unit
+                    is Resource.Success -> {
+                        isSaving = false
+                        if (isStopwatch) {
+                            resetStopwatch()
+                        } else {
+                            pomodoroFocusLoggedMs = 0L
+                            pomodoroRoundsCompleted = 0
+                            pomodoroSessionStart = null
+                            pomodoroEntryId = UUID.randomUUID().toString()
+                            resetPomodoro()
+                        }
+                        message = "Saved ${TimeUtils.formatDurationShort(durationMs)} to $category"
                     }
-                    message = "Saved ${TimeUtils.formatDurationShort(durationMs)} to $category"
-                }
-                is Resource.Error -> {
-                    isSaving = false
-                    message = result.message
+                    is Resource.Error -> {
+                        isSaving = false
+                        message = result.message
+                    }
                 }
             }
         }
     }
 
+
+    init {
+        if (ownerId.isNotEmpty()) drafts.edit().putString("writer:$ownerId", draftWriter).apply()
+        restoreDraft()
+    }
+
+    /** Persist a checkpoint, not a running wall clock: recovery always requires explicit resume. */
+    private fun persistDraft() {
+        if (ownerId.isEmpty() || drafts.getString("writer:$ownerId", null) != draftWriter) return
+        val snapshot = JSONObject()
+            .put("stopwatchEntryId", stopwatchEntryId)
+            .put("pomodoroEntryId", pomodoroEntryId)
+            .put("mode", mode.name)
+            .put("category", selectedCategory)
+            .put("stopwatchMs", stopwatchElapsedMs)
+            .put("stopwatchStart", stopwatchSessionStart?.time ?: 0L)
+            .put("phase", pomodoroPhase.name)
+            .put("focusMinutes", pomodoroFocusMinutes)
+            .put("breakMinutes", pomodoroBreakMinutes)
+            .put("remainingMs", pomodoroRemainingMs)
+            .put("rounds", pomodoroRoundsCompleted)
+            .put("focusMs", pomodoroFocusLoggedMs)
+            .put("focusStart", pomodoroSessionStart?.time ?: 0L)
+        drafts.edit().putString(ownerId, snapshot.toString()).apply()
+    }
+
+    private fun restoreDraft() {
+        if (ownerId.isEmpty()) return
+        val raw = drafts.getString(ownerId, null) ?: return
+        try {
+            val snapshot = JSONObject(raw)
+            stopwatchEntryId = snapshot.optString("stopwatchEntryId").ifBlank { UUID.randomUUID().toString() }
+            pomodoroEntryId = snapshot.optString("pomodoroEntryId").ifBlank { UUID.randomUUID().toString() }
+            mode = TimerMode.valueOf(snapshot.getString("mode"))
+            selectedCategory = snapshot.optString("category")
+            stopwatchElapsedMs = snapshot.optLong("stopwatchMs").coerceAtLeast(0)
+            stopwatchBaseMs = stopwatchElapsedMs
+            stopwatchSessionStart = snapshot.optLong("stopwatchStart").takeIf { it > 0 }?.let(::Date)
+            pomodoroPhase = PomodoroPhase.valueOf(snapshot.getString("phase"))
+            pomodoroFocusMinutes = snapshot.optInt("focusMinutes", 25).coerceIn(1, 180)
+            pomodoroBreakMinutes = snapshot.optInt("breakMinutes", 5).coerceIn(1, 60)
+            pomodoroTotalDurationMs = (if (pomodoroPhase == PomodoroPhase.FOCUS) pomodoroFocusMinutes else pomodoroBreakMinutes) * 60_000L
+            pomodoroRemainingMs = snapshot.optLong("remainingMs", pomodoroTotalDurationMs).coerceIn(0, pomodoroTotalDurationMs)
+            pomodoroRoundsCompleted = snapshot.optInt("rounds").coerceAtLeast(0)
+            pomodoroFocusLoggedMs = snapshot.optLong("focusMs").coerceAtLeast(0)
+            pomodoroSessionStart = snapshot.optLong("focusStart").takeIf { it > 0 }?.let(::Date)
+            if (stopwatchElapsedMs > 0 || pomodoroFocusLoggedMs > 0) {
+                message = "Paused draft restored. Resume or save when ready."
+            }
+        } catch (_: IllegalArgumentException) {
+            drafts.edit().remove(ownerId).apply()
+        } catch (_: org.json.JSONException) {
+            drafts.edit().remove(ownerId).apply()
+        }
+    }
+
     override fun onCleared() {
+        pauseStopwatch()
+        pausePomodoro()
+        persistDraft()
         TimerForegroundService.stop(getApplication())
         super.onCleared()
     }

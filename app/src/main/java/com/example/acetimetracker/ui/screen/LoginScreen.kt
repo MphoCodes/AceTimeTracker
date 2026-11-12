@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -30,6 +31,7 @@ import com.example.acetimetracker.ui.components.AceAlertDialog
 import com.example.acetimetracker.ui.theme.AceRed
 import com.example.acetimetracker.ui.theme.AceRedLight
 import com.example.acetimetracker.util.Resource
+import com.example.acetimetracker.util.isDebuggableBuild
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -214,46 +216,49 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            if (LocalContext.current.isDebuggableBuild()) {
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // Quick Offline Test Login (Distinct Ace Red outline)
-            OutlinedCard(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.5.dp, AceRed),
-                colors = CardDefaults.outlinedCardColors(
-                    containerColor = AceRedLight.copy(alpha = 0.35f)
-                ),
-                onClick = onTestLoginClick
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                // Quick Offline Test Login (Distinct Ace Red outline)
+                OutlinedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.5.dp, AceRed),
+                    colors = CardDefaults.outlinedCardColors(
+                        containerColor = AceRedLight.copy(alpha = 0.35f)
+                    ),
+                    onClick = onTestLoginClick
                 ) {
-                    Icon(
-                        imageVector = PhosphorIcons.Regular.Lightning,
-                        contentDescription = "Test Login",
-                        tint = AceRed,
-                        modifier = Modifier.size(28.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column {
-                        Text(
-                            text = "Quick Test Login (Bypass Server)",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = AceRed
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = PhosphorIcons.Regular.Lightning,
+                            contentDescription = "Test Login",
+                            tint = AceRed,
+                            modifier = Modifier.size(28.dp)
                         )
-                        Text(
-                            text = "One-tap instant offline session for testing & grading",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = "Quick Test Login (Bypass Server)",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = AceRed
+                            )
+                            Text(
+                                text = "One-tap instant offline session for testing & grading",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
+
             }
 
             Spacer(modifier = Modifier.height(20.dp))

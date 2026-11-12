@@ -114,6 +114,7 @@ fun EditProfileScreen(
 
                 FilledIconButton(
                     onClick = onUploadPhotoClick,
+                    enabled = !isUploading,
                     modifier = Modifier.size(38.dp),
                     shape = CircleShape,
                     colors = IconButtonDefaults.filledIconButtonColors(containerColor = AceRed, contentColor = Color.White)
@@ -177,7 +178,7 @@ fun EditProfileScreen(
             // Save Button
             Button(
                 onClick = { onSaveClick(displayName, email) },
-                enabled = displayName.isNotBlank() && email.isNotBlank() && !isSaving,
+                enabled = displayName.isNotBlank() && email.isNotBlank() && !isSaving && !isUploading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 50.dp),

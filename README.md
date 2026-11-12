@@ -1,88 +1,100 @@
-# TimeTracker App
+<p align="center">
+  <img src="acelogo.png" width="96" alt="AceTimeTracker logo">
+</p>
 
-TimeTracker is a simple yet powerful Android application designed to help users track their time efficiently. Whether you're a freelancer, student, or professional, TimeTracker offers intuitive features to monitor and manage your tasks effectively.
+<h1 align="center">AceTimeTracker</h1>
+<p align="center">Track your work. Make time for what matters.</p>
 
-## Features
+<p align="center">
+  <a href="https://github.com/MphoCodes/AceTimeTracker/actions/workflows/android.yml"><img src="https://github.com/MphoCodes/AceTimeTracker/actions/workflows/android.yml/badge.svg" alt="Android build"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
+  <img src="https://img.shields.io/badge/Android-8.1%2B-3DDC84?logo=android&logoColor=white" alt="Android 8.1 and later">
+  <img src="https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4" alt="Jetpack Compose">
+</p>
 
-- **Time Tracking**: Easily log your tasks and track the time spent on each activity.
-- **Category Management**: Organize your tasks into different categories for better organization and analysis.
-- **Image Attachment**: Attach images to your tasks to provide additional context or reference.
-- **Firebase Integration**: Seamlessly sync your data across devices with Firebase Firestore integration.
-- **Data Visualization**: Visualize your time usage with insightful **charts and graphs** to identify patterns and optimize your productivity.
-- **Permissions Handling**: Handle permissions gracefully to ensure smooth functionality, especially when accessing external storage for image attachments.
-- **Responsive UI**: Enjoy a seamless user experience with a responsive and intuitive user interface that adapts to various screen sizes.
-- **Forgot Password Functionality:** Easily recover your account if you forget your password.
-- **Profile Settings:** Customize your profile with a **profile picture** and choose between **light and dark themes**. 
+A native Android time tracker built with Kotlin and Jetpack Compose. Record a focused session or add time manually, organize it by category, and see where your week went.
 
-## Getting Started
+## A look inside
 
-To get started with TimeTracker, follow these steps:
+<p align="center">
+  <img src="play-store/screenshots/phone/01-dashboard.jpg" width="23%" alt="Dashboard with tracked time and weekly category goals">
+  <img src="play-store/screenshots/phone/02-log-time.jpg" width="23%" alt="Manual time entry with category and date selection">
+  <img src="play-store/screenshots/phone/03-history.jpg" width="23%" alt="Timesheet history">
+  <img src="play-store/screenshots/phone/04-progress.jpg" width="23%" alt="Progress overview">
+</p>
 
-1. Clone the repository to your local machine.
-2. Open the project in Android Studio.
-3. Follow the [Android development guide](docs/development.md) to configure JDK 21,
-   install the pinned SDK packages, and run the build, tests, and lint checks.
-   Debug builds use a separate demo Firebase configuration; see the guide before
-   testing account or cloud features.
+Screenshots show the demo interface captured in October 2026; they are illustrative, not evidence of a live backend or store release.
 
-## Usage
+## What you can do
 
-Once you have TimeTracker installed on your device, here's how you can make the most out of it:
+- **Track a session:** stopwatch or Pomodoro focus/break cycles, category selection, pause, reset, and save. Only focus time contributes to a Pomodoro entry.
+- **Keep a timer draft:** leaving the timer pauses it and preserves a draft per account on the device. After process loss, the most recent checkpoint is restored paused; time after that checkpoint is not inferred.
+- **Log time manually:** date-aware start/end validation, notes, and an optional photo.
+- **Organize work:** create colored categories with hour targets and optional minimum/maximum goals; delete categories while retaining historical entries.
+- **Review progress:** daily and weekly totals, category breakdowns, history filtering, and entry deletion.
+- **Share a report:** export the selected history as CSV text through Android's share sheet, with quoting and spreadsheet formula protection.
+- **Manage your profile:** email/password sign-in, registration, password reset, and profile details/photo.
+- **Choose your appearance:** light, dark, or system theme.
 
-1. **Log Tasks**: Start by logging your tasks and categorizing them appropriately.
-2. **Track Time**: Use the built-in timer to track the time spent on each task accurately.
-3. **Attach Images**: Add context to your tasks by attaching relevant images directly from your device.
-4. **Sync Data**: Enjoy seamless synchronization of your data across devices with Firebase integration.
-5. **Visualize Progress**: Utilize the data visualization features to gain insights into your time usage patterns.
-6. **Optimize Productivity**: Analyze your time usage data to identify areas for improvement and optimize your productivity.
+## Try it locally
 
-## Contributions
+1. Clone the repository and open it in Android Studio.
+2. Configure **JDK 21** and the SDK packages in the [development guide](docs/development.md).
+3. Build and install the debug variant:
 
-Contributions to TimeTracker are welcome! Whether you want to fix a bug, add a new feature, or improve the documentation, feel free to submit a pull request.
+   ```sh
+   ./gradlew :app:assembleDebug
+   ./gradlew :app:installDebug
+   ```
 
-**Frequently Asked Questions (FAQ)**
+4. Use the **test sign-in** option on the login screen to explore with local sample data.
 
-1. **How can I track my time with TimeTracker?**
-   - To track your time with TimeTracker, simply log into the app and create a new task. Start the timer when you begin working on the task, and stop it when you're done. TimeTracker will automatically calculate the duration of your task.
+The demo does not need a live Firebase backend. Its sample categories, profile, and saved entries are held in memory and reset when the process restarts. Timer drafts and appearance preferences persist locally. Test sign-in is disabled in release builds.
 
-2. **Can I categorize my tasks in TimeTracker?**
-   - Yes, TimeTracker allows you to categorize your tasks for better organization. You can create custom categories and assign tasks to them as needed.
+For real accounts, configure a Firebase project you control. The checked-in debug configuration is a placeholder; see [Firebase setup and data boundaries](docs/development.md#firebase-setup).
 
-3. **Is it possible to attach images to tasks in TimeTracker?**
-   - Absolutely! TimeTracker lets you attach images to your tasks. This feature is useful for adding context or reference to your tasks.
+## Engineering
 
-4. **How does TimeTracker handle data synchronization across devices?**
-   - TimeTracker seamlessly syncs your data across devices using Firebase Firestore integration. This means that you can access your tasks and time logs from any device connected to your TimeTracker account.
+The app uses Compose Material 3 screens, activity-based navigation, ViewModels for screen state, and repositories for Firebase access. Time is stored in milliseconds; the timer measures elapsed time with a monotonic clock. Dashboard and chart totals are derived from the same timesheet entries.
 
-5. **Can I visualize my time usage with TimeTracker?**
-   - Yes, TimeTracker offers data visualization features to help you analyze your time usage. You can view insightful **charts and graphs** to identify patterns and optimize your productivity.
+```text
+app/src/main/java/com/example/acetimetracker/
+├── data/model/        Categories, profiles, and timesheet entries
+├── data/repository/   Authentication, Firebase access, settings, aggregation
+├── ui/activity/       Android lifecycle and navigation
+├── ui/screen/         Compose screens
+├── ui/components/     Shared controls and dialogs
+├── ui/viewmodel/      Validation and screen state
+├── ui/theme/          Color, typography, and theme preference
+├── service/           Active timer notification
+└── util/              Time calculations, CSV export, and result types
+```
 
-6. **What permissions does TimeTracker require?**
-   - TimeTracker may require permissions to access your device's external storage to attach images to tasks. Additionally, it may request permissions related to network access for data synchronization.
+The project retains some XML layouts and adapters from its earlier UI. This is an incremental modernization, not a claim that every legacy component has been removed. See [architecture](docs/architecture.md).
 
-7. **Is TimeTracker's user interface responsive?**
-   - Absolutely! TimeTracker boasts a responsive and intuitive user interface that adapts seamlessly to various screen sizes, ensuring a smooth user experience.
+## Build and verify
 
-8. **How can I contribute to TimeTracker's development?**
-   - Contributions to TimeTracker are always welcome! Whether you want to fix a bug, add a new feature, or improve the documentation, feel free to submit a pull request on GitHub.
+```sh
+./gradlew --console=plain :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+./gradlew --console=plain :app:lintRelease :app:assembleRelease :app:bundleRelease
+```
 
-9. **What if I encounter issues or have questions about TimeTracker?**
-   - If you encounter any issues or have any questions about TimeTracker, you can reach out to the developer, **Mpho Ndlela**, at mpho.c.ndlela@gmail.com. 
+GitHub Actions builds debug and release artifacts, runs local tests and lint, and retains reports. Device tests are a separate check:
 
-10. **Is TimeTracker free to use?**
-    - Yes, TimeTracker is free to download and use. Enjoy tracking your time and boosting your productivity without any cost!
+```sh
+./gradlew :app:connectedDebugAndroidTest
+```
 
-## Support
+See [release preparation](docs/release.md) for output paths, optional signing, and remaining publication requirements. Builds are unsigned unless release signing is explicitly configured.
 
+## Project status
 
+The current time-tracking workflows are implemented, with local regression coverage for time calculations, aggregation, release authentication boundaries, photo failures, timer recovery, goal validation, and CSV export.
 
+Live Firebase ownership/rules, production authentication and media flows, account deletion, privacy disclosures, and store submission still require release-owner verification. There is no claim of a published Play release. The larger goals/routines, durable offline synchronization, and reminders roadmap in `docs/superpowers/` is future work, not a list of shipped features.
 
-If you encounter any issues or have any questions about TimeTracker, please don't hesitate to [contact me](mailto:mpho.c.ndlela@gmail.com).
+## Contributing
 
-## License
+Bug reports and focused pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), include reproduction steps, and keep screenshots free of personal data. Report security issues using [SECURITY.md](SECURITY.md).
 
-TimeTracker is licensed under the [MIT License](LICENSE).
-
----
-
-With TimeTracker, take control of your time and unlock your productivity potential. Download now and start tracking your tasks like a pro!
+Built by [Mpho Ndlela](https://github.com/MphoCodes). Licensed under the [MIT License](LICENSE).
