@@ -32,6 +32,7 @@ import com.example.acetimetracker.data.model.Category
 import com.example.acetimetracker.data.model.TimesheetEntry
 import com.example.acetimetracker.data.model.UserProfile
 import com.example.acetimetracker.data.repository.TimesheetStats
+import com.example.acetimetracker.ui.components.HomeBottomBar
 import com.example.acetimetracker.ui.components.AceCard
 import com.example.acetimetracker.ui.components.IconBadge
 import com.example.acetimetracker.ui.components.SectionLabel
@@ -173,45 +174,6 @@ private fun HomeTopBar(
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-        )
-    }
-}
-
-@Composable
-private fun HomeBottomBar(onNavigate: (Destination) -> Unit) {
-    NavigationBar(containerColor = MaterialTheme.colorScheme.surface, tonalElevation = 0.dp) {
-        val itemColors = NavigationBarItemDefaults.colors(
-            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            selectedTextColor = MaterialTheme.colorScheme.onSurface,
-            indicatorColor = MaterialTheme.colorScheme.primaryContainer
-        )
-        NavigationBarItem(
-            selected = true,
-            onClick = {},
-            icon = { Icon(PhosphorIcons.Regular.House, contentDescription = null, modifier = Modifier.size(22.dp)) },
-            label = { Text("Today") },
-            colors = itemColors
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { onNavigate(Destination.Timer) },
-            icon = { Icon(PhosphorIcons.Regular.Timer, contentDescription = null, modifier = Modifier.size(22.dp)) },
-            label = { Text("Timer") },
-            colors = itemColors
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { onNavigate(Destination.Timesheet) },
-            icon = { Icon(PhosphorIcons.Regular.FileText, contentDescription = null, modifier = Modifier.size(22.dp)) },
-            label = { Text("Timesheet") },
-            colors = itemColors
-        )
-        NavigationBarItem(
-            selected = false,
-            onClick = { onNavigate(Destination.MyProgress) },
-            icon = { Icon(PhosphorIcons.Regular.ChartLineUp, contentDescription = null, modifier = Modifier.size(22.dp)) },
-            label = { Text("Progress") },
-            colors = itemColors
         )
     }
 }

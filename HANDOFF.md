@@ -69,3 +69,11 @@ SHA-256:
 - Broader roadmap features (history editing, category renaming, durable offline synchronization, reminders) remain unimplemented.
 - CI configuration was updated locally but has not run on GitHub.
 - No project knowledge-ingestion tool was found. No graph was rebuilt or replaced; historical indexed context may be stale. Portable files reflect this pass.
+
+
+## Bottom navigation refinement — 2026-11-13
+
+- Extracted HomeBottomBar into a reusable themed component with a rounded floating surface, subtle outline/shadow, branded active indicator, and system navigation insets. Existing dashboard routes remain unchanged.
+- Added light, dark, and 320dp/1.5x font previews. Large-text labels use Log/Stats with full accessibility descriptions. Visually checked all previews and the installed API 36 emulator dashboard.
+- Passed :app:testDebugUnitTest, :app:lintDebug, :app:lintRelease, :app:assembleDebug, :app:assembleRelease, :app:bundleRelease and :app:connectedDebugAndroidTest. Release artifacts were rebuilt; checksums listed above describe the previous build. Release signing/publication blockers above still apply.
+- Personal .idea changes excluded from the commit. No source knowledge-ingestion tool is available; portable handoff is current.
