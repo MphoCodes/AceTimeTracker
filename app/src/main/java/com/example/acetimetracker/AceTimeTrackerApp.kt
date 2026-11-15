@@ -18,5 +18,6 @@ class AceTimeTrackerApp : Application() {
         super.onCreate()
         instance = this
         SettingsRepository(this).applyTheme()
+        com.example.acetimetracker.reminder.ReminderScheduler.reschedule(this)
     }
 }

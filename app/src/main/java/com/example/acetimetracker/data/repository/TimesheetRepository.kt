@@ -1,7 +1,11 @@
 package com.example.acetimetracker.data.repository
 
 import android.net.Uri
+import androidx.lifecycle.LiveData
+import com.example.acetimetracker.data.local.RecordCodec
 import com.example.acetimetracker.data.model.TimesheetEntry
+import com.example.acetimetracker.data.sync.OfflineData
+import com.example.acetimetracker.data.sync.SyncStatus
 import com.example.acetimetracker.util.Resource
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -11,50 +15,10 @@ class TimesheetRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 ) {
-
-    companion object {
-        private val mockTimesheets = mutableListOf(
-            TimesheetEntry(
-                id = "mock_ts_1",
-                userId = AuthRepository.TEST_USER_ID,
-                category = "Development",
-                startDate = "2026-10-25",
-                startTime = "09:00",
-                endDate = "2026-10-25",
-                endTime = "14:30",
-                timeSpent = 19800000L, // 5.5 hours
-                imageUrl = "",
-                description = "Refactored Clean Architecture and MVVM layers"
-            ),
-            TimesheetEntry(
-                id = "mock_ts_2",
-                userId = AuthRepository.TEST_USER_ID,
-                category = "Design",
-                startDate = "2026-10-26",
-                startTime = "10:00",
-                endDate = "2026-10-26",
-                endTime = "13:00",
-                timeSpent = 10800000L, // 3 hours
-                imageUrl = "",
-                description = "Designed progress chart layouts and navigation"
-            ),
-            TimesheetEntry(
-                id = "mock_ts_3",
-                userId = AuthRepository.TEST_USER_ID,
-                category = "Testing",
-                startDate = "2026-10-27",
-                startTime = "08:00",
-                endDate = "2026-10-27",
-                endTime = "10:00",
-                timeSpent = 7200000L, // 2 hours
-                imageUrl = "",
-                description = "Verified offline mock login flow"
-            )
-        )
-    }
-
-    private fun List<TimesheetEntry>.newestFirst(): List<TimesheetEntry> =
-        sortedWith(compareByDescending<TimesheetEntry> { it.startDate }.thenByDescending { it.startTime })
+    private val local by lazy { OfflineData.get(firestore) }
+    fun observeSyncStatus(userId: String): LiveData<SyncStatus> = local.status(userId)
+    fun observeChanges(userId: String): LiveData<Long> = local.changes(userId)
+    fun retrySync(userId: String) = local.retry(userId)
 
     fun uploadImage(imageUri: Uri, onResult: (Resource<String>) -> Unit) {
         onResult(Resource.Loading)
@@ -78,142 +42,45 @@ class TimesheetRepository(
         }
     }
 
-    fun saveTimesheetEntry(
-        userId: String,
-        entry: TimesheetEntry,
-        onResult: (Resource<Unit>) -> Unit
-    ) {
-        if (userId.isEmpty()) {
-            onResult(Resource.Error("User not authenticated"))
-            return
-        }
-
-        // Offline test mode bypass
-        if (userId == AuthRepository.TEST_USER_ID) {
-            val generatedId = entry.id.ifBlank { "mock_ts_${UUID.randomUUID()}" }
-            val entryWithId = entry.copy(id = generatedId, userId = userId)
-            mockTimesheets.removeAll { it.id == generatedId && it.userId == userId }
-            mockTimesheets.add(0, entryWithId)
-            onResult(Resource.Success(Unit))
-            return
-        }
-
-        onResult(Resource.Loading)
-        val timesheetDocRef = firestore.collection("timesheetEntries").document(entry.id.ifBlank { UUID.randomUUID().toString() })
-        val entryWithId = entry.copy(id = timesheetDocRef.id, userId = userId)
-
-        timesheetDocRef.set(entryWithId)
-            .addOnSuccessListener {
-                onResult(Resource.Success(Unit))
-            }
-            .addOnFailureListener { exception ->
-                onResult(Resource.Error(exception.localizedMessage ?: "Failed to save timesheet", exception))
-            }
+    /** Success means the entry and its pending sync have been durably committed locally. */
+    fun saveTimesheetEntry(userId: String, entry: TimesheetEntry, onResult: (Resource<Unit>) -> Unit) {
+        if (userId.isBlank()) { onResult(Resource.Error("User not authenticated")); return }
+        val saved = entry.copy(id = entry.id.ifBlank { UUID.randomUUID().toString() }, userId = userId)
+        local.write(userId, RecordCodec.ENTRIES, saved.id, RecordCodec.encode(saved), onResult)
     }
 
     fun fetchTimesheets(userId: String, onResult: (Resource<List<TimesheetEntry>>) -> Unit) {
-        if (userId.isEmpty()) {
-            onResult(Resource.Error("User not authenticated"))
-            return
+        local.read(userId, RecordCodec.ENTRIES) { result ->
+            onResult(when (result) {
+                is Resource.Success -> Resource.Success(result.data.map(RecordCodec::entry)
+                    .sortedWith(compareByDescending<TimesheetEntry> { it.startDate }.thenByDescending { it.startTime }))
+                is Resource.Error -> result
+                Resource.Loading -> Resource.Loading
+            })
         }
-
-        // Offline test mode bypass
-        if (userId == AuthRepository.TEST_USER_ID) {
-            onResult(Resource.Success(mockTimesheets.newestFirst()))
-            return
-        }
-
-        onResult(Resource.Loading)
-        firestore.collection("timesheetEntries")
-            .whereEqualTo("userId", userId)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val entries = snapshot.documents.mapNotNull { it.toObject(TimesheetEntry::class.java) }
-                onResult(Resource.Success(entries.newestFirst()))
-            }
-            .addOnFailureListener { exception ->
-                onResult(Resource.Error(exception.localizedMessage ?: "Failed to fetch timesheets", exception))
-            }
     }
 
-    fun fetchTimesheetsByCategory(
-        userId: String,
-        category: String,
-        onResult: (Resource<List<TimesheetEntry>>) -> Unit
-    ) {
-        if (userId.isEmpty()) {
-            onResult(Resource.Error("User not authenticated"))
-            return
+    fun fetchTimesheetsByCategory(userId: String, category: String, onResult: (Resource<List<TimesheetEntry>>) -> Unit) {
+        fetchTimesheets(userId) { result ->
+            onResult(when (result) {
+                is Resource.Success -> Resource.Success(if (category.isBlank() || category == "All") result.data else result.data.filter { it.category == category })
+                is Resource.Error -> result
+                Resource.Loading -> Resource.Loading
+            })
         }
-
-        // Offline test mode bypass
-        if (userId == AuthRepository.TEST_USER_ID) {
-            val filtered = if (category == "All" || category.isEmpty()) {
-                mockTimesheets.toList()
-            } else {
-                mockTimesheets.filter { it.category == category }
-            }
-            onResult(Resource.Success(filtered.newestFirst()))
-            return
-        }
-
-        onResult(Resource.Loading)
-        val query = if (category == "All" || category.isEmpty()) {
-            firestore.collection("timesheetEntries").whereEqualTo("userId", userId)
-        } else {
-            firestore.collection("timesheetEntries")
-                .whereEqualTo("userId", userId)
-                .whereEqualTo("category", category)
-        }
-
-        query.get()
-            .addOnSuccessListener { snapshot ->
-                val entries = snapshot.documents.mapNotNull { it.toObject(TimesheetEntry::class.java) }
-                onResult(Resource.Success(entries.newestFirst()))
-            }
-            .addOnFailureListener { exception ->
-                onResult(Resource.Error(exception.localizedMessage ?: "Failed to fetch timesheets by category", exception))
-            }
     }
 
     fun fetchChartData(userId: String, onResult: (Resource<Map<String, Float>>) -> Unit) {
-        if (userId.isEmpty()) {
-            onResult(Resource.Error("User not authenticated"))
-            return
-        }
-
-        // Derived from the saved entries themselves so deletions and edits are always reflected.
         fetchTimesheets(userId) { result ->
-            onResult(
-                when (result) {
-                    is Resource.Success -> Resource.Success(TimesheetStats.hoursByCategory(result.data))
-                    is Resource.Error -> result
-                    Resource.Loading -> Resource.Loading
-                }
-            )
+            onResult(when (result) {
+                is Resource.Success -> Resource.Success(TimesheetStats.hoursByCategory(result.data))
+                is Resource.Error -> result
+                Resource.Loading -> Resource.Loading
+            })
         }
     }
 
     fun deleteTimesheetEntry(userId: String, entryId: String, onResult: (Resource<Unit>) -> Unit) {
-        if (userId.isEmpty()) {
-            onResult(Resource.Error("User not authenticated"))
-            return
-        }
-
-        if (userId == AuthRepository.TEST_USER_ID) {
-            mockTimesheets.removeAll { it.id == entryId }
-            onResult(Resource.Success(Unit))
-            return
-        }
-
-        onResult(Resource.Loading)
-        firestore.collection("timesheetEntries").document(entryId)
-            .delete()
-            .addOnSuccessListener {
-                onResult(Resource.Success(Unit))
-            }
-            .addOnFailureListener { exception ->
-                onResult(Resource.Error(exception.localizedMessage ?: "Failed to delete timesheet entry", exception))
-            }
+        local.write(userId, RecordCodec.ENTRIES, entryId, null, onResult)
     }
 }

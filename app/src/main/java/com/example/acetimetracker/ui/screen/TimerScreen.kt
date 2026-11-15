@@ -79,7 +79,8 @@ fun TimerScreen(
     message: String?,
     onMessageShown: () -> Unit,
     onCreateCategoryClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    keepRunningOnNavigate: Boolean = false
 ) {
     val categories = (categoriesState as? Resource.Success)?.data ?: emptyList()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -95,9 +96,9 @@ fun TimerScreen(
     }
 
     // Leaving pauses the session and keeps a local draft for this account.
-    BackHandler(enabled = isSaving || isRunning || unsaved >= 1000L) { showLeaveDialog = true }
+    BackHandler(enabled = !keepRunningOnNavigate && (isSaving || isRunning || unsaved >= 1000L)) { showLeaveDialog = true }
     val requestBack = {
-        if (isSaving || isRunning || unsaved >= 1000L) showLeaveDialog = true else onBackClick()
+        if (!keepRunningOnNavigate && (isSaving || isRunning || unsaved >= 1000L)) showLeaveDialog = true else onBackClick()
     }
 
     Scaffold(

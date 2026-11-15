@@ -59,6 +59,35 @@ class TimerRecoveryTest {
         assertTrue("Save should begin after its local checkpoint is durable", condition())
     }
 
+    @Test fun desiredRunningStateIsIdempotent() {
+        val store = ViewModelStore()
+        val vm = timer(store)
+        vm.selectCategory("Development")
+        vm.setRunning(true)
+        ShadowSystemClock.advanceBy(Duration.ofSeconds(5))
+        vm.setRunning(true)
+        assertTrue(vm.isStopwatchRunning)
+        vm.setRunning(false)
+        assertEquals(5000L, vm.stopwatchElapsedMs)
+        vm.setRunning(false)
+        assertEquals(5000L, vm.stopwatchElapsedMs)
+        store.clear()
+    }
+
+    @Test fun repeatCannotOverwritePausedDraft() {
+        val store = ViewModelStore()
+        val vm = timer(store)
+        vm.selectCategory("Development")
+        vm.setRunning(true)
+        ShadowSystemClock.advanceBy(Duration.ofSeconds(5))
+        vm.setRunning(false)
+        vm.trackAgain("Design")
+        assertEquals("Development", vm.selectedCategory)
+        assertEquals(5000L, vm.stopwatchElapsedMs)
+        assertFalse(vm.isAnyRunning)
+        store.clear()
+    }
+
     @Test fun interruptedSaveRetriesTheSameEntryIdentity() {
         val entries = mutableListOf<com.example.acetimetracker.data.model.TimesheetEntry>()
         val saver: (String, com.example.acetimetracker.data.model.TimesheetEntry, (com.example.acetimetracker.util.Resource<Unit>) -> Unit) -> Unit =

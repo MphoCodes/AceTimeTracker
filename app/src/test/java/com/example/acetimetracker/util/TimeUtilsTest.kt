@@ -43,6 +43,7 @@ class TimeUtilsTest {
     @Test
     fun shortDurationFormatting() {
         assertEquals("0m", TimeUtils.formatDurationShort(0L))
+        assertEquals("<1m", TimeUtils.formatDurationShort(48000L))
         assertEquals("45m", TimeUtils.formatDurationShort(45 * 60 * 1000L))
         assertEquals("2h", TimeUtils.formatDurationShort(2 * hour))
         assertEquals("1h 5m", TimeUtils.formatDurationShort(hour + 5 * 60 * 1000L))

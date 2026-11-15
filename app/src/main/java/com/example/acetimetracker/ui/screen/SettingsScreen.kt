@@ -1,5 +1,12 @@
 package com.example.acetimetracker.ui.screen
 
+import java.time.DayOfWeek
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.time.format.TextStyle
+import java.util.Locale
+import com.example.acetimetracker.reminder.ReminderSchedule
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -35,13 +42,19 @@ private val themeOptions = listOf(
 )
 
 /** Preferences are applied as soon as they change, so there is no separate save step. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     currentTheme: String,
     initialNotificationsEnabled: Boolean,
     onBackClick: () -> Unit,
     onThemeChange: (String) -> Unit,
-    onNotificationsChange: (Boolean) -> Unit
+    onNotificationsChange: (Boolean) -> Unit,
+    reminder: ReminderSchedule = ReminderSchedule(),
+    notificationsAllowed: Boolean = true,
+    onReminderChange: (ReminderSchedule) -> Unit = {},
+    onReminderTimeClick: () -> Unit = {},
+    onNotificationSettingsClick: () -> Unit = {}
 ) {
     var selectedTheme by rememberSaveable { mutableStateOf(currentTheme) }
     var notificationsEnabled by rememberSaveable { mutableStateOf(initialNotificationsEnabled) }
@@ -138,6 +151,57 @@ fun SettingsScreen(
                         onCheckedChange = null,
                         colors = SwitchDefaults.colors(checkedTrackColor = AceRed)
                     )
+                }
+            }
+            SectionLabel("Daily reminder")
+            AceCard(contentPadding = PaddingValues(16.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().toggleable(
+                            value = reminder.enabled, role = Role.Switch,
+                            onValueChange = { onReminderChange(reminder.copy(enabled = it)) }
+                        ),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text("Remember to track", style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold)
+                            Text("An optional nudge on the days you choose.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                        Switch(checked = reminder.enabled, onCheckedChange = null)
+                    }
+                    OutlinedButton(onClick = onReminderTimeClick) {
+                        Text("Time: " + LocalTime.of(reminder.hour, reminder.minute)
+                            .format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)))
+                    }
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        DayOfWeek.values().forEach { day ->
+                                FilterChip(
+                                    selected = day in reminder.days,
+                                    onClick = {
+                                        val days = if (day in reminder.days) reminder.days - day else reminder.days + day
+                                        onReminderChange(reminder.copy(days = days, enabled = reminder.enabled && days.isNotEmpty()))
+                                    },
+                                    label = { Text(day.getDisplayName(TextStyle.SHORT, Locale.getDefault())) }
+                                )
+                        }
+                    }
+                    if (reminder.days.isEmpty()) {
+                        Text("Select at least one day to enable reminders.",
+                            style = MaterialTheme.typography.bodySmall)
+                    }
+                    Text("Delivery is approximate and follows your device time zone. Battery settings may delay it.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (!notificationsAllowed) {
+                        Text("Notifications are blocked. Tracking still works; allow notifications to receive reminders.",
+                            style = MaterialTheme.typography.bodySmall)
+                        TextButton(onClick = onNotificationSettingsClick) {
+                            Text("Open notification settings")
+                        }
+                    }
                 }
             }
         }

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_open_timer">Open timer</string>
+    <string name="widget_description">Quick access to your timer. Sign in and choose a category to start tracking.</string>
+</resources>

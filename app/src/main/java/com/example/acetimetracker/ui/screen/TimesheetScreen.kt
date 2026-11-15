@@ -16,6 +16,7 @@ import com.adamglin.phosphoricons.Regular
 import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -65,25 +66,31 @@ fun TimesheetScreen(
     onRemoveImageClick: () -> Unit = {},
     onSaveClick: (category: String, startDate: String, startTime: String, endDate: String, endTime: String, description: String) -> Unit,
     onDeleteEntryClick: (String) -> Unit = {},
-    onExportCsvClick: (List<TimesheetEntry>) -> Unit = {}
+    onExportCsvClick: (List<TimesheetEntry>) -> Unit = {},
+    editingEntry: TimesheetEntry? = null,
+    onEditEntryClick: (TimesheetEntry) -> Unit = {},
+    onCancelEdit: () -> Unit = {},
+    onRepeatEntryClick: (TimesheetEntry) -> Unit = {}
 ) {
     val context = LocalContext.current
-    var selectedTabIndex by remember { mutableIntStateOf(initialTab) }
+    var selectedTabIndex by rememberSaveable { mutableIntStateOf(initialTab) }
 
     // Form state, cleared whenever formResetKey changes after a successful save
-    var selectedCategory by remember(formResetKey) { mutableStateOf("") }
+    var selectedCategory by rememberSaveable(formResetKey, editingEntry?.id) { mutableStateOf(editingEntry?.category.orEmpty()) }
     var categoryExpanded by remember { mutableStateOf(false) }
-    var startDate by remember(formResetKey) { mutableStateOf(TimeUtils.today()) }
-    var startTime by remember(formResetKey) { mutableStateOf("") }
-    var endDate by remember(formResetKey) { mutableStateOf(TimeUtils.today()) }
-    var endTime by remember(formResetKey) { mutableStateOf("") }
-    var description by remember(formResetKey) { mutableStateOf("") }
+    var startDate by rememberSaveable(formResetKey, editingEntry?.id) { mutableStateOf(editingEntry?.startDate ?: TimeUtils.today()) }
+    var startTime by rememberSaveable(formResetKey, editingEntry?.id) { mutableStateOf(editingEntry?.startTime ?: "") }
+    var endDate by rememberSaveable(formResetKey, editingEntry?.id) { mutableStateOf(editingEntry?.endDate ?: TimeUtils.today()) }
+    var endTime by rememberSaveable(formResetKey, editingEntry?.id) { mutableStateOf(editingEntry?.endTime ?: "") }
+    var description by rememberSaveable(formResetKey, editingEntry?.id) { mutableStateOf(editingEntry?.description ?: "") }
+
+    LaunchedEffect(editingEntry?.id) { if (editingEntry != null) selectedTabIndex = 0 }
 
     // History filter state
-    var selectedCategoryFilter by remember { mutableStateOf("All Categories") }
+    var selectedCategoryFilter by rememberSaveable { mutableStateOf("All Categories") }
     var categoryFilterExpanded by remember { mutableStateOf(false) }
-    var selectedDatePeriod by remember { mutableStateOf(DateFilterPeriod.ALL) }
-    var searchQuery by remember { mutableStateOf("") }
+    var selectedDatePeriod by rememberSaveable { mutableStateOf(DateFilterPeriod.ALL) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
     var fullScreenImageUrl by remember { mutableStateOf<String?>(null) }
     var entryToDelete by remember { mutableStateOf<TimesheetEntry?>(null) }
 
@@ -94,11 +101,14 @@ fun TimesheetScreen(
     val allTimesheets = (timesheetsState as? Resource.Success)?.data ?: emptyList()
 
     // Calculated time spent preview in Form
-    val calculatedDuration = remember(startDate, startTime, endDate, endTime) {
-        TimeUtils.calculateTimeSpentMillis(startDate, startTime, endDate, endTime)
+    val calculatedDuration = remember(editingEntry, startDate, startTime, endDate, endTime) {
+        val original = editingEntry
+        if (original != null && original.startDate == startDate && original.startTime == startTime && original.endDate == endDate && original.endTime == endTime) {
+            original.timeSpent
+        } else TimeUtils.calculateTimeSpentMillis(startDate, startTime, endDate, endTime)
     }
     val hasCompleteRange = startDate.isNotBlank() && startTime.isNotBlank() && endDate.isNotBlank() && endTime.isNotBlank()
-    val canSave = selectedCategory.isNotBlank() && hasCompleteRange && calculatedDuration > 0L && !isSaving && !isUploading
+    val canSave = selectedCategory.isNotBlank() && hasCompleteRange && (calculatedDuration > 0L || (editingEntry != null && editingEntry.timeSpent > 0L)) && !isSaving && !isUploading
 
     // Filtered timesheets in History
     val filteredTimesheets = remember(allTimesheets, selectedCategoryFilter, selectedDatePeriod, searchQuery) {
@@ -149,6 +159,7 @@ fun TimesheetScreen(
                             }
                         },
                         actions = {
+                            if (editingEntry != null) TextButton(onClick = onCancelEdit, enabled = !isSaving) { Text("Cancel edit") }
                             if (selectedTabIndex == 1 && filteredTimesheets.isNotEmpty()) {
                                 IconButton(onClick = { onExportCsvClick(filteredTimesheets) }) {
                                     Icon(
@@ -177,7 +188,7 @@ fun TimesheetScreen(
                             onClick = { selectedTabIndex = 0 },
                             text = {
                                 Text(
-                                    text = "Log entry",
+                                    text = if (editingEntry == null) "Log entry" else "Edit entry",
                                     fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Medium,
                                     fontSize = 14.sp
                                 )
@@ -422,7 +433,9 @@ fun TimesheetScreen(
                                 TimesheetHistoryCard(
                                     entry = entry,
                                     onImageClick = { fullScreenImageUrl = entry.imageUrl },
-                                    onDeleteClick = { entryToDelete = entry }
+                                    onDeleteClick = { entryToDelete = entry },
+                                    onEditClick = { onEditEntryClick(entry) },
+                                    onRepeatClick = { onRepeatEntryClick(entry) }
                                 )
                             }
                         }
@@ -562,7 +575,9 @@ private fun PickerField(
 fun TimesheetHistoryCard(
     entry: TimesheetEntry,
     onImageClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    onEditClick: () -> Unit = {},
+    onRepeatClick: () -> Unit = {}
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -571,6 +586,10 @@ fun TimesheetHistoryCard(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onEditClick) { Text("Edit") }
+                TextButton(onClick = onRepeatClick) { Text("Track again") }
+            }
             // Header Row: Category Badge, Duration, Delete
             Row(
                 modifier = Modifier.fillMaxWidth(),

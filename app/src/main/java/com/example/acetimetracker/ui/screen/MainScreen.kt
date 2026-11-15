@@ -72,7 +72,8 @@ fun MainScreen(
     onNavigate: (Destination) -> Unit,
     timesheets: List<TimesheetEntry> = emptyList(),
     categories: List<Category> = emptyList(),
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    showBottomBar: Boolean = true
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -97,7 +98,7 @@ fun MainScreen(
                     onProfileClick = { onNavigate(Destination.Profile) }
                 )
             },
-            bottomBar = { HomeBottomBar(onNavigate = onNavigate) }
+            bottomBar = { if (showBottomBar) HomeBottomBar(onNavigate = onNavigate) }
         ) { paddingValues ->
             HomeContent(
                 userProfile = userProfile,
@@ -611,6 +612,7 @@ private fun AppDrawer(
 }
 
 enum class Destination {
+    Today,
     Profile,
     Categories,
     Timesheet,

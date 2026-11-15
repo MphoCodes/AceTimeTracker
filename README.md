@@ -28,11 +28,14 @@ Screenshots show the demo interface captured in October 2026; they are illustrat
 ## What you can do
 
 - **Track a session:** stopwatch or Pomodoro focus/break cycles, category selection, pause, reset, and save. Only focus time contributes to a Pomodoro entry.
-- **Keep a timer draft:** leaving the timer pauses it and preserves a draft per account on the device. After process loss, the most recent checkpoint is restored paused; time after that checkpoint is not inferred.
+- **Keep a timer draft:** switching primary tabs keeps the timer running, with a draft per account on the device. After process loss, the most recent checkpoint is restored paused; time after that checkpoint is not inferred.
 - **Log time manually:** date-aware start/end validation, notes, and an optional photo.
-- **Organize work:** create colored categories with hour targets and optional minimum/maximum goals; delete categories while retaining historical entries.
-- **Review progress:** daily and weekly totals, category breakdowns, history filtering, and entry deletion.
-- **Share a report:** export the selected history as CSV text through Android's share sheet, with quoting and spreadsheet formula protection.
+- **Organize work:** create and edit colored categories and hour targets, favorite frequent categories, and delete categories while retaining historical entries. Renaming preserves existing session labels.
+- **Review and correct history:** search and filter entries, edit dates/times/notes/photos, delete entries, or track a category again. Notes-only edits preserve recorded focus time.
+- **Explore your time:** custom date ranges, previous-period comparisons, category targets, and a daily timeline with gaps, overlaps, and overnight clipping.
+- **Share a report:** export CSV files or paginated PDFs through Android's share sheet. CSV fields are quoted and protected against spreadsheet formulas.
+- **Keep work locally:** account-scoped SQLite storage saves entries and categories with a retryable outbox; the app shows pending sync and errors.
+- **Track with fewer taps:** persistent main tabs, an active-session strip, pause/resume notification actions, a home-screen shortcut widget, and optional daily reminders on chosen weekdays.
 - **Manage your profile:** email/password sign-in, registration, password reset, and profile details/photo.
 - **Choose your appearance:** light, dark, or system theme.
 
@@ -49,23 +52,28 @@ Screenshots show the demo interface captured in October 2026; they are illustrat
 
 4. Use the **test sign-in** option on the login screen to explore with local sample data.
 
-The demo does not need a live Firebase backend. Its sample categories, profile, and saved entries are held in memory and reset when the process restarts. Timer drafts and appearance preferences persist locally. Test sign-in is disabled in release builds.
+The demo does not need a live Firebase backend. Sample entries and categories persist locally across restarts. Demo profile data remains a sample, and no demo entries are uploaded. Timer drafts, favorites, and appearance preferences also persist locally. Test sign-in is disabled in release builds.
 
 For real accounts, configure a Firebase project you control. The checked-in debug configuration is a placeholder; see [Firebase setup and data boundaries](docs/development.md#firebase-setup).
 
 ## Engineering
 
-The app uses Compose Material 3 screens, activity-based navigation, ViewModels for screen state, and repositories for Firebase access. Time is stored in milliseconds; the timer measures elapsed time with a monotonic clock. Dashboard and chart totals are derived from the same timesheet entries.
+The app uses Compose Material 3 screens, a shared activity for the main tabs, ViewModels for screen state, and repositories backed by local SQLite storage and Firebase synchronization. Time is stored in milliseconds; the timer measures elapsed time with a monotonic clock. Dashboard and chart totals are derived from the same timesheet entries.
 
 ```text
 app/src/main/java/com/example/acetimetracker/
 ├── data/model/        Categories, profiles, and timesheet entries
-├── data/repository/   Authentication, Firebase access, settings, aggregation
+├── data/repository/   Authentication, repositories, settings, favorites
+├── data/local/        Transactional SQLite records and outbox
+├── data/sync/         Account-scoped synchronization and status
 ├── ui/activity/       Android lifecycle and navigation
 ├── ui/screen/         Compose screens
 ├── ui/components/     Shared controls and dialogs
 ├── ui/viewmodel/      Validation and screen state
 ├── ui/theme/          Color, typography, and theme preference
+├── report/            Range calculations, timelines, PDF and CSV export
+├── reminder/          Weekday schedules and inexact alarms
+├── widget/            Home-screen timer shortcut
 ├── service/           Active timer notification
 └── util/              Time calculations, CSV export, and result types
 ```
@@ -89,9 +97,9 @@ See [release preparation](docs/release.md) for output paths, optional signing, a
 
 ## Project status
 
-The current time-tracking workflows are implemented, with local regression coverage for time calculations, aggregation, release authentication boundaries, photo failures, timer recovery, goal validation, and CSV export.
+The current time-tracking workflows are implemented. The November 2026 verification passed 90 local tests and 3 device tests, covering durable storage, account isolation, stale sync acknowledgments, timer recovery, editing, reminders, report calculations, and PDF/CSV export. Debug and release lint have no errors; legacy warnings remain. Device checks cover the demo workflow, not a live production backend.
 
-Live Firebase ownership/rules, production authentication and media flows, account deletion, privacy disclosures, and store submission still require release-owner verification. There is no claim of a published Play release. The larger goals/routines, durable offline synchronization, and reminders roadmap in `docs/superpowers/` is future work, not a list of shipped features.
+Live Firebase ownership/rules, production authentication and media flows, account deletion, privacy disclosures, and store submission still require release-owner verification. There is no claim of a published Play release. The broader goals/routines roadmap in `docs/superpowers/` remains future work. Entry/category synchronization retries while the app process is alive and on authenticated relaunch; background execution after process death and offline photo uploads are not guaranteed. Local timestamps do not retain timezone identifiers.
 
 ## Contributing
 

@@ -11,6 +11,12 @@ import com.example.acetimetracker.data.repository.CategoryRepository
 import com.example.acetimetracker.data.repository.TimesheetRepository
 import com.example.acetimetracker.util.Resource
 import com.example.acetimetracker.util.TimeUtils
+import com.example.acetimetracker.util.EntryEditor
+import com.example.acetimetracker.data.repository.FavoriteCategories
+import com.example.acetimetracker.AceTimeTrackerApp
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 
 class TimesheetViewModel(
     private val timesheetRepository: TimesheetRepository = TimesheetRepository(),
@@ -40,7 +46,23 @@ class TimesheetViewModel(
         _deleteEntryState.value = null
     }
 
-    var selectedImageUrl: String = ""
+    var editingEntry by mutableStateOf<TimesheetEntry?>(null)
+        private set
+
+    fun beginEdit(entry: TimesheetEntry) {
+        if (_saveEntryState.value is Resource.Loading || entry.userId != authRepository.currentUserId) return
+        clearSelectedImage()
+        editingEntry = entry
+        selectedImageUrl = entry.imageUrl
+    }
+
+    fun cancelEdit() {
+        if (_saveEntryState.value is Resource.Loading) return
+        editingEntry = null
+        clearSelectedImage()
+    }
+
+    var selectedImageUrl by mutableStateOf("")
     private var imageUploadGeneration = 0L
 
     fun loadCategories() {
@@ -50,7 +72,9 @@ class TimesheetViewModel(
             return
         }
         categoryRepository.fetchCategories(userId) { result ->
-            _categoriesState.value = result
+            if (result !is Resource.Loading || _categoriesState.value !is Resource.Success) {
+                _categoriesState.value = if (result is Resource.Success) Resource.Success(FavoriteCategories(AceTimeTrackerApp.context).sort(userId, result.data)) else result
+            }
         }
     }
 
@@ -60,9 +84,8 @@ class TimesheetViewModel(
             _timesheetsState.value = Resource.Error("User not authenticated")
             return
         }
-        _timesheetsState.value = Resource.Loading
         timesheetRepository.fetchTimesheets(userId) { result ->
-            _timesheetsState.value = result
+            if (result !is Resource.Loading || _timesheetsState.value !is Resource.Success) _timesheetsState.value = result
         }
     }
 
@@ -127,38 +150,12 @@ class TimesheetViewModel(
             return
         }
 
-        if (category.isBlank() || category == "Select Category") {
-            _saveEntryState.value = Resource.Error("Please select a category")
+        val entry = try {
+            EntryEditor.build(editingEntry, userId, category, startDate, startTime, endDate, endTime, description, selectedImageUrl)
+        } catch (error: IllegalArgumentException) {
+            _saveEntryState.value = Resource.Error(error.message ?: "Invalid entry")
             return
         }
-
-        if (!TimeUtils.isValidDate(startDate) || !TimeUtils.isValidDate(endDate)) {
-            _saveEntryState.value = Resource.Error("Please enter valid dates (YYYY-MM-DD)")
-            return
-        }
-
-        if (!TimeUtils.isValidTime(startTime) || !TimeUtils.isValidTime(endTime)) {
-            _saveEntryState.value = Resource.Error("Please enter valid times (HH:MM)")
-            return
-        }
-
-        val timeSpentMillis = TimeUtils.calculateTimeSpentMillis(startDate, startTime, endDate, endTime)
-        if (timeSpentMillis <= 0L) {
-            _saveEntryState.value = Resource.Error("End time must be after the start time")
-            return
-        }
-
-        val entry = TimesheetEntry(
-            userId = userId,
-            category = category,
-            startDate = startDate,
-            startTime = startTime,
-            endDate = endDate,
-            endTime = endTime,
-            timeSpent = timeSpentMillis,
-            imageUrl = selectedImageUrl,
-            description = description.trim()
-        )
 
         timesheetRepository.saveTimesheetEntry(userId, entry) { result ->
             _saveEntryState.value = result

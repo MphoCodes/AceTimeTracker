@@ -15,16 +15,7 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(application = AceTimeTrackerApp::class, sdk = [36])
 class TimesheetExportTest {
-    @Suppress("DEPRECATION")
-    private fun export(entry: TimesheetEntry): String {
-        val activity = Robolectric.buildActivity(TimesheetActivity::class.java).get()
-        val method = TimesheetActivity::class.java.getDeclaredMethod("exportAndShareCsv", List::class.java)
-        method.isAccessible = true
-        method.invoke(activity, listOf(entry))
-        val chooser = shadowOf(activity).nextStartedActivity
-        val share = chooser.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)!!
-        return share.getStringExtra(Intent.EXTRA_TEXT)!!
-    }
+    private fun export(entry: TimesheetEntry): String = com.example.acetimetracker.util.TimesheetCsv.export(listOf(entry))
 
     @Test fun escapesQuotesInCategoryAndDescription() {
         val csv = export(TimesheetEntry(category = "A \"quoted\", category", description = "Line \"one\"\nLine two"))

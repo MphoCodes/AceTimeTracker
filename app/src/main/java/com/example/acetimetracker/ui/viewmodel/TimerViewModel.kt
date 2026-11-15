@@ -98,6 +98,29 @@ class TimerViewModel @JvmOverloads constructor(
     val unsavedMs: Long
         get() = if (mode == TimerMode.STOPWATCH) stopwatchElapsedMs else pomodoroFocusLoggedMs
 
+    fun setRunning(running: Boolean) {
+        if (isSaving || ownerId.isEmpty() || authRepository.currentUserId != ownerId) return
+        if (mode == TimerMode.STOPWATCH) {
+            if (running != isStopwatchRunning) toggleStopwatch()
+        } else if (running != isPomodoroRunning) togglePomodoro()
+    }
+
+    fun pauseAll() {
+        pauseStopwatch()
+        pausePomodoro()
+        persistDraft()
+    }
+
+    fun trackAgain(category: String) {
+        if (isSaving || isAnyRunning || stopwatchElapsedMs > 0 || pomodoroFocusLoggedMs > 0) {
+            message = "Save or reset the current session before tracking another"
+            return
+        }
+        changeMode(TimerMode.STOPWATCH)
+        selectCategory(category)
+        setRunning(true)
+    }
+
     fun selectCategory(name: String) {
         if (isSaving) return
         selectedCategory = name
@@ -145,6 +168,7 @@ class TimerViewModel @JvmOverloads constructor(
         stopwatchElapsedMs = 0L
         stopwatchSessionStart = null
         stopwatchEntryId = UUID.randomUUID().toString()
+        TimerForegroundService.stop(getApplication())
         persistDraft()
     }
 
@@ -173,6 +197,7 @@ class TimerViewModel @JvmOverloads constructor(
         if (isSaving) return
         pausePomodoro()
         pomodoroRemainingMs = pomodoroTotalDurationMs
+        if (unsavedMs <= 0) TimerForegroundService.stop(getApplication())
         persistDraft()
     }
 
@@ -194,6 +219,7 @@ class TimerViewModel @JvmOverloads constructor(
         pomodoroPhase = phase
         pomodoroTotalDurationMs = (if (phase == PomodoroPhase.FOCUS) pomodoroFocusMinutes else pomodoroBreakMinutes) * 60 * 1000L
         pomodoroRemainingMs = pomodoroTotalDurationMs
+        if (unsavedMs <= 0) TimerForegroundService.stop(getApplication())
         persistDraft()
     }
 
@@ -261,6 +287,9 @@ class TimerViewModel @JvmOverloads constructor(
             tickerJob?.cancel()
             tickerJob = null
             TimerForegroundService.stop(getApplication())
+            if (unsavedMs > 0 && settingsRepository.isNotificationsEnabled()) {
+                TimerForegroundService.showPaused(getApplication(), selectedCategory, TimeUtils.formatDuration(unsavedMs), if (mode == TimerMode.STOPWATCH) "Stopwatch" else "Focus")
+            }
         }
         persistDraft()
     }
@@ -402,7 +431,7 @@ class TimerViewModel @JvmOverloads constructor(
         pauseStopwatch()
         pausePomodoro()
         persistDraft()
-        TimerForegroundService.stop(getApplication())
+        if (unsavedMs <= 0) TimerForegroundService.stop(getApplication())
         super.onCleared()
     }
 }

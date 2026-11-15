@@ -1,79 +1,63 @@
-# Handoff — 2026-11-13
+# Handoff — 2026-11-16
 
 ## Scope and provenance
 
-User requested feature completion, best-practice cleanup, a release build, and public-facing GitHub presentation. This pass hardened the existing time tracker. The larger historical goals/routines/offline/reminders roadmap is not complete and must not be represented as shipped.
+Implemented the six approved daily-workflow improvements: entry/category editing, durable offline data and sync status, persistent navigation/shared timer, quick actions/reminders/favorites, reporting/export, and daily timeline. This supersedes the November 13 implementation and artifact notes.
 
 Origin: https://github.com/MphoCodes/AceTimeTracker.git
-Starting HEAD: `31b8cec104ce89075a34f51c1bbee1e11fe8f654`.
-The owner subsequently requested a push to origin/main. This handoff accompanies the implementation commit; store publication is not included. Existing auth/photo/UI/Gradle changes are included; personal IDE modifications remain local.
+Starting commit: `ad5adb54e7b9ee09a256be319a5c0334367c4363` on `main`.
+Prior user push authorization applies to this implementation. Personal changes in four `.idea` files are excluded. No Firebase deployment, package-identity change or store publication.
 
-## Changes
+## Delivered workflows
 
-- Per-account paused timer draft recovery with checkpoints and monotonic active timing.
-- Stable per-mode entry IDs for save retries; remote writes use supplied IDs, and demo saves upsert those IDs.
-- Local checkpoints are flushed off the main thread before submission. Writer tokens prevent an older ViewModel callback from overwriting a newer draft.
-- Timer mutation controls are guarded during save; users can leave after a pending-save explanation.
-- CSV quoting covers every field and neutralizes spreadsheet formulas in user text.
-- Category targets reject nonfinite and out-of-range values; removed obsolete global category writes.
-- History deletion now reports errors and guards repeated concurrent requests.
-- Timer service stopping uses stopService rather than starting a service just to stop it.
-- Backup/transfer allowlists appearance settings instead of restoring account sessions, drafts, or media caches.
-- Optional release signing through four ACE_RELEASE_* environment variables; no credentials added.
-- README with screenshots and accurate feature/setup boundaries, development/architecture/release guides, contributing/security docs, release CI artifacts, and root portable context.
-- Old tracked root app-debug.apk moved to ignored app/build/legacy-artifacts/app-debug.apk. New artifacts belong in CI/Releases, not source control.
+- Account-scoped SQLite records and transactional outbox for entries/categories, stable IDs, revision-checked acknowledgments, persistent tombstones, server-snapshot watermarks and explicit sync status/retry. Demo data is durable and never uploaded.
+- Entry editing with validation, notes/photo support, same-ID updates and preserved active duration when the clock range is unchanged. Repeat tracking refuses to overwrite an existing timer draft.
+- Category editing, validated hour targets/colors and per-account favorites. Rename preserves historical entry labels.
+- Shared Today/Timer/Timesheet/Progress host, saved tab UI state, one retained timer ViewModel and running/paused session strip. Legacy activities redirect to the host.
+- Immutable notification pause/resume intents, authenticated timer shortcut widget, opt-in weekday reminders with inexact alarms and permission feedback.
+- Custom-range reports, equal prior-period comparison, category goals/actuals, daily gap/overlap timeline, overnight clipping, formula-safe CSV and multi-page PDF sharing. Heavy calculations/export/storage run off the UI thread.
+- Existing paused-draft recovery, stable timer retry IDs, writer ownership, debug/release authentication separation and restricted backup behavior retained.
 
 ## Verification
 
-Final host command:
+Final commands, using Android Studio JBR:
 ```sh
-JAVA_HOME='<Android Studio JBR>' ./gradlew --console=plain \
-  :app:testDebugUnitTest :app:lintDebug :app:lintRelease \
-  :app:assembleDebug :app:assembleRelease :app:bundleRelease
+./gradlew --console=plain :app:testDebugUnitTest
+./gradlew --console=plain :app:lintDebug :app:lintRelease \
+  :app:assembleDebug :app:assembleRelease :app:bundleRelease \
+  :app:connectedDebugAndroidTest
 ```
 
-Passed: **43 JVM tests, 0 failures, 0 errors**. Added regression coverage for draft recovery/reset/account separation, delayed save callbacks, retry identity, category validation, and CSV export. Initial red runs reproduced timer data loss, invalid targets, broken CSV quoting, and duplicate save behavior.
+**90 JVM tests and 3 instrumentation tests passed, zero failures/errors/skips.** Device tests include real PDF generation/rendering and the package smoke test. Debug/release lint passed with **284 warnings and zero errors**. There is only one application module, `:app`. `git diff --check` passed.
 
-Debug/release lint: no errors. Release report retains **282 warnings**, largely legacy resources/layouts and dependency suggestions. Do not describe it as warning-free.
+Manual API 36 Business_Phone debug/demo checks:
+- Start timer, change primary tabs while it runs, pause from the shared strip and save.
+- Edit the resulting entry without duplicating it or inflating its 48 seconds of active time.
+- Force-stop/relaunch and verify the entry and edited note survived.
+- Rename/favorite a category and verify the updated list and dashboard.
+- Open report/timeline and Android PDF share chooser; no recipient selected or report sent.
+- Enable reminder, grant notification permission, inspect time picker and verify the scheduled inexact AlarmManager record. Disable test reminder afterward.
 
-Instrumentation APK compiled. **1 instrumentation package smoke test passed** on API 36 (Arc_Testing); this is not complete journey coverage.
+An independent reviewer found a photo-restoration issue on recreation. Fixed reinitialization of the retained edit ViewModel and preserved the selected URL/pending upload in saved state. The reviewer then reached its usage limit; no completed independent review is claimed. Author integration review and full verification completed. The specific real-photo recreation journey remains unverified.
 
-Manual API 36 debug/demo checks on final APK:
-- Quick test sign-in and dashboard.
-- Denied notification permission; timer remained usable.
-- Selected Development, ran stopwatch, confirmed pause-and-leave.
-- Reopened the timer with the same 51-second paused draft.
-- Force-stopped/reopened and recovered the paused draft.
-- Saved it, saw timer reset and saved-session feedback, then saw Development in dashboard recent sessions.
+Compose preview rendering aborted during compilation; the report screen was instead inspected on the emulator. The user's emulator remains running with the debug app installed. Only sample/demo records were changed.
 
-Emulator was booted read-only without snapshot save, preserving its persistent disk. Live Firebase authentication/storage flows, release-device sign-in, broad accessibility, all form factors, and reboot tracking were not validated.
+## Release artifacts
 
-Independent review identified a pending-save duplicate/stale-draft race; fixed with stable IDs and writer ownership and covered by tests. A follow-up review noted offline navigation blocking; corrected to allow leaving with pending-save feedback.
-
-## Artifacts
-
+- `app/build/outputs/apk/debug/app-debug.apk`
 - `app/build/outputs/apk/release/app-release-unsigned.apk`
 - `app/build/outputs/bundle/release/app-release.aab`
-- `app/build/outputs/apk/debug/app-debug.apk`
 
-AAB inspected with jarsigner: **unsigned**.
-SHA-256:
-- AAB: `a585e0dcd8db8ff63421bc85f66d16932632746a98bf8616430e6dde07e71ea3`
-- Release APK: `91ce5df3187ff7381f651a504c9980818509408fe2b9b4c932476db0bf27a1ea`
+AAB checked with jarsigner: **unsigned**. SHA-256:
+- AAB: `19328ef68739a1dd089eb044ef64b596222b4e454e71a58380eb27d26226bb49`
+- Release APK: `15543508a86f4586f1490e440db43220c639ec60a7b95c21a514e62ddfed6e49`
 
-## Remaining work before publication
+## Boundaries and remaining publication work
 
-- Confirm final package ID and owned Firebase release project; verify deployed access rules and real account/media flows.
-- Implement complete account/data deletion and publish privacy/deletion disclosures; finish store declarations.
-- Supply the intended signing key, verify its certificate/backup, and validate the signed release on devices.
-- Broader roadmap features (history editing, category renaming, durable offline synchronization, reminders) remain unimplemented.
-- CI configuration was updated locally but has not run on GitHub.
-- No project knowledge-ingestion tool was found. No graph was rebuilt or replaced; historical indexed context may be stale. Portable files reflect this pass.
-
-
-## Bottom navigation refinement — 2026-11-13
-
-- Extracted HomeBottomBar into a reusable themed component with a rounded floating surface, subtle outline/shadow, branded active indicator, and system navigation insets. Existing dashboard routes remain unchanged.
-- Added light, dark, and 320dp/1.5x font previews. Large-text labels use Log/Stats with full accessibility descriptions. Visually checked all previews and the installed API 36 emulator dashboard.
-- Passed :app:testDebugUnitTest, :app:lintDebug, :app:lintRelease, :app:assembleDebug, :app:assembleRelease, :app:bundleRelease and :app:connectedDebugAndroidTest. Release artifacts were rebuilt; checksums listed above describe the previous build. Release signing/publication blockers above still apply.
-- Personal .idea changes excluded from the commit. No source knowledge-ingestion tool is available; portable handoff is current.
+- Sync retries while the process lives and on authenticated relaunch; background delivery after process death is not guaranteed. Real-account photo uploads require connectivity.
+- Live Firebase authentication, ownership rules and media flows were not exercised. Backend deployment and production data migration were not performed.
+- Timer process loss restores the last checkpoint paused; it is not a reboot-continuing timer engine. Local date/time fields do not encode a timezone.
+- Widget placement, actual scheduled/reboot notification delivery, broad accessibility and all form factors need further device validation.
+- Release owner must confirm package/Firebase ownership, implement complete account/data deletion and disclosures, supply intended signing credentials, test signed release and complete store declarations.
+- Broader goals/routines, billing and external calendar integrations remain future work. The six daily-workflow features above are implemented.
+- No project source-ingestion tool was available. No existing graph was replaced; indexed historical context may be stale. README, architecture, plan and portable memory reflect this pass.

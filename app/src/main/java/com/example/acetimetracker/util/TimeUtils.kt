@@ -82,8 +82,9 @@ object TimeUtils {
         return String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, seconds)
     }
 
-    /** Human-friendly duration such as "2h 15m", "45m" or "0m". */
+    /** Human-friendly duration such as "2h 15m", "45m", "<1m" or "0m". */
     fun formatDurationShort(timeInMillis: Long): String {
+        if (timeInMillis in 1L until 60_000L) return "<1m"
         val totalMinutes = timeInMillis.coerceAtLeast(0L) / (1000 * 60)
         val hours = totalMinutes / 60
         val minutes = totalMinutes % 60

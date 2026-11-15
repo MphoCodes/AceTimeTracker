@@ -34,11 +34,12 @@ import com.adamglin.phosphoricons.regular.Timer
 import com.example.acetimetracker.ui.screen.Destination
 import com.example.acetimetracker.ui.theme.AceTimeTrackerTheme
 
-/** Dashboard shortcuts: Today stays selected because other destinations open their own activities. */
+/** Shared primary destinations; state is owned by the main host. */
 @Composable
 fun HomeBottomBar(
     onNavigate: (Destination) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    selected: Destination = Destination.Today
 ) {
     val useShortLabels = LocalDensity.current.fontScale >= 1.3f
     Box(
@@ -67,28 +68,28 @@ fun HomeBottomBar(
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 NavigationBarItem(
-                    selected = true,
-                    onClick = {},
+                    selected = selected == Destination.Today,
+                    onClick = { onNavigate(Destination.Today) },
                     icon = { Icon(PhosphorIcons.Regular.House, null, Modifier.size(24.dp)) },
                     label = { Text("Today", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold) },
                     colors = colors
                 )
                 NavigationBarItem(
-                    selected = false,
+                    selected = selected == Destination.Timer,
                     onClick = { onNavigate(Destination.Timer) },
                     icon = { Icon(PhosphorIcons.Regular.Timer, null, Modifier.size(24.dp)) },
                     label = { Text("Timer", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium) },
                     colors = colors
                 )
                 NavigationBarItem(
-                    selected = false,
+                    selected = selected == Destination.Timesheet,
                     onClick = { onNavigate(Destination.Timesheet) },
                     icon = { Icon(PhosphorIcons.Regular.FileText, null, Modifier.size(24.dp)) },
                     label = { Text(if (useShortLabels) "Log" else "Timesheet", modifier = Modifier.semantics { contentDescription = "Timesheet" }, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium) },
                     colors = colors
                 )
                 NavigationBarItem(
-                    selected = false,
+                    selected = selected == Destination.MyProgress,
                     onClick = { onNavigate(Destination.MyProgress) },
                     icon = { Icon(PhosphorIcons.Regular.ChartLineUp, null, Modifier.size(24.dp)) },
                     label = { Text(if (useShortLabels) "Stats" else "Progress", modifier = Modifier.semantics { contentDescription = "Progress" }, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium) },

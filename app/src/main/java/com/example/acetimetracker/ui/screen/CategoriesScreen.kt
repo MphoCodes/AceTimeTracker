@@ -15,6 +15,8 @@ import com.adamglin.phosphoricons.Regular
 import com.adamglin.phosphoricons.regular.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.example.acetimetracker.ui.viewmodel.CategoryValidation
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,9 +56,22 @@ fun CategoriesScreen(
     addCategoryState: Resource<*>?,
     onBackClick: () -> Unit,
     onAddCategory: (String, String, Float?, Float?, Float?, String) -> Unit,
-    onDeleteCategory: (Category) -> Unit
+    onDeleteCategory: (Category) -> Unit,
+    updateCategoryState: Resource<Unit>? = null,
+    favoriteIds: Set<String> = emptySet(),
+    onUpdateCategory: (Category) -> Unit = {},
+    onToggleFavorite: (Category) -> Unit = {},
+    onResetSaveState: () -> Unit = {}
 ) {
-    var showAddDialog by remember { mutableStateOf(false) }
+    var showAddDialog by rememberSaveable { mutableStateOf(false) }
+    var editingCategory by rememberSaveable { mutableStateOf<Category?>(null) }
+    val saveState = if (editingCategory != null) updateCategoryState else addCategoryState
+    LaunchedEffect(saveState) {
+        if (saveState is Resource.Success && showAddDialog) {
+            showAddDialog = false
+            editingCategory = null
+        }
+    }
     var selectedCategoryForDetails by remember { mutableStateOf<Category?>(null) }
     var categoryToDelete by remember { mutableStateOf<Category?>(null) }
 
@@ -89,7 +104,7 @@ fun CategoriesScreen(
         floatingActionButton = {
             if ((categoriesState as? Resource.Success)?.data?.isNotEmpty() == true) {
                 ExtendedFloatingActionButton(
-                    onClick = { showAddDialog = true },
+                    onClick = { onResetSaveState(); editingCategory = null; showAddDialog = true },
                     containerColor = AceRed,
                     contentColor = Color.White,
                     shape = RoundedCornerShape(16.dp),
@@ -151,7 +166,7 @@ fun CategoriesScreen(
                             )
                             Spacer(modifier = Modifier.height(20.dp))
                             Button(
-                                onClick = { showAddDialog = true },
+                                onClick = { onResetSaveState(); editingCategory = null; showAddDialog = true },
                                 colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White),
                                 modifier = Modifier.heightIn(min = 48.dp)
                             ) {
@@ -170,7 +185,9 @@ fun CategoriesScreen(
                                 CategoryCard(
                                     category = category,
                                     onClick = { selectedCategoryForDetails = category },
-                                    onDeleteClick = { categoryToDelete = category }
+                                    onDeleteClick = { categoryToDelete = category },
+                                    isFavorite = category.documentId in favoriteIds,
+                                    onFavoriteClick = { onToggleFavorite(category) }
                                 )
                             }
                         }
@@ -199,11 +216,15 @@ fun CategoriesScreen(
     // Add Category Dialog
     if (showAddDialog) {
         AddCategoryDialog(
-            isLoading = addCategoryState is Resource.Loading,
-            onDismiss = { showAddDialog = false },
+            isLoading = saveState is Resource.Loading,
+            initialCategory = editingCategory,
+            errorMessage = (saveState as? Resource.Error)?.message,
+            onDismiss = { if (saveState !is Resource.Loading) { showAddDialog = false; editingCategory = null } },
             onConfirm = { name, desc, goal, minGoal, maxGoal, colorHex ->
-                onAddCategory(name, desc, goal, minGoal, maxGoal, colorHex)
-                showAddDialog = false
+                val original = editingCategory
+                if (original == null) onAddCategory(name, desc, goal, minGoal, maxGoal, colorHex)
+                else onUpdateCategory(original.copy(name = name, description = desc, goal = goal,
+                    minGoal = minGoal, maxGoal = maxGoal, colorHex = colorHex))
             }
         )
     }
@@ -239,9 +260,15 @@ fun CategoriesScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { selectedCategoryForDetails = null }) {
-                    Text("Close")
-                }
+                TextButton(onClick = {
+                    onResetSaveState()
+                    editingCategory = cat
+                    selectedCategoryForDetails = null
+                    showAddDialog = true
+                }) { Text("Edit category") }
+            },
+            dismissButton = {
+                TextButton(onClick = { selectedCategoryForDetails = null }) { Text("Close") }
             }
         )
     }
@@ -274,11 +301,14 @@ fun CategoriesScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CategoryCard(
     category: Category,
     onClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    isFavorite: Boolean = false,
+    onFavoriteClick: () -> Unit = {}
 ) {
     val catColor = parseHexColor(category.colorHex)
     Card(
@@ -326,7 +356,7 @@ fun CategoryCard(
                     )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     category.goal?.let { goal ->
                         GoalChip(label = "Target ${formatHours(goal)}", tint = AccentEmerald)
                     }
@@ -339,13 +369,23 @@ fun CategoryCard(
                 }
             }
 
-            IconButton(onClick = onDeleteClick) {
-                Icon(
-                    imageVector = PhosphorIcons.Regular.Trash,
-                    contentDescription = "Delete ${category.name}",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
-                )
+            Column {
+                IconToggleButton(checked = isFavorite, onCheckedChange = { onFavoriteClick() }) {
+                    Icon(
+                        imageVector = PhosphorIcons.Regular.Star,
+                        contentDescription = if (isFavorite) "Remove ${category.name} from favorites" else "Favorite ${category.name}",
+                        tint = if (isFavorite) AccentAmber else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        imageVector = PhosphorIcons.Regular.Trash,
+                        contentDescription = "Delete ${category.name}",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }
@@ -378,18 +418,21 @@ fun formatHours(hours: Float): String {
 fun AddCategoryDialog(
     isLoading: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (name: String, desc: String, goal: Float?, minGoal: Float?, maxGoal: Float?, colorHex: String) -> Unit
+    onConfirm: (name: String, desc: String, goal: Float?, minGoal: Float?, maxGoal: Float?, colorHex: String) -> Unit,
+    initialCategory: Category? = null,
+    errorMessage: String? = null
 ) {
-    var name by remember { mutableStateOf("") }
-    var desc by remember { mutableStateOf("") }
-    var goalText by remember { mutableStateOf("") }
-    var minGoalText by remember { mutableStateOf("") }
-    var maxGoalText by remember { mutableStateOf("") }
-    var selectedColorHex by remember { mutableStateOf(CATEGORY_PALETTES.first().first) }
+    var name by rememberSaveable(initialCategory?.documentId) { mutableStateOf(initialCategory?.name.orEmpty()) }
+    var desc by rememberSaveable(initialCategory?.documentId) { mutableStateOf(initialCategory?.description.orEmpty()) }
+    var goalText by rememberSaveable(initialCategory?.documentId) { mutableStateOf(initialCategory?.goal?.toString().orEmpty()) }
+    var minGoalText by rememberSaveable(initialCategory?.documentId) { mutableStateOf(initialCategory?.minGoal?.toString().orEmpty()) }
+    var maxGoalText by rememberSaveable(initialCategory?.documentId) { mutableStateOf(initialCategory?.maxGoal?.toString().orEmpty()) }
+    var selectedColorHex by rememberSaveable(initialCategory?.documentId) { mutableStateOf(initialCategory?.colorHex ?: CATEGORY_PALETTES.first().first) }
+    var inputError by remember { mutableStateOf<String?>(null) }
 
     AceAlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("New category", fontWeight = FontWeight.Bold) },
+        onDismissRequest = { if (!isLoading) onDismiss() },
+        title = { Text(if (initialCategory == null) "New category" else "Edit category", fontWeight = FontWeight.Bold) },
         text = {
             Column(
                 modifier = Modifier
@@ -397,6 +440,14 @@ fun AddCategoryDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                (inputError ?: errorMessage)?.let {
+                    Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+                }
+                if (initialCategory != null) {
+                    Text("Renaming keeps the original category label on past sessions.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
@@ -484,6 +535,8 @@ fun AddCategoryDialog(
         confirmButton = {
             Button(
                 onClick = {
+                    inputError = CategoryValidation.goalInputError(goalText, minGoalText, maxGoalText)
+                    if (inputError != null) return@Button
                     val goal = goalText.toFloatOrNull()
                     val min = minGoalText.toFloatOrNull()
                     val max = maxGoalText.toFloatOrNull()
@@ -492,11 +545,11 @@ fun AddCategoryDialog(
                 enabled = name.isNotBlank() && !isLoading,
                 colors = ButtonDefaults.buttonColors(containerColor = AceRed, contentColor = Color.White)
             ) {
-                Text("Create")
+                Text(if (isLoading) "Saving…" else if (initialCategory == null) "Create" else "Save changes")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = onDismiss, enabled = !isLoading) {
                 Text("Cancel")
             }
         }
