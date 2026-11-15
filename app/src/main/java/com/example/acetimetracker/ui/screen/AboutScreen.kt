@@ -60,7 +60,7 @@ fun AboutScreen(
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.acelogo),
+                    painter = painterResource(id = R.drawable.ace_mark),
                     contentDescription = "AceTimeTracker logo",
                     modifier = Modifier
                         .size(112.dp)

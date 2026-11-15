@@ -53,7 +53,7 @@ object ReminderScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.acelogo)
+            .setSmallIcon(R.drawable.ic_ace_notification)
             .setContentTitle("Make time for your day")
             .setContentText("Track a session or review the time you have logged.")
             .setContentIntent(open)

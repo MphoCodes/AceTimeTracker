@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="acelogo.png" width="96" alt="AceTimeTracker logo">
+  <img src="docs/brand/ace-mark.svg" width="96" alt="AceTimeTracker logo">
 </p>
 
 <h1 align="center">AceTimeTracker</h1>
@@ -17,13 +17,13 @@ A native Android time tracker built with Kotlin and Jetpack Compose. Record a fo
 ## A look inside
 
 <p align="center">
-  <img src="play-store/screenshots/phone/01-dashboard.jpg" width="23%" alt="Dashboard with tracked time and weekly category goals">
-  <img src="play-store/screenshots/phone/02-log-time.jpg" width="23%" alt="Manual time entry with category and date selection">
-  <img src="play-store/screenshots/phone/03-history.jpg" width="23%" alt="Timesheet history">
-  <img src="play-store/screenshots/phone/04-progress.jpg" width="23%" alt="Progress overview">
+  <img src="docs/screenshots/today.png" width="23%" alt="Dashboard with tracked time and weekly category goals">
+  <img src="docs/screenshots/add-time.png" width="23%" alt="Manual time entry with category and date selection">
+  <img src="docs/screenshots/history.png" width="23%" alt="Timesheet history">
+  <img src="docs/screenshots/reports.png" width="23%" alt="Progress overview">
 </p>
 
-Screenshots show the demo interface captured in October 2026; they are illustrative, not evidence of a live backend or store release.
+Screenshots show the updated November 2026 demo interface, including the empty report state. They are not evidence of a live backend or store release.
 
 ## What you can do
 

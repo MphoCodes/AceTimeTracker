@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<resources>
+    <style name="SplashTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowSplashScreenBackground">#09090B</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ace_mark</item>
+        <item name="android:windowSplashScreenAnimationDuration">300</item>
+    </style>
+</resources>

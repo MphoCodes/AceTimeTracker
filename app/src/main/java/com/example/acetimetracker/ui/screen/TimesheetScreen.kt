@@ -60,7 +60,8 @@ fun TimesheetScreen(
     uploadImageState: Resource<*>?,
     selectedImageUri: Uri?,
     formResetKey: Int = 0,
-    initialTab: Int = 0,
+    initialTab: Int = 1,
+    tabRequestKey: Int = 0,
     onBackClick: () -> Unit,
     onSelectImageClick: () -> Unit,
     onRemoveImageClick: () -> Unit = {},
@@ -74,6 +75,11 @@ fun TimesheetScreen(
 ) {
     val context = LocalContext.current
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(initialTab) }
+
+    var handledTabRequest by rememberSaveable { mutableIntStateOf(tabRequestKey) }
+    LaunchedEffect(tabRequestKey) {
+        if (handledTabRequest != tabRequestKey) { selectedTabIndex = initialTab; handledTabRequest = tabRequestKey }
+    }
 
     // Form state, cleared whenever formResetKey changes after a successful save
     var selectedCategory by rememberSaveable(formResetKey, editingEntry?.id) { mutableStateOf(editingEntry?.category.orEmpty()) }
@@ -147,7 +153,7 @@ fun TimesheetScreen(
                     TopAppBar(
                         title = {
                             Text(
-                                text = "Timesheet",
+                                text = if (selectedTabIndex == 1) "History" else if (editingEntry != null) "Edit entry" else "Add time",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -178,22 +184,11 @@ fun TimesheetScreen(
 
                     // Clean Segmented Tab Row
                     TabRow(
-                        selectedTabIndex = selectedTabIndex,
+                        selectedTabIndex = if (selectedTabIndex == 1) 0 else 1,
                         containerColor = MaterialTheme.colorScheme.surface,
                         contentColor = AceRed,
                         divider = { HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant) }
                     ) {
-                        Tab(
-                            selected = selectedTabIndex == 0,
-                            onClick = { selectedTabIndex = 0 },
-                            text = {
-                                Text(
-                                    text = if (editingEntry == null) "Log entry" else "Edit entry",
-                                    fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Medium,
-                                    fontSize = 14.sp
-                                )
-                            }
-                        )
                         Tab(
                             selected = selectedTabIndex == 1,
                             onClick = { selectedTabIndex = 1 },
@@ -201,6 +196,17 @@ fun TimesheetScreen(
                                 Text(
                                     text = "History (${allTimesheets.size})",
                                     fontWeight = if (selectedTabIndex == 1) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        )
+                        Tab(
+                            selected = selectedTabIndex == 0,
+                            onClick = { selectedTabIndex = 0 },
+                            text = {
+                                Text(
+                                    text = if (editingEntry == null) "Add time" else "Edit entry",
+                                    fontWeight = if (selectedTabIndex == 0) FontWeight.Bold else FontWeight.Medium,
                                     fontSize = 14.sp
                                 )
                             }

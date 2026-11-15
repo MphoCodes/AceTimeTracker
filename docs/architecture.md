@@ -1,6 +1,6 @@
 # Architecture
 
-AceTimeTracker is a single-module native Android app. Compose screens receive state and callbacks from activity/ViewModel pairs. MainActivity owns Today, Timer, Timesheet and Progress tabs, retaining one TimerViewModel. A SaveableStateHolder preserves tab UI state; secondary settings/profile/category activities remain separate. Legacy timer/history/progress activity entry points redirect to the main host.
+AceTimeTracker is a single-module native Android app. Compose screens receive state and callbacks from activity/ViewModel pairs. MainActivity owns Today, Timer, History and Reports tabs, retaining one TimerViewModel. A SaveableStateHolder preserves tab UI state; secondary settings/profile/category activities remain separate. Legacy timer/history/progress activity entry points redirect to the main host.
 
 ## State and data
 
@@ -36,3 +36,7 @@ Debug test sign-in uses a fixed sample identity. Sample categories and entries a
 - The historical goals/routines migration remains a roadmap. Current reminders are opt-in inexact AlarmManager alarms, rescheduled on reboot/time changes. The widget and notification actions use immutable intents into the authenticated host.
 - ReportCalculator performs date-range clipping and previous-period comparisons off the UI thread; PDF/CSV files are generated on IO and shared with scoped FileProvider grants.
 - Photo attachment still requires a successful online upload for real accounts; media is not part of the durable outbox.
+
+## Brand and navigation presentation
+
+Primary destination labels are Today, Timer, History and Reports. Internal Timesheet/MyProgress identifiers remain stable for existing intents. LogEntry is an explicit action into the History form; request counters preserve form/history intent across tab restoration. The drawer contains secondary organization/account routes only. Brand assets are native vectors with an adaptive launcher and a separate monochrome notification silhouette.

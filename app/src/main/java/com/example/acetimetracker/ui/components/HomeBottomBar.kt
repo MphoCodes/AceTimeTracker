@@ -52,7 +52,7 @@ fun HomeBottomBar(
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)),
-            shadowElevation = 8.dp
+            shadowElevation = 2.dp
         ) {
             NavigationBar(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -85,14 +85,14 @@ fun HomeBottomBar(
                     selected = selected == Destination.Timesheet,
                     onClick = { onNavigate(Destination.Timesheet) },
                     icon = { Icon(PhosphorIcons.Regular.FileText, null, Modifier.size(24.dp)) },
-                    label = { Text(if (useShortLabels) "Log" else "Timesheet", modifier = Modifier.semantics { contentDescription = "Timesheet" }, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium) },
+                    label = { Text(if (useShortLabels) "Log" else "History", modifier = Modifier.semantics { contentDescription = "History" }, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium) },
                     colors = colors
                 )
                 NavigationBarItem(
                     selected = selected == Destination.MyProgress,
                     onClick = { onNavigate(Destination.MyProgress) },
                     icon = { Icon(PhosphorIcons.Regular.ChartLineUp, null, Modifier.size(24.dp)) },
-                    label = { Text(if (useShortLabels) "Stats" else "Progress", modifier = Modifier.semantics { contentDescription = "Progress" }, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium) },
+                    label = { Text(if (useShortLabels) "Stats" else "Reports", modifier = Modifier.semantics { contentDescription = "Reports" }, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Medium) },
                     colors = colors
                 )
             }

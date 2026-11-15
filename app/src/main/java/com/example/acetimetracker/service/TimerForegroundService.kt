@@ -92,7 +92,7 @@ class TimerForegroundService : Service() {
             return NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle("AceTimeTracker • $mode" + if (isRunning) "" else " paused")
                 .setContentText(content)
-                .setSmallIcon(R.drawable.acelogo)
+                .setSmallIcon(R.drawable.ic_ace_notification)
                 .setContentIntent(activityIntent(context))
                 .addAction(
                     0, if (isRunning) "Pause" else "Resume",

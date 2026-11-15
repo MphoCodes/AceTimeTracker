@@ -61,3 +61,16 @@ AAB checked with jarsigner: **unsigned**. SHA-256:
 - Release owner must confirm package/Firebase ownership, implement complete account/data deletion and disclosures, supply intended signing credentials, test signed release and complete store declarations.
 - Broader goals/routines, billing and external calendar integrations remain future work. The six daily-workflow features above are implemented.
 - No project source-ingestion tool was available. No existing graph was replaced; indexed historical context may be stale. README, architecture, plan and portable memory reflect this pass.
+
+## Brand and usability refinement — 2026-11-16
+
+User approved the proposed visual/usability direction and requested implementation.
+- New editable vector A/clock identity, adaptive launcher, monochrome notification icon, branded Android 12+ system splash and a 420ms Compose reveal within the existing 700ms launch delay. Light/dark splash previews rendered successfully.
+- Warm ivory/charcoal/crimson theme, clearer dashboard action hierarchy and a lighter bottom dock. Primary navigation is Today / Timer / History / Reports; secondary drawer no longer duplicates these routes.
+- Add time opens the form, History opens saved entries, form title reflects add/edit state, and saving returns to history. Route requests and tab state survive recreation.
+- Empty reports offer Start session / Choose another period before any empty goals or timeline. Routine successful/demo sync text is hidden; pending/error states remain visible.
+- New README screenshots captured from the debug demo. Source mark: docs/brand/ace-mark.svg.
+
+Verification: 90 JVM tests and 3 device tests passed. Final debug/release builds and both lint variants passed (279 warnings, zero errors). Device tests preceded only the final large-font label adjustment; final JVM/lint/build checks include it. Rendered splash in both themes and bottom dock at 320dp/1.5x font; fixed word wrapping found in that preview. Demo device checks verified Today → Add time, History, report → Timer, and editing/saving a sample entry returning to the same three-entry history. No live account or backend mutation performed.
+
+Release outputs rebuilt and remain unsigned; older checksums above are superseded. Personal .idea changes remain excluded. No source graph refresh tool is available; portable context is current.

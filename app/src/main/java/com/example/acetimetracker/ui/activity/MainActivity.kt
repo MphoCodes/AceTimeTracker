@@ -44,6 +44,8 @@ class MainActivity : ComponentActivity() {
     private var tab by mutableStateOf(Destination.Today)
     private var selectedImageUri by mutableStateOf<Uri?>(null)
     private var formResetKey by mutableIntStateOf(0)
+    private var entryTab by mutableIntStateOf(1)
+    private var entryRequest by mutableIntStateOf(0)
     private var restoredEditId: String? = null
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
     private val imagePicker = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -58,6 +60,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         if (!requireAccount()) return
         tab = savedInstanceState?.getString("tab")?.let { runCatching { Destination.valueOf(it) }.getOrNull() } ?: Destination.Today
+        entryTab = savedInstanceState?.getInt("entry_tab", 1) ?: 1
+        entryRequest = savedInstanceState?.getInt("entry_request", 0) ?: 0
         if (savedInstanceState == null) handleIntent(intent)
         restoredEditId = if (entriesViewModel.editingEntry == null) savedInstanceState?.getString("editing_id") else null
         selectedImageUri = savedInstanceState?.getString("selected_image")?.let(Uri::parse)
@@ -101,7 +105,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             }
-                            sync?.let { status ->
+                            sync?.takeIf { it.lastError != null || it.pendingCount > 0 }?.let { status ->
                                 Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                                     Text(when {
                                         status.isLocalOnly -> "Saved on this device · Demo"
@@ -147,7 +151,7 @@ class MainActivity : ComponentActivity() {
                                 Destination.Timesheet -> TimesheetScreen(
                                     categoriesState = categories, timesheetsState = entries, saveEntryState = saving,
                                     uploadImageState = uploading, selectedImageUri = selectedImageUri ?: vm.selectedImageUrl.takeIf(String::isNotBlank)?.let(Uri::parse),
-                                    formResetKey = formResetKey, initialTab = 1,
+                                    formResetKey = formResetKey, initialTab = entryTab, tabRequestKey = entryRequest,
                                     onBackClick = { navigate(Destination.Today) },
                                     onSelectImageClick = { imagePicker.launch(arrayOf("image/*")) },
                                     onRemoveImageClick = { selectedImageUri = null; vm.clearSelectedImage() },
@@ -160,7 +164,7 @@ class MainActivity : ComponentActivity() {
                                     onCancelEdit = { vm.cancelEdit(); selectedImageUri = null; formResetKey++ },
                                     onRepeatEntryClick = { timer.trackAgain(it.category); navigate(Destination.Timer) }
                                 )
-                                Destination.MyProgress -> ReportsScreen((entries as? Resource.Success)?.data.orEmpty(), (categories as? Resource.Success)?.data.orEmpty(), onBackClick = { navigate(Destination.Today) })
+                                Destination.MyProgress -> ReportsScreen((entries as? Resource.Success)?.data.orEmpty(), (categories as? Resource.Success)?.data.orEmpty(), onBackClick = { navigate(Destination.Today) }, onStartSession = { navigate(Destination.Timer) })
                                 else -> Unit
                             }
                         }
@@ -171,7 +175,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); if (requireAccount()) handleIntent(intent) }
-    override fun onSaveInstanceState(outState: Bundle) { outState.putString("tab", tab.name); outState.putString("editing_id", entriesViewModel.editingEntry?.id); outState.putString("selected_image", selectedImageUri?.toString()); outState.putString("editing_image_url", entriesViewModel.selectedImageUrl); outState.putBoolean("upload_pending", entriesViewModel.uploadImageState.value is Resource.Loading); super.onSaveInstanceState(outState) }
+    override fun onSaveInstanceState(outState: Bundle) { outState.putString("tab", tab.name); outState.putInt("entry_tab", entryTab); outState.putInt("entry_request", entryRequest); outState.putString("editing_id", entriesViewModel.editingEntry?.id); outState.putString("selected_image", selectedImageUri?.toString()); outState.putString("editing_image_url", entriesViewModel.selectedImageUrl); outState.putBoolean("upload_pending", entriesViewModel.uploadImageState.value is Resource.Loading); super.onSaveInstanceState(outState) }
     override fun onResume() { super.onResume(); if (requireAccount()) { profileViewModel.loadUserProfile(); refreshEntries() } }
 
     private fun requireAccount(): Boolean {
@@ -190,7 +194,11 @@ class MainActivity : ComponentActivity() {
     private fun refreshEntries() { entriesViewModel.loadTimesheets(); entriesViewModel.loadCategories() }
     private fun navigate(destination: Destination) {
         when (destination) {
-            Destination.Today, Destination.Timer, Destination.Timesheet, Destination.MyProgress -> { tab = destination; refreshEntries() }
+            Destination.LogEntry -> {
+                if (entriesViewModel.saveEntryState.value !is Resource.Loading) { entriesViewModel.cancelEdit(); selectedImageUri = null }
+                entryTab = 0; entryRequest++; tab = Destination.Timesheet; refreshEntries() }
+            Destination.Timesheet -> { entryTab = 1; entryRequest++; tab = destination; refreshEntries() }
+            Destination.Today, Destination.Timer, Destination.MyProgress -> { tab = destination; refreshEntries() }
             Destination.Graph -> { tab = Destination.MyProgress; refreshEntries() }
             Destination.Profile -> startActivity(Intent(this, ProfileActivity::class.java))
             Destination.Categories -> startActivity(Intent(this, CategoriesActivity::class.java))
@@ -203,7 +211,7 @@ class MainActivity : ComponentActivity() {
         entriesViewModel.saveEntryState.observe(this) { result ->
             if (result is Resource.Success) {
                 Toast.makeText(this, "Entry saved on this device", Toast.LENGTH_SHORT).show()
-                entriesViewModel.consumeSaveState(); entriesViewModel.cancelEdit(); selectedImageUri = null; formResetKey++; refreshEntries()
+                entriesViewModel.consumeSaveState(); entriesViewModel.cancelEdit(); selectedImageUri = null; formResetKey++; entryTab = 1; entryRequest++; refreshEntries()
             } else if (result is Resource.Error) { Toast.makeText(this, result.message, Toast.LENGTH_LONG).show(); entriesViewModel.consumeSaveState() }
         }
         entriesViewModel.deleteEntryState.observe(this) { result ->

@@ -66,7 +66,7 @@ fun LoginScreen(
         ) {
             // Authentic Ace Logo
             Image(
-                painter = painterResource(id = R.drawable.acelogo),
+                painter = painterResource(id = R.drawable.ace_mark),
                 contentDescription = "AceTimeTracker Logo",
                 modifier = Modifier
                     .size(150.dp)

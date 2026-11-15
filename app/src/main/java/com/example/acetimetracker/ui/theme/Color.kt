@@ -2,23 +2,23 @@ package com.example.acetimetracker.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Premium AceTimeTracker Palette (Modern Executive Design System)
-val AceRed = Color(0xFFDC2626) // Deep Ruby Crimson (Tailwind Red 600)
-val AceRedDark = Color(0xFF991B1B)
-val AceRedLight = Color(0xFFFEE2E2)
-val AceRedSubtle = Color(0xFFFEF2F2)
+// Ace brand: crimson, warm ivory and charcoal.
+val AceRed = Color(0xFFB52A3B) // Deep Ruby Crimson (Tailwind Red 600)
+val AceRedDark = Color(0xFF842030)
+val AceRedLight = Color(0xFFF8E0E2)
+val AceRedSubtle = Color(0xFFFCF0EE)
 
-// Slate Neutral System (Linear / Apple aesthetic)
-val Slate900 = Color(0xFF0F172A)
-val Slate800 = Color(0xFF1E293B)
-val Slate700 = Color(0xFF334155)
-val Slate600 = Color(0xFF475569)
-val Slate500 = Color(0xFF64748B)
-val Slate400 = Color(0xFF94A3B8)
-val Slate300 = Color(0xFFCBD5E1)
-val Slate200 = Color(0xFFE2E8F0)
-val Slate100 = Color(0xFFF1F5F9)
-val Slate50 = Color(0xFFF8FAFC)
+// Shared neutral tokens (names retained for existing components).
+val Slate900 = Color(0xFF252421)
+val Slate800 = Color(0xFF34322F)
+val Slate700 = Color(0xFF494641)
+val Slate600 = Color(0xFF625D56)
+val Slate500 = Color(0xFF797269)
+val Slate400 = Color(0xFFA49C92)
+val Slate300 = Color(0xFFD4CCC1)
+val Slate200 = Color(0xFFE8E1D7)
+val Slate100 = Color(0xFFF2EDE5)
+val Slate50 = Color(0xFFFAF7F2)
 
 // Sophisticated Accents
 val AccentEmerald = Color(0xFF10B981)
@@ -75,7 +75,7 @@ val OutlineVariantLight = Slate200
 val PrimaryDark = Color(0xFFF87171)
 val OnPrimaryDark = Color(0xFF450A0A)
 val PrimaryContainerDark = Color(0xFF7F1D1D)
-val OnPrimaryContainerDark = Color(0xFFFEE2E2)
+val OnPrimaryContainerDark = Color(0xFFF8E0E2)
 
 val SecondaryDark = Slate200
 val OnSecondaryDark = Slate900

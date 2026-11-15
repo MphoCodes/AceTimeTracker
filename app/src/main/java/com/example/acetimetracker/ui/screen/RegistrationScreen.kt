@@ -63,7 +63,7 @@ fun RegistrationScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.acelogo),
+                painter = painterResource(id = R.drawable.ace_mark),
                 contentDescription = "AceTimeTracker Logo",
                 modifier = Modifier
                     .size(130.dp)

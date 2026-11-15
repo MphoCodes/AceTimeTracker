@@ -49,14 +49,8 @@ import java.util.Locale
 private data class DrawerItem(val title: String, val icon: ImageVector, val destination: Destination)
 
 private val drawerSections = listOf(
-    "Track" to listOf(
-        DrawerItem("Timer", PhosphorIcons.Regular.Timer, Destination.Timer),
-        DrawerItem("Timesheet", PhosphorIcons.Regular.FileText, Destination.Timesheet),
+    "Organize" to listOf(
         DrawerItem("Categories", PhosphorIcons.Regular.Folder, Destination.Categories)
-    ),
-    "Insights" to listOf(
-        DrawerItem("Goal progress", PhosphorIcons.Regular.ChartLineUp, Destination.MyProgress),
-        DrawerItem("Time breakdown", PhosphorIcons.Regular.ChartPie, Destination.Graph)
     ),
     "Account" to listOf(
         DrawerItem("Profile", PhosphorIcons.Regular.User, Destination.Profile),
@@ -145,7 +139,7 @@ private fun HomeTopBar(
             title = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Image(
-                        painter = painterResource(id = R.drawable.acelogo),
+                        painter = painterResource(id = R.drawable.ace_mark),
                         contentDescription = null,
                         modifier = Modifier.size(30.dp)
                     )
@@ -214,7 +208,7 @@ private fun HomeContent(
         TodayHeroCard(
             todayMillis = todayMillis,
             onStartTimer = { onNavigate(Destination.Timer) },
-            onLogManually = { onNavigate(Destination.Timesheet) }
+            onLogManually = { onNavigate(Destination.LogEntry) }
         )
 
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -290,9 +284,9 @@ private fun TodayHeroCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = AceRed
+        color = Slate900
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(modifier = Modifier.padding(24.dp)) {
             Text(
                 text = "Tracked today",
                 style = MaterialTheme.typography.labelLarge,
@@ -322,7 +316,7 @@ private fun TodayHeroCard(
                 ) {
                     Icon(PhosphorIcons.Regular.Play, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Start timer", fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
+                    Text("Start session", fontWeight = FontWeight.Bold, maxLines = 1, softWrap = false)
                 }
                 OutlinedButton(
                     onClick = onLogManually,
@@ -336,7 +330,7 @@ private fun TodayHeroCard(
                 ) {
                     Icon(PhosphorIcons.Regular.Plus, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text("Log time", fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false)
+                    Text("Add time", fontWeight = FontWeight.SemiBold, maxLines = 1, softWrap = false)
                 }
             }
         }
@@ -612,6 +606,7 @@ private fun AppDrawer(
 }
 
 enum class Destination {
+    LogEntry,
     Today,
     Profile,
     Categories,

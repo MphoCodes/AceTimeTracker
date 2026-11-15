@@ -4,6 +4,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -76,6 +78,7 @@ fun ReportsScreen(
     categories: List<Category>,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onStartSession: () -> Unit = {},
 ) {
     val today = LocalDate.now()
     val initial = ReportRange.week(today)
@@ -111,6 +114,7 @@ fun ReportsScreen(
         exporting = exporting,
         snackbar = snackbar,
         onBackClick = onBackClick,
+        onStartSession = onStartSession,
         onWeek = { selectRange(ReportRange.week(today)) },
         onMonth = { selectRange(ReportRange.month(today)) },
         onCustom = { showRange = true },
@@ -170,10 +174,11 @@ private fun ReportsContent(
     onPickDay: () -> Unit,
     onExport: (ReportFormat) -> Unit,
     modifier: Modifier = Modifier,
+    onStartSession: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { AceTopBar(title = "Progress", subtitle = "Reports & daily timeline", onBackClick = onBackClick) },
+        topBar = { AceTopBar(title = "Reports", subtitle = "See where your time goes", onBackClick = onBackClick) },
         snackbarHost = { SnackbarHost(hostState = snackbar) },
     ) { padding ->
         LazyColumn(
@@ -194,6 +199,23 @@ private fun ReportsContent(
             if (report == null) {
                 item { LinearProgressIndicator(modifier = Modifier.fillMaxWidth()) }
             } else {
+                if (report.sessions.isEmpty()) {
+                    item {
+                        AceCard(modifier = Modifier.fillMaxWidth()) {
+                            Text("Your time tells a story", style = MaterialTheme.typography.headlineSmall)
+                            Spacer(Modifier.height(8.dp))
+                            Text("No sessions in this period yet. Start tracking, or choose a different date range.",
+                                style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Spacer(Modifier.height(24.dp))
+                            Button(onClick = onStartSession, modifier = Modifier.fillMaxWidth()) { Text("Start session") }
+                            TextButton(onClick = onCustom, modifier = Modifier.fillMaxWidth()) { Text("Choose another period") }
+                        }
+                    }
+                    if (report.invalidEntryCount > 0) item {
+                        Text("${report.invalidEntryCount} invalid record(s) omitted.", color = MaterialTheme.colorScheme.error)
+                    }
+                    return@LazyColumn
+                }
                 item { ReportOverview(report = report, modifier = Modifier.fillMaxWidth()) }
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

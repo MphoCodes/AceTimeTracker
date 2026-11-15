@@ -7,3 +7,5 @@
 - Public documentation must distinguish implemented entry editing, offline outbox, persistent tabs, reports, timeline, widgets/reminders from the still-future goals/routines roadmap.
 - Preserve existing source and IDE changes; do not change the permanent package ID or deploy to the configured Firebase project without verified ownership and explicit scope.
 - See HANDOFF.md for current validation, artifacts, and remaining release requirements.
+
+- Approved November 16 visual direction: warm ivory, charcoal and restrained crimson, with a vector A/clock mark. Primary labels are Today, Timer, History and Reports; Add time is an explicit form route. Large-font navigation uses Log/Stats with full accessibility descriptions.
