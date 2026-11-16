@@ -17,12 +17,12 @@ check(releaseSigningValues.values.all { it.isNullOrBlank() } || hasReleaseSignin
 }
 
 android {
-    namespace = "com.example.acetimetracker"
+    namespace = "com.mphocodes.acetimetracker"
     compileSdk = 37
     buildToolsVersion = "36.0.0"
 
     defaultConfig {
-        applicationId = "com.example.acetimetracker"
+        applicationId = "com.mphocodes.acetimetracker"
         minSdk = 27
         targetSdk = 36
         versionCode = 1
