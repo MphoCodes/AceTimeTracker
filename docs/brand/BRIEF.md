@@ -62,8 +62,8 @@ error text on a red surface; use white text or the amber/emerald accents.
 ## Demo and marketing assets
 
 - Demo video: `docs/demo/acetimetracker-demo.mp4`, rebuilt with
-  `python3 docs/demo/build_demo.py` (see that file for narration, scene order and
-  how to add a music bed). Keep it under 60 s and keep the screenshots free of
+  `python3 docs/demo/build_film.py` and OpenFilm (see `docs/demo/README.md` for the
+  editable timeline, local neural narration and music attribution). Keep it under 60 s and keep the screenshots free of
   personal data.
 - Screenshots: `docs/screenshots/*.png` from the debug demo account only.
 

@@ -17,9 +17,9 @@ A native Android time tracker built with Kotlin and Jetpack Compose. Record a fo
 ## A look inside
 
 <p align="center">
-  <a href="docs/demo/acetimetracker-demo.mp4"><img src="docs/demo/acetimetracker-demo.jpg" width="80%" alt="Watch the 45-second AceTimeTracker demo video"></a>
+  <a href="docs/demo/acetimetracker-demo.mp4"><img src="docs/demo/acetimetracker-demo.jpg" width="80%" alt="Watch the 53-second AceTimeTracker demo video"></a>
 </p>
-<p align="center"><a href="docs/demo/acetimetracker-demo.mp4">▶ Watch the demo (MP4, narrated)</a> · rebuilt with <code>python3 docs/demo/build_demo.py</code></p>
+<p align="center"><a href="docs/demo/acetimetracker-demo.mp4">▶ Watch the demo (MP4, narrated)</a> · <a href="docs/demo/README.md">Editable OpenFilm source &amp; media credits</a> · <a href="docs/demo/PRODUCT.md">Product &amp; developer information</a></p>
 
 <p align="center">
   <img src="docs/screenshots/today.png" width="23%" alt="Dashboard with tracked time and weekly category goals">
@@ -28,7 +28,7 @@ A native Android time tracker built with Kotlin and Jetpack Compose. Record a fo
   <img src="docs/screenshots/reports.png" width="23%" alt="Progress overview">
 </p>
 
-Screenshots show the updated November 2026 demo interface, including the empty report state. They are not evidence of a live backend or store release.
+Screenshots show the updated November 2026 demo interface, including populated reports and category progress. They are not evidence of a live backend or store release.
 
 ## What you can do
 
@@ -102,7 +102,7 @@ See [release preparation](docs/release.md) for output paths, optional signing, a
 
 ## Project status
 
-The current time-tracking workflows are implemented. The November 2026 verification passed 90 local tests and 3 device tests, covering durable storage, account isolation, stale sync acknowledgments, timer recovery, editing, reminders, report calculations, and PDF/CSV export. Debug and release lint have no errors; legacy warnings remain. Device checks cover the demo workflow, not a live production backend.
+The current time-tracking workflows are implemented. The November 2026 verification passed 103 local tests and 3 device tests, covering durable storage, account isolation, stale sync acknowledgments, timer recovery, editing, reminders, report calculations, and PDF/CSV export. Debug and release lint have no errors; legacy warnings remain. Device checks cover the demo workflow, not a live production backend.
 
 Live Firebase ownership/rules, production authentication and media flows, account deletion, privacy disclosures, and store submission still require release-owner verification. There is no claim of a published Play release. The broader goals/routines roadmap in `docs/superpowers/` remains future work. Entry/category synchronization retries while the app process is alive and on authenticated relaunch; background execution after process death and offline photo uploads are not guaranteed. Local timestamps do not retain timezone identifiers.
 

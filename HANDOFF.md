@@ -1,5 +1,24 @@
 # Handoff — 2026-11-16
 
+## Latest — reviewed code and OpenFilm showcase
+
+Owner authorized takeover, review/fixes, PR integration and release packaging; requested polished natural narration and founder credit Mpho Ndlela · MphoCodes. Owner explicitly has no production keystore or owned Firebase setup. This pass prepares a development pre-release, not a production/Play release.
+
+- Reviewed PRs #6–#10 with an independent code reviewer. Fixed lost DST report hours, elapsed-time clipping and timeline overlap math, edit duration preview zone mismatch, duplicate/mixed-zone gap linkage, and added zone context to CSV/PDF/timeline.
+- Seven report regressions cover fall-back totals/export/clipping/overlap, spring-forward clipping, mixed-zone gap/overlap and equal-start linkage (seven added tests in total across the fixes). New demo installations seed dates relative to today; existing local data is preserved.
+- Final source verification: 103 JVM tests and 3 device tests passed, zero failures/errors/skips. Release lint, debug/release APK and release AAB builds passed. The initial locked Business_Phone run ran ZERO device tests despite task success; it is not counted. Valid tests ran on new unlocked API 36 `Ace_Demo_Review` emulator.
+- Fresh anonymous demo walkthrough verified Today, Timer, History, Add time and populated Reports. Captured actual timer footage and screenshots. This is not full real-account/backend/widget/reminder validation.
+- PRs #6–#9 merged into main; #10 targets main and carries the review fixes and final film. Recheck live state for the final merge.
+- New 53.1-second 1080p30 film replaces old system-voice slideshow. Seven editable OpenFilm shots; local Kokoro stock neural voice, quiet CC0 music, captions, owner-approved credit. See docs/demo/README.md for source and regeneration. No voice cloned or paid API used. Final export: H.264/AAC, 53.101 seconds, 1920×1080 at 30 fps; measured mix -16.1 LUFS and -1.9 dBTP.
+- Merged newer main documentation into the stack, preserving the older development download notes. Source app files were unchanged by that merge.
+- Existing four `.idea` changes remain uncommitted. Local work and OpenFilm caches are ignored. Agent Memory available; no source graph ingestion tool exposed, so source graph may be stale.
+
+### Still required for production
+
+Owned Firebase project and registration for both new IDs, verified Auth/Firestore/Storage ownership rules and real-account flows; complete account/data deletion and disclosures; intended production/upload signing identity and independently backed-up key; signed release device validation and store declarations. Release APK/AAB are unsigned build-verification artifacts. Installable preview APK uses debug signing. Do not label the GitHub pre-release as production-ready.
+
+The dated notes below are history. Recheck live GitHub PR/release state before a future agent continues; old main-package and artifact hashes are superseded.
+
 ## Start here — Codex takeover, 2026-11-16
 
 The owner's final Android Studio / Claude request was to write a proper handoff of completed and remaining work and push it. Claude hit its usage limit before doing that final documentation pass. Codex recovered the project-specific session, inspected this checkout and GitHub, and completed the handoff. No raw transcript is included.
