@@ -31,7 +31,7 @@ Verify signatures with Android SDK `apksigner verify --verbose` for the APK and 
 
 Before an external release, the owner must resolve:
 
-- Permanent application ID. Source still uses `com.example.acetimetracker`; a prior proposed replacement must be confirmed before migration.
+- Permanent application ID. Source still uses `com.mphocodes.acetimetracker`; a prior proposed replacement must be confirmed before migration.
 - Ownership and configuration of the release Firebase project, including rules, storage access, and real account flows.
 - Complete in-app and external account/data deletion, privacy policy, and accurate Data Safety declarations.
 - The special-use foreground-service declaration and its actual timer behavior.

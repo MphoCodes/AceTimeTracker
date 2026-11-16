@@ -61,7 +61,7 @@ For real accounts, configure a Firebase project you control. The checked-in debu
 The app uses Compose Material 3 screens, a shared activity for the main tabs, ViewModels for screen state, and repositories backed by local SQLite storage and Firebase synchronization. Time is stored in milliseconds; the timer measures elapsed time with a monotonic clock. Dashboard and chart totals are derived from the same timesheet entries.
 
 ```text
-app/src/main/java/com/example/acetimetracker/
+app/src/main/java/com/mphocodes/acetimetracker/
 ├── data/model/        Categories, profiles, and timesheet entries
 ├── data/repository/   Authentication, repositories, settings, favorites
 ├── data/local/        Transactional SQLite records and outbox
