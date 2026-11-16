@@ -1,0 +1,13 @@
+{
+  "deletionEnabled": false,
+  "firebase": {
+    "projectId": "ace-time-tracker-3d7d3",
+    "appId": "1:243695413543:web:8d8f001b5b5b39dbf86102",
+    "storageBucket": "ace-time-tracker-3d7d3.firebasestorage.app",
+    "apiKey": "AIzaSyDqzDLsZMxSK2oNFmR5_xWCIRhp45PvQtY",
+    "authDomain": "ace-time-tracker-3d7d3.firebaseapp.com",
+    "messagingSenderId": "243695413543",
+    "projectNumber": "243695413543",
+    "version": "2"
+  }
+}

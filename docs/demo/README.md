@@ -1,6 +1,6 @@
 # AceTimeTracker product film
 
-53-second, 1920×1080, 30 fps product showcase. Built by Mpho Ndlela · MphoCodes.
+50-second, 1920×1080, 30 fps product showcase. Built by Mpho Ndlela · MphoCodes.
 
 The film uses actual anonymous Android demo screens, real timer footage, locally generated neural narration and a quiet music bed. The demonstrated app is a development build; the film does not claim Play availability or verified production cloud sync.
 
@@ -21,8 +21,8 @@ Verify with `npx -y openfilm@latest look`, then render with `npx -y openfilm@lat
 ## Media provenance
 
 - UI and brand assets: AceTimeTracker repository, MIT licence.
-- Narration: local [Kokoro-82M v1.0](https://huggingface.co/hexgrad/Kokoro-82M), Apache-2.0 model, `af_heart` stock voice, speed 1.04, via [kokoro-onnx](https://github.com/thewh1teagle/kokoro-onnx) (MIT). Synthetic stock voice; no person’s voice was cloned. WAV files are included so a rebuild needs no account or model download. To regenerate, install `requirements.txt` in a Python 3.12 environment, download the v1.0 ONNX model and voices from the kokoro-onnx model release, then run `python docs/demo/narrate.py --models /path/to/models` and rebuild the film.
+- Narration: local [Kokoro-82M v1.0](https://huggingface.co/hexgrad/Kokoro-82M), Apache-2.0 model, `af_heart` stock voice, speed 1.04, with a speech-only phoneme override for Pomodoro (poh-moh-DOH-roh), via [kokoro-onnx](https://github.com/thewh1teagle/kokoro-onnx) (MIT). Synthetic stock voice; no person’s voice was cloned. WAV files are included so a rebuild needs no account or model download. To regenerate, install `requirements.txt` in a Python 3.12 environment, download the v1.0 ONNX model and voices from the kokoro-onnx model release, then run `python docs/demo/narrate.py --models /path/to/models` and rebuild the film.
 - Music: OpenFilm library, `openfilm/audio/music/minimal-product-launch-pads-c52fb2.mp3`, CC0 according to OpenFilm’s media library. Mixed quietly under the voice.
 - Editor/render pipeline: [OpenFilm](https://github.com/openfilm/openfilm), MIT. Checked 2026-11-16. No paid media generation service used.
 
-Release/source limitations remain in `../release.md`. The founder credit is owner-approved. Device data is fictional and for demonstration.
+Release/source limitations remain in `../release.md`. The written founder credit is owner-approved; the closing narration omits the founder’s name at the owner’s request. Captions retain the normal spelling of Pomodoro. Timer footage placement is derived from narration timing. Device data is fictional and for demonstration.

@@ -12,12 +12,18 @@ lines=[
 'Missed a session? Add it by hand. Keep a note, attach a photo, and give your work the context it needs.',
 'Your history stays easy to review. Find a session, correct a detail, or return to the work you want to continue.',
 'See the bigger picture with reports. Compare periods, review your categories, and share a clear P D F or spreadsheet.',
-'Built by Mpho Ndlela, at Mpho Codes. Ace Time Tracker. Track your work. Make time for what matters.'
+'Ace Time Tracker. Track your work. Make time for what matters.'
 ]
 k=Kokoro(str(args.models/'kokoro-v1.0.onnx'),str(args.models/'voices-v1.0.bin'))
 metadata=[]
 for i,line in enumerate(lines):
- samples,sr=k.create(line,voice='af_heart',speed=1.04,lang='en-us')
+ # Keep caption text natural; override only spoken Pomodoro: poh-moh-DOH-roh.
+ speech=line
+ if 'Pomodoro' in line:
+  speech=k.tokenizer.phonemize(line,lang='en-us').replace(
+   k.tokenizer.phonemize('Pomodoro',lang='en-us'), 'poʊmoʊdˈɔːɹoʊ')
+ samples,sr=k.create(speech,voice='af_heart',speed=1.04,lang='en-us',
+                     is_phonemes='Pomodoro' in line)
  sf.write(str(out/f'voice-{i}.wav'),samples,sr)
  metadata.append({'text':line,'duration':round(len(samples)/sr+1.0,3)})
  print(i,metadata[-1]['duration'],flush=True)

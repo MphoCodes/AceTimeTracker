@@ -32,7 +32,9 @@ for i,(kicker,title,detail,shot) in enumerate(scenes):
  audio.append(f'<audio src="assets/voice-{i}.wav" at="{offset+.35:.3f}" volume="1"></audio>')
  srt.append(f'{i+1}\n{stamp(offset+.35)} --> {stamp(offset+duration-.3)}\n{meta[i]["text"]}\n')
  offset+=duration
-video='<section><video src="assets/timer-recording.mp4#t=1,8.848" at="14.587" muted style="left:1240px;top:90px;width:390px;height:891px;object-fit:cover;border-radius:37px"></video></section>'
+timer_start=sum(m['duration'] for m in meta[:2])
+timer_end=1+min(7.848,meta[2]['duration'])
+video=f'<section><video src="assets/timer-recording.mp4#t=1,{timer_end:.3f}" at="{timer_start:.3f}" muted style="left:1240px;top:90px;width:390px;height:891px;object-fit:cover;border-radius:37px"></video></section>'
 (FILM/'film.html').write_text('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=1920, height=1080"></head><body>'+video+'<section>'+''.join(clips)+'</section><section>'+''.join(audio)+'</section><section><audio src="assets/minimal-product-launch-pads-c52fb2.mp3#t=0,'+str(offset)+'" volume="0.10"></audio></section></body></html>')
 (ROOT/'docs/demo/acetimetracker-demo.srt').write_text('\n'.join(srt))
 print(f'Built seven editable shots, {offset:.2f}s')
