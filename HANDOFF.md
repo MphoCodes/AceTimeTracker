@@ -1,5 +1,9 @@
 # Handoff — 2026-11-16
 
+## Contact and owner account update
+
+Owner confirms public support/privacy/deletion email `hello@mphondlela.co.za` and an existing personal Play Console developer account. Published mailto contact and external deletion-request instructions; online deletion gate remains false. Do not ask owner to create another developer account. Account creation date/verification/testing eligibility remain unverified. Hosted CI43864716715 for application965d278 completed successfully (Android and account-services jobs). Firebase billing rechecked and still OFF. Enable Blaze, provision Storage and deploy/verify cleanup before account-enabled public distribution. Independent signing-key backup remains owner action.
+
 ## Latest — production preparation and friend preview, 16 November 2026
 
 Owner explicitly authorized Firebase/signing/deletion/privacy preparation and a Vercel APK site; requested removal of spoken name and corrected Pomodoro pronunciation. Written credit remains Mpho Ndlela · MphoCodes.

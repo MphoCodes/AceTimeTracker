@@ -17,3 +17,5 @@
 - Final publication: PRs #6–#10 merged; local checkout returned to main at integration a328132. Public development pre-release v1.0.0-dev.20261116.2 targets verified source d3f73e2, with video, full showcase package, debug-signed APK and checksums. Hosted run 43860599437 passed. Production remains blocked as above.
 
 - Production-prep correction (16 November): owned Firebase ace-time-tracker-3d7d3 verified, new clients registered and Firestore rules deployed. Upload key generated securely outside Git, signed APK/AAB verified. Billing/storage/functions and complete live deletion remain pending; owner email/Play account/backup needed. Live Vercel preview acetimetracker.vercel.app serves prior demo APK and revised49.8s film (no spoken founder name; correct Pomodoro override).106JVM+3device+3backend+4rules pass. Read newest HANDOFF for exact scope; prior “no owned project/key” status is superseded.
+
+- Owner confirmation: public contact hello@mphondlela.co.za for support/privacy/deletion; existing personal Play Console account. Contact published, automated deletion still gated by Firebase billing/setup. CI43864716715 passed.
