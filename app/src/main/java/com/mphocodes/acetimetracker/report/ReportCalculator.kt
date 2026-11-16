@@ -67,7 +67,7 @@ data class ReportSummary(
 data class TimelineSession(val session: ReportSession, val overlapsPrevious: Boolean)
 data class TimelineGap(val start: LocalDateTime, val end: LocalDateTime,
     val millis: Long = Duration.between(start, end).toMillis(),
-    val followingStart: Instant? = null, val zoneId: String = "")
+    val followingStart: Instant? = null, val zoneId: String = "", val followingEntryId: String = "")
 data class DailyTimeline(val day: LocalDate, val sessions: List<TimelineSession>, val gaps: List<TimelineGap>, val overlapMillis: Long)
 
 object ReportCalculator {
@@ -92,7 +92,7 @@ object ReportCalculator {
             if (previous != null && session.startInstant > previous) {
                 val zone = TimeUtils.resolveZone(session.entry.zoneId)
                 gaps += TimelineGap(previous.atZone(zone).toLocalDateTime(), session.start,
-                    Duration.between(previous, session.startInstant).toMillis(), session.startInstant, zone.id)
+                    Duration.between(previous, session.startInstant).toMillis(), session.startInstant, zone.id, session.entry.id)
             }
             val overlaps = previous != null && session.startInstant < previous
             coveredUntil = maxOf(previous ?: session.endInstant, session.endInstant)

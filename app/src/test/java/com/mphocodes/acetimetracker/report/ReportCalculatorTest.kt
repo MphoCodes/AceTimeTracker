@@ -150,4 +150,11 @@ class ReportCalculatorTest {
         val london = entry("09:30", "10:30").copy(zoneId="Europe/London")
         assertEquals(3_600_000L, ReportCalculator.timeline(listOf(tokyo, london), day).overlapMillis)
     }
+    @Test fun `equal starts do not duplicate the preceding gap`() {
+        val timeline = ReportCalculator.timeline(listOf(entry("08:00", "09:00").copy(id="a"),
+            entry("10:00", "11:00").copy(id="b"), entry("10:00", "12:00", 7_200_000).copy(id="c")), day)
+        val gap = timeline.gaps.single()
+        assertEquals("b", gap.followingEntryId)
+        assertEquals(1, timeline.sessions.count { it.session.entry.id == gap.followingEntryId && it.session.startInstant == gap.followingStart })
+    }
 }

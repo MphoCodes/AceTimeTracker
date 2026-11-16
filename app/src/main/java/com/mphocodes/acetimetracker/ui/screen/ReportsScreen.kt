@@ -263,7 +263,7 @@ private fun ReportsContent(
                     item { Text(text = "No sessions on this day.", color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
                 timeline.sessions.forEachIndexed { index, item ->
-                    timeline.gaps.firstOrNull { it.followingStart == item.session.startInstant }?.let { gap ->
+                    timeline.gaps.firstOrNull { it.followingEntryId == item.session.entry.id && it.followingStart == item.session.startInstant }?.let { gap ->
                         item(key = "gap-$index") {
                             Text(text = "${gap.start.toLocalTime()} – ${gap.end.toLocalTime()} · ${TimeUtils.formatDurationShort(gap.millis)} gap · ${gap.zoneId}",
                                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
