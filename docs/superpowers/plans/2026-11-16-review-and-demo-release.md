@@ -9,7 +9,7 @@ User direction: take over execution; professional natural narration, no sloppy v
 - [x] Verify JVM, actual nonzero device tests, release lint/APK/AAB; inspect UI and sample reports.
 - [x] Capture anonymous app screens/footage and build seven editable OpenFilm shots. Use local Kokoro narration and CC0 music; retain red/slate target-and-dart identity. Avoid fake UI and unimplemented feature claims.
 - [x] Inspect every scene, full video decoding and sound levels; deliver MP4, poster, captions, source and product/release notes.
-- [ ] Integrate reviewed PRs and main, rerun checks for integrated changes, publish an explicitly development-labelled package while production ownership/signing/deletion prerequisites remain.
-- [ ] Update portable handoff and shared memory with exact artifacts and unresolved blockers.
+- [x] Integrate reviewed PRs and main, rerun checks for integrated changes, publish an explicitly development-labelled package while production ownership/signing/deletion prerequisites remain.
+- [x] Update portable handoff and shared memory with exact artifacts and unresolved blockers.
 
 Review focus: DST and cross-zone time loss; preview/save consistency; package/Firebase mismatch; misleading production/signing claims; unreadable UI or clipped narration.
