@@ -53,7 +53,7 @@ The instrumentation suite currently contains a package-name smoke test; it is no
 
 ### Local demo
 
-Debug installs as `com.mphocodes.acetimetracker.debug` and uses `app/src/debug/google-services.json`. The checked-in placeholder configuration cannot authenticate to production. Tap test sign-in to use local sample data. Sample saved entries, categories, and profile changes reset on process restart; timer drafts and settings persist locally.
+Debug installs as `com.mphocodes.acetimetracker.debug` and uses `app/src/debug/google-services.json`. The checked-in placeholder configuration cannot authenticate to production. Tap test sign-in to use local sample data. Sample entries and categories persist locally; profile sample changes are process-local. Timer drafts and settings persist locally.
 
 ### Your own backend
 

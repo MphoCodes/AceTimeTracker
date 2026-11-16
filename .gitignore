@@ -26,3 +26,10 @@ keystore.properties
 .env
 .env.*
 !.env.example
+
+# Local review and OpenFilm render caches
+/work/
+/docs/demo/film/.film/
+/docs/demo/film/.git/
+
+/docs/demo/__pycache__/

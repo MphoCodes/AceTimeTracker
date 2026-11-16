@@ -263,9 +263,9 @@ private fun ReportsContent(
                     item { Text(text = "No sessions on this day.", color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 }
                 timeline.sessions.forEachIndexed { index, item ->
-                    timeline.gaps.firstOrNull { it.end == item.session.start }?.let { gap ->
+                    timeline.gaps.firstOrNull { it.followingEntryId == item.session.entry.id && it.followingStart == item.session.startInstant }?.let { gap ->
                         item(key = "gap-$index") {
-                            Text(text = "${gap.start.toLocalTime()} – ${gap.end.toLocalTime()} · ${TimeUtils.formatDurationShort(gap.millis)} gap",
+                            Text(text = "${gap.start.toLocalTime()} – ${gap.end.toLocalTime()} · ${TimeUtils.formatDurationShort(gap.millis)} gap · ${gap.zoneId}",
                                 style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(horizontal = 16.dp))
                         }
@@ -314,7 +314,7 @@ private fun CategoryGoalCard(category: CategoryReport, modifier: Modifier = Modi
 private fun TimelineSessionCard(item: TimelineSession, modifier: Modifier = Modifier) {
     AceCard(modifier = modifier) {
         val session = item.session
-        Text(text = "${session.start.toLocalTime()} – ${if (session.end.toLocalDate() > session.start.toLocalDate()) "24:00" else session.end.toLocalTime()}",
+        Text(text = "${TimeUtils.resolveZone(session.entry.zoneId).id} · ${session.start.toLocalTime()} – ${if (session.end.toLocalDate() > session.start.toLocalDate()) "24:00" else session.end.toLocalTime()}",
             style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(text = session.entry.category.ifBlank { "Uncategorized" }, style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))

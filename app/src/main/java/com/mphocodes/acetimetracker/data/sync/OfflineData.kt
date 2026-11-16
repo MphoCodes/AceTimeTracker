@@ -89,15 +89,16 @@ internal class OfflineData private constructor(context: Context, private val fir
     private fun changed(account: String) { changes.getOrPut(account) { MutableLiveData() }.postValue(store.revision()) }
     private fun seed(account: String, kind: String) {
         if (!demo(account)) return
+        val today = java.time.LocalDate.now()
         val data = if (kind == RecordCodec.CATEGORIES) listOf(
             Category("mock_cat_1", "Development", "Android App development and refactoring", 2f, 6f, 4f, "#2563EB"),
             Category("mock_cat_2", "Design", "UI/UX wireframing and prototyping", 1f, 4f, 2f, "#F59E0B"),
             Category("mock_cat_3", "Testing", "Unit testing and QA verification", 1f, 3f, 2f, "#10B981"),
             Category("mock_cat_4", "Documentation", "Architecture and user documentation", 1f, 2f, 1.5f, "#8B5CF6")
         ).associate { it.documentId to RecordCodec.encode(it) } else listOf(
-            TimesheetEntry("mock_ts_1", account, "Development", "2026-10-25", "09:00", "2026-10-25", "14:30", 19_800_000, "", "Refactored Clean Architecture and MVVM layers"),
-            TimesheetEntry("mock_ts_2", account, "Design", "2026-10-26", "10:00", "2026-10-26", "13:00", 10_800_000, "", "Designed progress chart layouts and navigation"),
-            TimesheetEntry("mock_ts_3", account, "Testing", "2026-10-27", "08:00", "2026-10-27", "10:00", 7_200_000, "", "Verified offline demo login flow")
+            TimesheetEntry("mock_ts_1", account, "Development", today.minusDays(2).toString(), "09:00", today.minusDays(2).toString(), "14:30", 19_800_000, "", "Refactored Clean Architecture and MVVM layers"),
+            TimesheetEntry("mock_ts_2", account, "Design", today.minusDays(1).toString(), "10:00", today.minusDays(1).toString(), "13:00", 10_800_000, "", "Designed progress chart layouts and navigation"),
+            TimesheetEntry("mock_ts_3", account, "Testing", today.toString(), "08:00", today.toString(), "10:00", 7_200_000, "", "Verified offline demo login flow")
         ).associate { it.id to RecordCodec.encode(it) }
         store.seedOnce(account, kind, data)
     }

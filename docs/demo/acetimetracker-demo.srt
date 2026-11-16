@@ -1,0 +1,27 @@
+1
+00:00:00,350 --> 00:00:07,015
+Busy days can blur together. Ace Time Tracker helps you see where your time goes, and make room for what matters.
+
+2
+00:00:07,665 --> 00:00:14,287
+Start with a clear view of your day. See your progress, choose a category, and decide what deserves your attention.
+
+3
+00:00:14,937 --> 00:00:22,135
+Ready to focus? Start the timer, or use a Pomodoro session. Your timer stays with you as you move through the app.
+
+4
+00:00:22,785 --> 00:00:29,066
+Missed a session? Add it by hand. Keep a note, attach a photo, and give your work the context it needs.
+
+5
+00:00:29,716 --> 00:00:36,871
+Your history stays easy to review. Find a session, correct a detail, or return to the work you want to continue.
+
+6
+00:00:37,521 --> 00:00:44,868
+See the bigger picture with reports. Compare periods, review your categories, and share a clear P D F or spreadsheet.
+
+7
+00:00:45,518 --> 00:00:52,801
+Built by Mpho Ndlela, at Mpho Codes. Ace Time Tracker. Track your work. Make time for what matters.

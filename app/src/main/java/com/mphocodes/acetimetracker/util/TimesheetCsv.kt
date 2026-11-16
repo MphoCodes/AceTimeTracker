@@ -5,12 +5,12 @@ import com.mphocodes.acetimetracker.data.model.TimesheetEntry
 /** RFC 4180 quoting with spreadsheet formula protection for user-supplied cells. */
 object TimesheetCsv {
     fun export(entries: List<TimesheetEntry>): String = buildString {
-        append("Category,Start Date,Start Time,End Date,End Time,Duration,Description\r\n")
+        append("Category,Start Date,Start Time,End Date,End Time,Duration,Description,Time Zone\r\n")
         entries.forEach { entry ->
             append(listOf(
                 entry.category, entry.startDate, entry.startTime,
                 entry.endDate, entry.endTime, TimeUtils.formatDuration(entry.timeSpent),
-                entry.description
+                entry.description, TimeUtils.resolveZone(entry.zoneId).id
             ).joinToString(",") { cell(it) })
             append("\r\n")
         }

@@ -104,4 +104,57 @@ class ReportCalculatorTest {
         assertTrue(csv.contains("\"'=SUM(A1)\""))
         assertTrue(csv.contains("\"A,\"\"B\"\"\nC\""))
     }
+    @Test fun `fall back session retains four elapsed hours in reports and exports`() {
+        val date = LocalDate.of(2026, 11, 1)
+        val session = entry("00:30", "03:30", 14_400_000).copy(
+            startDate = date.toString(), endDate = date.toString(), zoneId = "America/New_York")
+        val report = ReportCalculator.summarize(listOf(session), emptyList(), ReportRange(date, date))
+        assertEquals(14_400_000L, report.totalMillis)
+        assertTrue(ReportCsv.export(report).contains("04:00:00"))
+    }
+
+    @Test fun `midnight clipping allocates elapsed hours across fall back`() {
+        val date = LocalDate.of(2026, 11, 1)
+        val session = entry("23:00", "03:00", 18_000_000).copy(
+            startDate = "2026-10-31", endDate = date.toString(), zoneId = "America/New_York")
+        assertEquals(14_400_000L, ReportCalculator.summarize(listOf(session), emptyList(),
+            ReportRange(date, date)).totalMillis)
+    }
+
+    @Test fun `timeline overlap counts elapsed time across fall back`() {
+        val date = LocalDate.of(2026, 11, 1)
+        val session = entry("00:30", "03:30", 14_400_000).copy(
+            startDate = date.toString(), endDate = date.toString(), zoneId = "America/New_York")
+        assertEquals(14_400_000L, ReportCalculator.timeline(listOf(session, session.copy(id="second")), date).overlapMillis)
+    }
+    @Test fun `spring forward midnight split preserves four hours total`() {
+        val date = LocalDate.of(2026, 3, 8)
+        val session = entry("23:00", "04:00", 14_400_000).copy(
+            startDate = "2026-03-07", endDate = date.toString(), zoneId = "America/New_York")
+        assertEquals(10_800_000L, ReportCalculator.summarize(listOf(session), emptyList(), ReportRange(date, date)).totalMillis)
+        assertEquals(3_600_000L, ReportCalculator.summarize(listOf(session), emptyList(), ReportRange(date.minusDays(1), date.minusDays(1))).totalMillis)
+    }
+
+    @Test fun `mixed zone gap belongs only to following instant`() {
+        val tokyo = entry().copy(id="tokyo", zoneId="Asia/Tokyo")
+        val london = entry().copy(id="london", zoneId="Europe/London")
+        val timeline = ReportCalculator.timeline(listOf(london, tokyo), day)
+        assertEquals("tokyo", timeline.sessions.first().session.entry.id)
+        assertEquals(28_800_000L, timeline.gaps.single().millis)
+        assertEquals(timeline.sessions.last().session.startInstant, timeline.gaps.single().followingStart)
+        assertFalse(timeline.gaps.single().followingStart == timeline.sessions.first().session.startInstant)
+    }
+
+    @Test fun `mixed zone overlap uses simultaneous instants`() {
+        val tokyo = entry("18:00", "20:00", 7_200_000).copy(zoneId="Asia/Tokyo")
+        val london = entry("09:30", "10:30").copy(zoneId="Europe/London")
+        assertEquals(3_600_000L, ReportCalculator.timeline(listOf(tokyo, london), day).overlapMillis)
+    }
+    @Test fun `equal starts do not duplicate the preceding gap`() {
+        val timeline = ReportCalculator.timeline(listOf(entry("08:00", "09:00").copy(id="a"),
+            entry("10:00", "11:00").copy(id="b"), entry("10:00", "12:00", 7_200_000).copy(id="c")), day)
+        val gap = timeline.gaps.single()
+        assertEquals("b", gap.followingEntryId)
+        assertEquals(1, timeline.sessions.count { it.session.entry.id == gap.followingEntryId && it.session.startInstant == gap.followingStart })
+    }
 }
