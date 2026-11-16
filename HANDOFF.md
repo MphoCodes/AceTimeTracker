@@ -1,5 +1,45 @@
 # Handoff — 2026-11-16
 
+## Start here — Codex takeover, 2026-11-16
+
+The owner's final Android Studio / Claude request was to write a proper handoff of completed and remaining work and push it. Claude hit its usage limit before doing that final documentation pass. Codex recovered the project-specific session, inspected this checkout and GitHub, and completed the handoff. No raw transcript is included.
+
+### Current checkout and pull requests
+
+- Local project: `/Users/mphondlela/Downloads/Github/AceTimeTracker`.
+- Canonical memory scope: `MphoCodes/AceTimeTracker` (derived from origin).
+- Branch: `docs/demo-video`; implementation tip before this documentation update: `14662a776efc56bac2799fbc8c24ff18441ae6ff`, verified present on origin.
+- All five PRs were OPEN when checked. They are stacked as follows:
+
+| PR | Branch | Base | Delivered |
+| --- | --- | --- | --- |
+| [#6](https://github.com/MphoCodes/AceTimeTracker/pull/6) | `refactor/single-activity-host` | `main` | Dead Activities and View UI removal |
+| [#7](https://github.com/MphoCodes/AceTimeTracker/pull/7) | `fix/timezone-aware-entries` | `refactor/single-activity-host` | Stored zone IDs and zone-aware duration |
+| [#8](https://github.com/MphoCodes/AceTimeTracker/pull/8) | `chore/rename-package-mphocodes` | `fix/timezone-aware-entries` | New application IDs and namespace |
+| [#9](https://github.com/MphoCodes/AceTimeTracker/pull/9) | `docs/brand-brief-and-device-checks` | `chore/rename-package-mphocodes` | Brand rules and device checklist |
+| [#10](https://github.com/MphoCodes/AceTimeTracker/pull/10) | `docs/demo-video` | `docs/brand-brief-and-device-checks` | Demo video, scripts and this handoff |
+
+No merge was requested in the interrupted final task. If subsequently authorized, integrate in order #6 through #10, checking/retargeting the next PR's base and reviewing its diff after each merge. Do not assume the stack has already reached main.
+
+### What remains, in practical order
+
+1. Review the PR stack; the prior session's builds are historical evidence, not a new independent review. Run relevant checks on the final integrated revision.
+2. Resolve Firebase configuration for `com.mphocodes.acetimetracker` and `com.mphocodes.acetimetracker.debug` with the owner's intended Firebase project. Current JSON files are not evidence that those clients are registered or authentication works. Confirm ownership before backend changes. The package rename is a separate install identity, not an in-place upgrade.
+3. Follow `docs/device-checks.md` on a device/emulator. These checks remain unverified for the newest PR stack. Include real photo recreation, live-account sync, widget placement, reminder/reboot delivery, accessibility and form factors. Earlier device results below predate the structural/package changes.
+4. Complete account/data deletion, privacy disclosures, signing and store declarations before publication. Rebuild and inspect release artifacts; old checksums below are superseded and signing was not established.
+5. Have the owner review the video pacing/audio. `docs/demo/acetimetracker-demo.mp4` is a locally rendered screenshot demo, not a recorded device walkthrough. Regeneration scripts sit beside it.
+6. Optional future scope: remaining nine Activities into a navigation host, goals/routines, billing and external calendar integration. These are not completed or newly authorized by this handoff.
+
+### Instructions for the next agent
+
+Read `AGENTS.md`, `MEMORY.md`, this Start here section, `docs/brand/BRIEF.md`, and `docs/development.md`. Check origin, branch, status and live PR state again. Preserve the four existing `.idea` edits (`appInsightsSettings.xml`, `compiler.xml`, `deploymentTargetSelector.xml`, `misc.xml`); do not include them in a commit. Preserve the red target/blue dart brand. Source now lives under `app/src/main/java/com/mphocodes/acetimetracker`; old `com/example` generated editor tabs are stale build outputs, not source to repair.
+
+Agent Memory was available for recovery. No source-graph ingestion tool was exposed; existing graph was preserved and may lag current source. Portable files and current Git are authoritative. This takeover only updates documentation: source/package/manifest/media existence and remote PR state were checked; application tests were not rerun and no fresh runtime validation is claimed.
+
+## Historical delivery notes
+
+The dated sections below retain prior implementation and verification evidence. Current state and remaining work above take precedence, especially for branding, package identity, time zones, PR bases and obsolete artifact hashes.
+
 ## Scope and provenance
 
 Implemented the six approved daily-workflow improvements: entry/category editing, durable offline data and sync status, persistent navigation/shared timer, quick actions/reminders/favorites, reporting/export, and daily timeline. This supersedes the November 13 implementation and artifact notes.
@@ -83,7 +123,7 @@ Verification: local suite and debug/release APK, release bundle and lintRelease 
 
 ## Structural fixes and demo video — 2026-11-16 (afternoon)
 
-Owner asked for the review findings to be fixed as separate PRs and for a demo video. Five stacked PRs are open against `main` (merge in order):
+Owner asked for the review findings to be fixed as separate PRs and for a demo video. Five stacked PRs are open; only #6 directly targets `main` (see current base table above; integrate in order):
 
 1. **#6 `refactor/single-activity-host`** — deleted the redirect Activities (Timer/Timesheet/MyProgress), unreachable `GraphActivity`/`GraphScreen`, RecyclerView adapters, XML `DialogFragment`, 18 unused layouts, drawer menu, `nav_header_*` strings (one embedded a personal email) and the `viewBinding` feature. Nine Activities remain; Nav3 consolidation of Profile/Categories/Settings/About/Login/Registration is still future work.
 2. **#7 `fix/timezone-aware-entries`** — `TimesheetEntry.zoneId` (IANA) captured on create; durations computed in that zone via `java.time`; blank/unknown zones fall back to device zone so legacy records are unchanged. 6 new tests.

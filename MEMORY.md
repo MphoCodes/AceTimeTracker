@@ -9,3 +9,5 @@
 - See HANDOFF.md for current validation, artifacts, and remaining release requirements.
 
 - Correction from owner: preserve Ace’s bright red/crisp neutral theme and target-and-arrow identity. The ivory/muted crimson and generic A-ring redesign was rejected. Do not interpret usability improvements as permission to replace the brand identity. Primary labels are Today, Timer, History and Reports; Add time is an explicit form route. Large-font navigation uses Log/Stats with full accessibility descriptions.
+
+- November 16 Claude-to-Codex handoff: current stack is PRs #6–#10, branch `docs/demo-video`; each PR targets the previous branch, starting at main. See HANDOFF.md Start here for verified provenance, remaining device/Firebase/signing work and continuation instructions. New namespace/application ID is `com.mphocodes.acetimetracker`; Firebase client registration is unverified. Nine Activities remain. Earlier verification and artifact hashes are historical.
