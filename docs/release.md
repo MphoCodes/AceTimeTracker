@@ -31,7 +31,7 @@ Verify signatures with Android SDK `apksigner verify --verbose` for the APK and 
 
 Before an external release, the owner must resolve:
 
-- Permanent application ID. Source still uses `com.mphocodes.acetimetracker`; a prior proposed replacement must be confirmed before migration.
+- Firebase registration for the new application IDs `com.mphocodes.acetimetracker` and `.debug`. This is a new install identity; existing old-package installs do not upgrade in place.
 - Ownership and configuration of the release Firebase project, including rules, storage access, and real account flows.
 - Complete in-app and external account/data deletion, privacy policy, and accurate Data Safety declarations.
 - The special-use foreground-service declaration and its actual timer behavior.
@@ -42,6 +42,6 @@ No local build or demo screenshot proves these requirements are complete. Store 
 
 ## Current limitations
 
-The app supports paused local timer draft recovery, not uninterrupted tracking after force-stop or reboot. Demo data is transient. Category renaming, editing past sessions, full offline synchronization, routine reminders, and account deletion are not implemented. See [architecture](architecture.md).
+The app supports paused local timer draft recovery, not uninterrupted tracking after force-stop or reboot. Demo categories and entries persist locally. Category/session editing, account-scoped entry/category outbox and opt-in weekday reminders are implemented. Outbox retry runs in-process and on authenticated relaunch; media uploads require connectivity. Complete account/data deletion remains unfinished. See [architecture](architecture.md).
 
 The material under `play-store/` is prepared artwork and draft copy; it does not establish that a listing is published. Historical signing notes may refer to one developer's machine and are not portable setup instructions.

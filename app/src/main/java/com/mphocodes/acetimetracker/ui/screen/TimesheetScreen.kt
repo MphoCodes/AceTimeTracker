@@ -111,7 +111,7 @@ fun TimesheetScreen(
         val original = editingEntry
         if (original != null && original.startDate == startDate && original.startTime == startTime && original.endDate == endDate && original.endTime == endTime) {
             original.timeSpent
-        } else TimeUtils.calculateTimeSpentMillis(startDate, startTime, endDate, endTime)
+        } else TimeUtils.calculateTimeSpentMillis(startDate, startTime, endDate, endTime, original?.zoneId.orEmpty())
     }
     val hasCompleteRange = startDate.isNotBlank() && startTime.isNotBlank() && endDate.isNotBlank() && endTime.isNotBlank()
     val canSave = selectedCategory.isNotBlank() && hasCompleteRange && (calculatedDuration > 0L || (editingEntry != null && editingEntry.timeSpent > 0L)) && !isSaving && !isUploading

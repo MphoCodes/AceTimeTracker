@@ -41,7 +41,7 @@ object ReportPdf {
                 writer.space(8f)
                 writer.line("${index + 1}. ${session.entry.category.ifBlank { "Uncategorized" }}", bold = true)
                 writer.line("${session.start.toLocalDate()} ${session.start.toLocalTime()}  →  ${session.end.toLocalDate()} ${session.end.toLocalTime()}", muted = true)
-                writer.line("Recorded: ${TimeUtils.formatDuration(session.trackedMillis)}")
+                writer.line("Recorded: ${TimeUtils.formatDuration(session.trackedMillis)} · ${TimeUtils.resolveZone(session.entry.zoneId).id}")
                 if (session.entry.description.isNotBlank()) writer.line(session.entry.description, muted = true)
                 writer.rule()
             }
