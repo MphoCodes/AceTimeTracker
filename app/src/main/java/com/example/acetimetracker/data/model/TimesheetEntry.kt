@@ -10,5 +10,7 @@ data class TimesheetEntry(
     val endTime: String = "",
     val timeSpent: Long = 0,
     val imageUrl: String = "",
-    val description: String = ""
+    val description: String = "",
+    /** IANA zone the clock fields were recorded in; blank for records predating zone capture. */
+    val zoneId: String = ""
 )

@@ -2,6 +2,11 @@ package com.example.acetimetracker.util
 
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.DateTimeException
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -38,11 +43,33 @@ object TimeUtils {
      * Duration between two local date-times. Returns a negative value when the end is before the
      * start and 0 when either side cannot be parsed, so callers can reject invalid ranges.
      */
-    fun calculateTimeSpentMillis(startDate: String, startTime: String, endDate: String, endTime: String): Long {
-        val start = parseDateTime(startDate, startTime) ?: return 0L
-        val end = parseDateTime(endDate, endTime) ?: return 0L
-        return end.time - start.time
+    fun calculateTimeSpentMillis(startDate: String, startTime: String, endDate: String, endTime: String): Long =
+        calculateTimeSpentMillis(startDate, startTime, endDate, endTime, zoneId = "")
+
+    /**
+     * Duration between two clock readings taken in [zoneId], so an edit made in another zone or
+     * across a DST change keeps the hours the user actually worked. A blank or unknown zone falls
+     * back to the device zone, matching records created before zones were captured.
+     */
+    fun calculateTimeSpentMillis(startDate: String, startTime: String, endDate: String, endTime: String, zoneId: String): Long {
+        if (!isValidDate(startDate) || !isValidTime(startTime) || !isValidDate(endDate) || !isValidTime(endTime)) return 0L
+        val zone = resolveZone(zoneId)
+        return try {
+            val start = LocalDateTime.parse("$startDate $startTime", LOCAL_FORMATTER).atZone(zone)
+            val end = LocalDateTime.parse("$endDate $endTime", LOCAL_FORMATTER).atZone(zone)
+            Duration.between(start, end).toMillis()
+        } catch (e: DateTimeException) {
+            0L
+        }
     }
+
+    /** The device's current IANA zone ID, stored with new entries. */
+    fun currentZoneId(): String = ZoneId.systemDefault().id
+
+    fun resolveZone(zoneId: String): ZoneId =
+        zoneId.takeIf { it.isNotBlank() }?.let { runCatching { ZoneId.of(it) }.getOrNull() } ?: ZoneId.systemDefault()
+
+    private val LOCAL_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT, Locale.US)
 
     fun parseDateTime(date: String, time: String): Date? {
         if (!isValidDate(date) || !isValidTime(time)) return null

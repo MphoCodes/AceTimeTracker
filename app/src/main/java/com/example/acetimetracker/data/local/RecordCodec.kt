@@ -12,11 +12,13 @@ internal object RecordCodec {
         put("startDate", entry.startDate); put("startTime", entry.startTime)
         put("endDate", entry.endDate); put("endTime", entry.endTime)
         put("timeSpent", entry.timeSpent); put("imageUrl", entry.imageUrl); put("description", entry.description)
+        put("zoneId", entry.zoneId)
     }.toString()
     fun entry(payload: String): TimesheetEntry = JSONObject(payload).let {
         TimesheetEntry(it.optString("id"), it.optString("userId"), it.optString("category"),
             it.optString("startDate"), it.optString("startTime"), it.optString("endDate"),
-            it.optString("endTime"), it.optLong("timeSpent"), it.optString("imageUrl"), it.optString("description"))
+            it.optString("endTime"), it.optLong("timeSpent"), it.optString("imageUrl"), it.optString("description"),
+            it.optString("zoneId"))
     }
     fun encode(category: Category): String = JSONObject().apply {
         put("documentId", category.documentId); put("name", category.name); put("description", category.description)
