@@ -42,6 +42,6 @@ No local build or demo screenshot proves these requirements are complete. Store 
 
 ## Current limitations
 
-The app supports paused local timer draft recovery, not uninterrupted tracking after force-stop or reboot. Demo data is transient. Category renaming, editing past sessions, full offline synchronization, routine reminders, and account deletion are not implemented. See [architecture](architecture.md).
+The app supports paused local timer draft recovery, not uninterrupted tracking after force-stop or reboot. Demo categories and entries persist locally. Category editing, past-session editing, an account-scoped entry/category outbox, and opt-in weekday reminders are implemented. Outbox retry runs while the process lives and on authenticated relaunch; media uploads still need connectivity. Complete account/data deletion remains a publication requirement. See [architecture](architecture.md).
 
 The material under `play-store/` is prepared artwork and draft copy; it does not establish that a listing is published. Historical signing notes may refer to one developer's machine and are not portable setup instructions.

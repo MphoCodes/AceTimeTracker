@@ -106,3 +106,7 @@ Live Firebase ownership/rules, production authentication and media flows, accoun
 Bug reports and focused pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md), include reproduction steps, and keep screenshots free of personal data. Report security issues using [SECURITY.md](SECURITY.md).
 
 Built by [Mpho Ndlela](https://github.com/MphoCodes). Licensed under the [MIT License](LICENSE).
+
+## Development build downloads
+
+The [Android workflow](https://github.com/MphoCodes/AceTimeTracker/actions/workflows/android.yml) uploads a debug APK and separate unsigned release artifacts. Choose the debug APK for a development preview; unsigned release files are build outputs, not installable production distributions. GitHub artifact downloads require access to the workflow run. See [release preparation](docs/release.md) for signing and publication requirements.
