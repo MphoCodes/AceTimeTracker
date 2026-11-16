@@ -284,7 +284,7 @@ private fun TodayHeroCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = Slate900
+        color = AceRed
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Text(

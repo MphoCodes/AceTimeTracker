@@ -2,7 +2,7 @@
 <resources>
     <style name="SplashTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowFullscreen">true</item>
-        <item name="android:windowSplashScreenBackground">#FAF7F2</item>
+        <item name="android:windowSplashScreenBackground">#F8FAFC</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/ace_mark</item>
         <item name="android:windowSplashScreenAnimationDuration">300</item>
     </style>

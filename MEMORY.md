@@ -8,4 +8,4 @@
 - Preserve existing source and IDE changes; do not change the permanent package ID or deploy to the configured Firebase project without verified ownership and explicit scope.
 - See HANDOFF.md for current validation, artifacts, and remaining release requirements.
 
-- Approved November 16 visual direction: warm ivory, charcoal and restrained crimson, with a vector A/clock mark. Primary labels are Today, Timer, History and Reports; Add time is an explicit form route. Large-font navigation uses Log/Stats with full accessibility descriptions.
+- Correction from owner: preserve Ace’s bright red/crisp neutral theme and target-and-arrow identity. The ivory/muted crimson and generic A-ring redesign was rejected. Do not interpret usability improvements as permission to replace the brand identity. Primary labels are Today, Timer, History and Reports; Add time is an explicit form route. Large-font navigation uses Log/Stats with full accessibility descriptions.

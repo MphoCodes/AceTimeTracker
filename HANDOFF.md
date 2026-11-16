@@ -74,3 +74,9 @@ User approved the proposed visual/usability direction and requested implementati
 Verification: 90 JVM tests and 3 device tests passed. Final debug/release builds and both lint variants passed (279 warnings, zero errors). Device tests preceded only the final large-font label adjustment; final JVM/lint/build checks include it. Rendered splash in both themes and bottom dock at 320dp/1.5x font; fixed word wrapping found in that preview. Demo device checks verified Today → Add time, History, report → Timer, and editing/saving a sample entry returning to the same three-entry history. No live account or backend mutation performed.
 
 Release outputs rebuilt and remain unsigned; older checksums above are superseded. Personal .idea changes remain excluded. No source graph refresh tool is available; portable context is current.
+
+## Owner brand correction — 2026-11-16
+
+The owner rejected the A-ring and warm palette as a loss of Ace identity. Restored the original bright-red/slate/white tokens and red dashboard. Replaced the A-ring with simplified red target rings and a blue dart, using matching vector, adaptive launcher, notification silhouette and SVG assets. Retained all navigation/form/empty-state improvements and the brief splash reveal. Refreshed README screenshots.
+
+Verification: local suite and debug/release APK, release bundle and lintRelease passed. Splash preview rendered (preview continued to display a monochrome cached rendering; source uses Image to preserve vector colors). Installed rebuilt debug app and checked navigation while refreshing screenshots. No data or backend changes. Existing release-signing/publication limitations remain.

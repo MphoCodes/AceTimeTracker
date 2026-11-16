@@ -88,9 +88,8 @@ fun SplashScreen(modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.surface,
                 border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
-                androidx.compose.material3.Icon(
+                Image(
                     painter = painterResource(R.drawable.ace_mark), contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(20.dp).size(112.dp)
                 )
             }
