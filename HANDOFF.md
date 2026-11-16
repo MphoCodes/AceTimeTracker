@@ -36,6 +36,10 @@ Read `AGENTS.md`, `MEMORY.md`, this Start here section, `docs/brand/BRIEF.md`, a
 
 Agent Memory was available for recovery. No source-graph ingestion tool was exposed; existing graph was preserved and may lag current source. Portable files and current Git are authoritative. This takeover only updates documentation: source/package/manifest/media existence and remote PR state were checked; application tests were not rerun and no fresh runtime validation is claimed.
 
+## Main-branch publication preserved
+
+The main branch independently published development preview `v1.0.0-dev.20261116` from `0ca2336`, using the former package ID and debug signing. Its README download section and accurate release limitations are preserved in this integration. It does not establish production readiness.
+
 ## Historical delivery notes
 
 The dated sections below retain prior implementation and verification evidence. Current state and remaining work above take precedence, especially for branding, package identity, time zones, PR bases and obsolete artifact hashes.
