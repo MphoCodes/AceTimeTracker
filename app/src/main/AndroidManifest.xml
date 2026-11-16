@@ -46,21 +46,9 @@
             android:name=".ui.activity.CategoriesActivity"
             android:exported="false" />
 
-        <activity
-            android:name=".ui.activity.TimesheetActivity"
-            android:exported="false" />
 
-        <activity
-            android:name=".ui.activity.TimerActivity"
-            android:exported="false" />
 
-        <activity
-            android:name=".ui.activity.MyProgressActivity"
-            android:exported="false" />
 
-        <activity
-            android:name=".ui.activity.GraphActivity"
-            android:exported="false" />
 
         <activity
             android:name=".ui.activity.ProfileActivity"

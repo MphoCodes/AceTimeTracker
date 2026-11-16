@@ -199,7 +199,6 @@ class MainActivity : ComponentActivity() {
                 entryTab = 0; entryRequest++; tab = Destination.Timesheet; refreshEntries() }
             Destination.Timesheet -> { entryTab = 1; entryRequest++; tab = destination; refreshEntries() }
             Destination.Today, Destination.Timer, Destination.MyProgress -> { tab = destination; refreshEntries() }
-            Destination.Graph -> { tab = Destination.MyProgress; refreshEntries() }
             Destination.Profile -> startActivity(Intent(this, ProfileActivity::class.java))
             Destination.Categories -> startActivity(Intent(this, CategoriesActivity::class.java))
             Destination.Settings -> startActivity(Intent(this, SettingsActivity::class.java))
