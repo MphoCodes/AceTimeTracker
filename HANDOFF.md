@@ -24,3 +24,5 @@ The permanent package ID remains `com.example.acetimetracker`. Production releas
 Current validation does not establish widget/reminder delivery, real-photo recreation, broad accessibility, timezone migration or backend security-rule correctness. Broader goals/routines and calendar integrations remain roadmap work.
 
 Shared memory was recalled. No project source-ingestion tool is installed in this checkout; no graph was replaced, and indexed source context may be stale. This handoff and the architecture/release docs describe the checked source.
+
+Published v1.0.0-dev.20261116 development APK with checksum/build metadata from 0ca2336. Hosted Android checks passed in run 43834787969. This is debug signing; production publication requirements remain unresolved as documented.
