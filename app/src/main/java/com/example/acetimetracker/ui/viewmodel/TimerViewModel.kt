@@ -332,7 +332,8 @@ class TimerViewModel @JvmOverloads constructor(
             endDate = TimeUtils.formatDate(end),
             endTime = TimeUtils.formatTime(end),
             timeSpent = durationMs,
-            description = if (isStopwatch) "Stopwatch session" else "Focus session ($pomodoroRoundsCompleted rounds)"
+            description = if (isStopwatch) "Stopwatch session" else "Focus session ($pomodoroRoundsCompleted rounds)",
+            zoneId = TimeUtils.currentZoneId()
         )
 
         isSaving = true
