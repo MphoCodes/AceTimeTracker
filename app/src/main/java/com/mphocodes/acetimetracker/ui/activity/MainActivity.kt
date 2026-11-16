@@ -94,7 +94,8 @@ class MainActivity : ComponentActivity() {
                     contentWindowInsets = WindowInsets(0, 0, 0, 0),
                     bottomBar = {
                         Column {
-                            if (timer.isAnyRunning || timer.unsavedMs > 0) {
+                            // The Timer tab already shows this state; repeating it here pushed Save below the fold.
+                            if ((timer.isAnyRunning || timer.unsavedMs > 0) && tab != Destination.Timer) {
                                 Surface(color = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.fillMaxWidth()) {
                                     Row(Modifier.padding(horizontal = 16.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                                         Column(Modifier.weight(1f).clickable { navigate(Destination.Timer) }.padding(vertical = 8.dp)) {
