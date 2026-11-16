@@ -613,7 +613,6 @@ enum class Destination {
     Timesheet,
     Timer,
     MyProgress,
-    Graph,
     Settings,
     About,
     Logout
