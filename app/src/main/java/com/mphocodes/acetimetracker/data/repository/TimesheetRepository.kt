@@ -23,7 +23,9 @@ class TimesheetRepository(
     fun uploadImage(imageUri: Uri, onResult: (Resource<String>) -> Unit) {
         onResult(Resource.Loading)
         try {
-            val imageRef = storage.reference.child("images/${UUID.randomUUID()}")
+            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                ?: error("Sign in before uploading a photo")
+            val imageRef = storage.reference.child("users/$uid/images/${UUID.randomUUID()}")
             imageRef.putFile(imageUri)
                 .addOnSuccessListener {
                     imageRef.downloadUrl

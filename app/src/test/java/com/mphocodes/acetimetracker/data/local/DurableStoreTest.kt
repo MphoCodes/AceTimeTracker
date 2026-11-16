@@ -14,6 +14,19 @@ class DurableStoreTest {
     private val context get() = RuntimeEnvironment.getApplication()
     private fun store() = DurableStore(context, "durable-test.db")
 
+    @Test fun eraseAccountRemovesPendingAndVisibleRowsWithoutTouchingOtherAccounts() {
+        store().use { db ->
+            val sent = db.put("alice", "entries", "one", "secret")
+            db.put("bob", "entries", "two", "keep")
+            db.eraseAccount("alice")
+            db.acknowledge(sent)
+            db.fail(sent, "late response")
+            assertTrue(db.pending("alice").isEmpty())
+            assertTrue(db.visible("alice", "entries").isEmpty())
+            assertEquals("keep", db.visible("bob", "entries").single().payload)
+        }
+    }
+
     @Test fun queuedEditAndPhotoSurviveReopeningAndStayAccountScoped() {
         store().use { db ->
             db.put("alice", "entries", "one", "{photo:kept}")

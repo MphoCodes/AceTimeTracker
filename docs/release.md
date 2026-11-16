@@ -45,3 +45,9 @@ No local build or demo screenshot proves these requirements are complete. Store 
 The app supports paused local timer draft recovery, not uninterrupted tracking after force-stop or reboot. Demo categories and entries persist locally. Category/session editing, account-scoped entry/category outbox and opt-in weekday reminders are implemented. Outbox retry runs in-process and on authenticated relaunch; media uploads require connectivity. Complete account/data deletion remains unfinished. See [architecture](architecture.md).
 
 The material under `play-store/` is prepared artwork and draft copy; it does not establish that a listing is published. Historical signing notes may refer to one developer's machine and are not portable setup instructions.
+
+## November 2026 production preparation update
+
+A new upload key now exists outside Git in the owner's private application-support folder. On this Mac, set `JAVA_HOME` to the Android Studio JBR and run `python3 scripts/build-signed-release.py`; the helper reads private JSON without printing passwords. For another machine, use `ACE_SIGNING_CONFIG` to point to a protected JSON file with the four environment-variable names above as keys. Restore the independently backed-up key rather than generating a replacement.
+
+Account deletion is implemented and tested locally, but its production function gate remains disabled pending billing, Storage provisioning and live validation. See [current release readiness](play-release-readiness.md) and [backend runbook](../backend/README.md) for authoritative current status; earlier “unfinished implementation” language above describes the pre-update state. The public site deliberately distributes the earlier sample-data debug APK until account services are ready.

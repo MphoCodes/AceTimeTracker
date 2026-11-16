@@ -78,3 +78,31 @@ jobs:
             app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
           retention-days: 14
+
+  account-services:
+    name: Account deletion and access rules
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: backend/functions/package-lock.json
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+        working-directory: backend/functions
+      - run: npm test
+        working-directory: backend/functions
+      - name: Verify account isolation and deletion fences
+        working-directory: backend
+        run: >-
+          functions/node_modules/.bin/firebase emulators:exec
+          --project demo-ace-deletion --only firestore,storage
+          'cd functions && npm run test:rules'

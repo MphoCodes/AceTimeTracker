@@ -40,6 +40,15 @@ internal class OfflineData private constructor(context: Context, private val fir
             return requireNotNull(instance)
         }
     }
+    private val deletedAccounts = context.getSharedPreferences("deleted_accounts", Context.MODE_PRIVATE)
+    fun eraseAccount(account: String, callback: (Boolean) -> Unit) {
+        // Fence reads, queued writes and late network snapshots before touching the local rows.
+        if (!deletedAccounts.edit().putBoolean(account, true).commit()) { callback(false); return }
+        worker.execute {
+            val success = runCatching { store.eraseAccount(account); changed(account); publish(account) }.isSuccess
+            main.post { callback(success) }
+        }
+    }
     private val store = DurableStore(context)
     private val worker = Executors.newSingleThreadScheduledExecutor { runnable ->
         Thread(runnable, "Ace-offline-data").apply { isDaemon = true }
@@ -53,7 +62,15 @@ internal class OfflineData private constructor(context: Context, private val fir
     private val inFlight = mutableMapOf<String, DurableStore.Row>()
     private val refreshing = mutableSetOf<String>()
     private val authListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-        firebaseAuth.currentUser?.uid?.let { uid -> worker.execute { sync(uid) } }
+        firebaseAuth.currentUser?.uid?.let { uid ->
+            firestore.collection("deletionRequests").document(uid).get(Source.SERVER)
+                .addOnSuccessListener { request ->
+                    if (request.exists()) {
+                        com.mphocodes.acetimetracker.data.repository.AccountLocalCleanup.erase(
+                            AceTimeTrackerApp.context, uid) { }
+                    } else worker.execute { sync(uid) }
+                }
+        }
     }
     init {
         auth.addAuthStateListener(authListener)
@@ -79,7 +96,7 @@ internal class OfflineData private constructor(context: Context, private val fir
         refresh(account, RecordCodec.CATEGORIES) { }
     } }
     private fun demo(account: String) = account == AuthRepository.TEST_USER_ID
-    private fun allowed(account: String) = account.isNotBlank() && session.currentUserId == account
+    private fun allowed(account: String) = account.isNotBlank() && !deletedAccounts.getBoolean(account, false) && session.currentUserId == account
     private fun signedIn(account: String) = allowed(account) && auth.currentUser?.uid == account
     private fun publish(account: String) {
         val pending = store.pending(account)

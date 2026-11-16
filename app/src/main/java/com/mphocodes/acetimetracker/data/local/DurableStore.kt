@@ -24,6 +24,11 @@ class DurableStore(context: Context, name: String = "ace-offline.db") :
         db.beginTransaction()
         return try { block().also { db.setTransactionSuccessful() } } finally { db.endTransaction() }
     }
+    fun eraseAccount(account: String) = transaction {
+        writableDatabase.delete("records", "account=?", arrayOf(account))
+        nextRevision()
+    }
+
     fun revision(): Long = readableDatabase.rawQuery("SELECT meta_value FROM metadata WHERE meta_key='revision'", null).use {
         it.moveToFirst(); it.getLong(0)
     }

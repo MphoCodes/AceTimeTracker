@@ -1,18 +1,85 @@
 {
   "project_info": {
-    "project_number": "123456789012",
-    "project_id": "demo-acetimetracker",
-    "storage_bucket": "demo-acetimetracker.firebasestorage.app"
+    "project_number": "243695413543",
+    "project_id": "ace-time-tracker-3d7d3",
+    "storage_bucket": "ace-time-tracker-3d7d3.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:123456789012:android:0000000000000000000000",
+        "mobilesdk_app_id": "1:243695413543:android:fa817acf6acc9b16f86102",
+        "android_client_info": {
+          "package_name": "com.example.acetimetracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcof4KzUeLnDsZyfi7UvgzKfipOH940_Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243695413543:android:f71d22d1a04993daf86102",
+        "android_client_info": {
+          "package_name": "com.example.acetimetracker.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcof4KzUeLnDsZyfi7UvgzKfipOH940_Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243695413543:android:bc7314ccc9133062f86102",
+        "android_client_info": {
+          "package_name": "com.mphocodes.acetimetracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcof4KzUeLnDsZyfi7UvgzKfipOH940_Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:243695413543:android:3b96fa5aea543b55f86102",
         "android_client_info": {
           "package_name": "com.mphocodes.acetimetracker.debug"
         }
       },
-      "api_key": [{ "current_key": "debug-placeholder-not-a-production-api-key" }]
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcof4KzUeLnDsZyfi7UvgzKfipOH940_Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
   ],
   "configuration_version": "1"

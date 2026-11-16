@@ -54,8 +54,40 @@ fun SettingsScreen(
     notificationsAllowed: Boolean = true,
     onReminderChange: (ReminderSchedule) -> Unit = {},
     onReminderTimeClick: () -> Unit = {},
-    onNotificationSettingsClick: () -> Unit = {}
+    onNotificationSettingsClick: () -> Unit = {},
+    accountDeletionAvailable: Boolean = false,
+    deletionBusy: Boolean = false,
+    deletionError: String? = null,
+    onDeleteAccount: (String) -> Unit = {},
+    onPrivacyClick: () -> Unit = {},
+    onDeletionInfoClick: () -> Unit = {}
 ) {
+    var showDeletion by rememberSaveable { mutableStateOf(false) }
+    var password by remember { mutableStateOf("") }
+    if (showDeletion) {
+        AlertDialog(
+            onDismissRequest = { if (!deletionBusy) { showDeletion = false; password = "" } },
+            title = { Text("Delete your account?") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text("This permanently deletes your account, profile, categories, time entries and uploaded photos. Unsynced entries and timer drafts on this device will also be removed. This cannot be undone. Export any reports you want to keep first.")
+                    Text("Enter your current password. Deletion continues on the server after your request is accepted.")
+                    OutlinedTextField(value = password, onValueChange = { password = it },
+                        label = { Text("Current password") }, singleLine = true,
+                        enabled = !deletionBusy,
+                        visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Password))
+                    deletionError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    if (deletionBusy) CircularProgressIndicator()
+                }
+            },
+            confirmButton = { TextButton(enabled = !deletionBusy && password.isNotEmpty(),
+                onClick = { onDeleteAccount(password); password = "" }) { Text("Delete permanently") } },
+            dismissButton = { TextButton(enabled = !deletionBusy,
+                onClick = { showDeletion = false; password = "" }) { Text("Cancel") } }
+        )
+    }
     var selectedTheme by rememberSaveable { mutableStateOf(currentTheme) }
     var notificationsEnabled by rememberSaveable { mutableStateOf(initialNotificationsEnabled) }
 
@@ -71,6 +103,12 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            if (accountDeletionAvailable) {
+                SectionLabel("Account")
+                OutlinedButton(onClick = { showDeletion = true }) { Text("Delete account") }
+            }
+            TextButton(onClick = onPrivacyClick) { Text("Privacy policy") }
+            TextButton(onClick = onDeletionInfoClick) { Text("Account deletion information") }
             SectionLabel("Appearance")
             AceCard(contentPadding = PaddingValues(vertical = 6.dp)) {
                 Column(modifier = Modifier.selectableGroup()) {

@@ -130,7 +130,9 @@ class UserRepository(
     fun uploadProfilePicture(imageUri: Uri, onResult: (Resource<String>) -> Unit) {
         onResult(Resource.Loading)
         try {
-            val imageRef = storage.reference.child("profile_pictures/${UUID.randomUUID()}")
+            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                ?: error("Sign in before uploading a photo")
+            val imageRef = storage.reference.child("users/$uid/profile_pictures/${UUID.randomUUID()}")
             imageRef.putFile(imageUri)
                 .addOnSuccessListener {
                     imageRef.downloadUrl
