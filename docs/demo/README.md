@@ -1,5 +1,7 @@
 # AceTimeTracker product film
 
+> **Newer:** [`acetimetracker-guided-tour.mp4`](acetimetracker-guided-tour.mp4) is a one-minute walkthrough built from real emulator footage; see [guided-tour/README.md](guided-tour/README.md). The OpenFilm showcase below is kept because the public website pins its checksum.
+
 50-second, 1920×1080, 30 fps product showcase. Built by Mpho Ndlela · MphoCodes.
 
 The film uses actual anonymous Android demo screens, real timer footage, locally generated neural narration and a quiet music bed. The demonstrated app is a development build; the film does not claim Play availability or verified production cloud sync.

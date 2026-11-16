@@ -1,0 +1,67 @@
+1
+00:00:00,500 --> 00:00:01,858
+Meet Ace Time Tracker.
+
+2
+00:00:01,858 --> 00:00:05,190
+A calm, simple way to see where your time really goes.
+
+3
+00:00:07,290 --> 00:00:09,933
+Open the app, and your day is already waiting.
+
+4
+00:00:09,933 --> 00:00:14,070
+Time tracked so far, your streak, and progress toward this week's goals.
+
+5
+00:00:15,470 --> 00:00:16,256
+Ready to work?
+
+6
+00:00:16,256 --> 00:00:19,794
+Tap Start session, pick what you're working on, and press play.
+
+7
+00:00:19,794 --> 00:00:21,760
+When you're done, one tap saves it.
+
+8
+00:00:25,729 --> 00:00:27,275
+Forgot to track something?
+
+9
+00:00:27,275 --> 00:00:28,346
+Add it afterwards.
+
+10
+00:00:28,346 --> 00:00:33,043
+Choose a category, set when you started and finished, and Ace adds up the time.
+
+11
+00:00:33,043 --> 00:00:34,649
+Jot a quick note, and save.
+
+12
+00:00:39,218 --> 00:00:41,655
+Everything you log lives in your history.
+
+13
+00:00:41,655 --> 00:00:45,638
+Search it, filter it, fix a mistake, or track the same thing again.
+
+14
+00:00:47,048 --> 00:00:54,658
+And for the bigger picture, Reports compare any period with the one before, check your goals, and share a PDF or CSV.
+
+15
+00:00:57,408 --> 00:00:58,442
+Ace Time Tracker.
+
+16
+00:00:58,442 --> 00:00:59,416
+Track your work.
+
+17
+00:00:59,416 --> 00:01:01,058
+Make time for what matters.

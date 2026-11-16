@@ -29,6 +29,7 @@ Read in this order, then re-check live state before acting (`git fetch`, `git st
 | Signing | Upload key generated outside Git; signed APK/AAB verified | `scripts/build-signed-release.py`; cert SHA-256 `421061d5…dddda8` registered with the production client. **Only one local copy of the key exists** |
 | Public preview | Live | https://acetimetracker.vercel.app (Vercel project `prj_m1xvU6lDs68oR4rtfAMNSLIsZ78J`, root `site`), pre-release `v1.0.0-dev.20261116.2` (sample-data **debug-signed** APK), checksum-pinned |
 | Showcase film | 49.8 s, 1080p30, local Kokoro voice, captions, OpenFilm source | `docs/demo/` (see its README). Written credit "Mpho Ndlela · MphoCodes"; no spoken name |
+| Guided-tour film | 62.7 s, 1080p30, **real emulator footage**, step checklist + tap rings, local Kokoro voice, CC0 music, SRT | `docs/demo/acetimetracker-guided-tour.mp4`, rebuild via `docs/demo/guided-tour/README.md`. Proposed as the README hero; **not yet on the public site** (`site/build.mjs` still copies the older film and `download.json` pins its checksum) |
 | Contact / privacy | Published | `hello@mphondlela.co.za`; privacy + external deletion-request pages live; online deletion portal gate is `false` |
 | CI | Green on main | Run `43864716715` (Android + account-services jobs) |
 
@@ -39,7 +40,7 @@ Read in this order, then re-check live state before acting (`git fetch`, `git st
 1. **Enable Firebase Blaze billing** on `ace-time-tracker-3d7d3` (and set budget alerts — alerts are not a cap). This unblocks Storage and Cloud Functions.
 2. **Back up the signing folder** `~/Library/Application Support/AceTimeTracker/signing/` to an independent encrypted location and verify restore. The JSON holds passwords; never upload it anywhere public.
 3. **Play Console** (existing personal account — do not create another): confirm verification status and creation date, register `com.mphocodes.acetimetracker`, enrol in Play App Signing, accept agreements. Accounts created after 13 Nov 2023 need ≥12 opted-in testers for 14 consecutive days before production access; website APK installs do not count.
-4. Listen to the showcase film once and confirm pacing/voice.
+4. Watch and listen to the guided tour (`docs/demo/acetimetracker-guided-tour.mp4`) and say what to change — pacing, voice, wording, order. I could not listen to it; levels were only measured (−16.1 LUFS, −1.5 dBFS peak).
 
 ### 3b. Engineering, in order, once billing is on
 
@@ -105,6 +106,8 @@ docs/                architecture, development, release, play-release-readiness,
 - `docs/superpowers/` and `docs/research/` are historical planning material and contain old `com.example` references; they are intentionally not rewritten.
 
 ## 8. Session log (most recent first)
+
+- **2026-11-17 — guided-tour film (Claude).** Owner was unhappy with the earlier film and asked for a far better, more intuitive one. Recorded the debug build on an API 36 emulator at 1080×2400 with a scripted tour, composed a five-step film (track, add time, history, reports) with real footage, tap rings and a checklist synced to the logged input, Kokoro narration and the CC0 bed. Recording exposed a real UX bug — the running-session strip pushed the Timer tab's **Save** button below the fold with its label clipped — fixed in its own PR (hides the strip on the Timer tab). PRs: #11 (Save fix, base `main`) and the film PR stacked on it. Not done: public-site swap, a Nav3/UX pass on History (the filter card fills most of the first screen and card actions sit above the category chip), and a recorded foreground-service demo for Play.
 
 - **2026-11-17 — consolidation.** Re-verified live state, ran JVM tests, archived the layered handoff, rewrote this file.
 - **2026-11-16 — production preparation, showcase, publication (Codex).** Reviewed and merged PRs #6–#10, fixed DST/zone report bugs, shipped pre-release `v1.0.0-dev.20261116.2`, deployed rules to the owned Firebase project, implemented account deletion, generated the upload key, published the Vercel preview and contact details.

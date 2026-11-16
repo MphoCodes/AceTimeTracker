@@ -21,3 +21,5 @@
 - Owner confirmation: public contact hello@mphondlela.co.za for support/privacy/deletion; existing personal Play Console account. Contact published, automated deletion still gated by Firebase billing/setup. CI43864716715 passed.
 
 - 17 November consolidation: HANDOFF.md was rewritten as a single current-state document (done / blocked-on-owner / engineering order / evidence / rules / repo map). The layered 16 November notes are archived verbatim at docs/history/HANDOFF-2026-11-16-archive.md and are superseded where they conflict. Re-verified main 568f23b, CI run 43864716715 green, 106 JVM tests pass; device tests and live-account flows were not re-run.
+
+- 17 November guided tour: new real-footage film `docs/demo/acetimetracker-guided-tour.mp4` (scripts in docs/demo/guided-tour/) made after the owner rejected the earlier film; PR #11 fixes the clipped Save button it uncovered. Site still serves the older film. Owner listening/pacing review pending; ElevenLabs video remains unavailable on their plan.

@@ -17,9 +17,9 @@ A native Android time tracker built with Kotlin and Jetpack Compose. Record a fo
 ## A look inside
 
 <p align="center">
-  <a href="docs/demo/acetimetracker-demo.mp4"><img src="docs/demo/acetimetracker-demo.jpg" width="80%" alt="Watch the 53-second AceTimeTracker demo video"></a>
+  <a href="docs/demo/acetimetracker-guided-tour.mp4"><img src="docs/demo/acetimetracker-guided-tour.jpg" width="80%" alt="Watch the one-minute AceTimeTracker guided tour, recorded on a real device"></a>
 </p>
-<p align="center"><a href="docs/demo/acetimetracker-demo.mp4">▶ Watch the demo (MP4, narrated)</a> · <a href="docs/demo/README.md">Editable OpenFilm source &amp; media credits</a> · <a href="docs/demo/PRODUCT.md">Product &amp; developer information</a></p>
+<p align="center"><a href="docs/demo/acetimetracker-guided-tour.mp4">▶ Watch the guided tour (1 min, narrated, real footage)</a> · <a href="docs/demo/guided-tour/README.md">How it was made</a> · <a href="docs/demo/acetimetracker-demo.mp4">Earlier showcase film</a> · <a href="docs/demo/PRODUCT.md">Product &amp; developer information</a></p>
 
 <p align="center">
   <img src="docs/screenshots/today.png" width="23%" alt="Dashboard with tracked time and weekly category goals">
