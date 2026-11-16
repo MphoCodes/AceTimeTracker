@@ -239,13 +239,13 @@ fun RegistrationScreen(
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "Quick Test Login (Bypass Server)",
+                                text = "Explore the demo",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = AceRed
                             )
                             Text(
-                                text = "Instant offline session for testing & grading",
+                                text = "Try sample projects and time entries. No account needed.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
